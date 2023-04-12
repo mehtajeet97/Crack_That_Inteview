@@ -13,4 +13,5 @@ router.route("/:id")
         res.send("article with an id")
     });
 
-export {router}
+export default router
+;
