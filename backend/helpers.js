@@ -16,16 +16,16 @@ let stringCheck = (str) => {
 };
 
 let passwordCheck = (pwd) => {
-    if (typeof pwd !== "string") throw "Password should be a string";
-    if (pwd.trim().length < 8) throw "Password should have at least 8 characters";
-    return pwd;
+  if (typeof pwd !== "string") throw "Password should be a string";
+  if (pwd.trim().length < 8) throw "Password should have at least 8 characters";
+  return pwd;
 };
 
 let ageCheck = (age) => {
-    if (typeof age !== "number") throw "Age must be a number";
-    if (age < 13) throw "Only users of 13 and above can sign up";
-    if (age > 100) throw "Please enter a valid age";
-    return age;
+  if (typeof age !== "number") throw "Age must be a number";
+  if (age < 13) throw "Only users of 13 and above can sign up";
+  if (age > 100) throw "Please enter a valid age";
+  return age;
 };
 
 let phoneNumberCheck = (num) => {

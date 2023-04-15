@@ -1,11 +1,6 @@
 import { interviews } from "../config/mongoCollections.js";
 import { ObjectId } from "mongodb";
-import {
-  idCheck,
-  dateCheck,
-  arrayCheck,
-  stringCheck,
-} from "../helpers.js";
+import { idCheck, dateCheck, arrayCheck, stringCheck } from "../helpers.js";
 
 const date = new Date();
 
@@ -14,7 +9,7 @@ const createInterview = async (
   interviewer,
   interviewDate,
   intervieweeRemarks,
-  interviewerRemarks,
+  interviewerRemarks
 ) => {
   if (!interviewee) throw "First Name must be provided";
   if (!interviewer) throw "Last Name must be provided";
@@ -30,7 +25,7 @@ const createInterview = async (
   arrayCheck(intervieweeRemarks);
   arrayCheck(interviewerRemarks);
   let day = date.getDate();
-  let month = date.getMonth()+1;
+  let month = date.getMonth() + 1;
   let year = date.getFullYear();
   let interview = {};
   interview = {
@@ -43,7 +38,7 @@ const createInterview = async (
     interviewerRemarks,
     createdAt: `${month}/${day}/${year}`,
     updatedAt: `${month}/${day}/${year}`,
-    interviewStatus: ["Completed","Scheduled","Pending"]
+    interviewStatus: ["Completed", "Scheduled", "Pending"],
   };
   const interviewCollection = await interviews();
   const insertInterview = await interviewCollection.insertOne(interview);
@@ -59,8 +54,11 @@ const getInterviewById = async (id) => {
   idCheck(id);
   id = id.trim();
   const interviewCollection = await interviews();
-  let listOfInterviews = await interviewCollection.findOne({ _id: new ObjectId(id) });
-  if (listOfInterviews === null) throw "There is no interview with the Id mentioned";
+  let listOfInterviews = await interviewCollection.findOne({
+    _id: new ObjectId(id),
+  });
+  if (listOfInterviews === null)
+    throw "There is no interview with the Id mentioned";
   listOfInterviews._id = listOfInterviews._id.toString();
   return listOfInterviews;
 };
@@ -90,4 +88,9 @@ const removeInterview = async (id) => {
   return `Interview with ${id} has been successfully deleted!`;
 };
 
-export default { createInterview, getInterviewById, getAllInterviews, removeInterview };
+export default {
+  createInterview,
+  getInterviewById,
+  getAllInterviews,
+  removeInterview,
+};
