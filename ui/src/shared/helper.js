@@ -4,7 +4,7 @@ export const validation = {
       formData;
     let result = { validationPassed: true, errors: {} };
 
-    if (!firstName || firstName.trim().length <= 3) {
+    if (!firstName || !isValidString(firstName)) {
       result.errors.firstName = "Invalid first name provided!";
     }
 
@@ -20,8 +20,12 @@ export const validation = {
       result.errors.password = "Invalid password provided!";
     }
 
-    if (!confirmPassword || password !== confirmPassword) {
-      result.errors.confirmPassword = "Invalid confirm password";
+    if (!confirmPassword) {
+      result.errors.confirmPassword = "Invalid confirm password provided!";
+    }
+
+    if (confirmPassword && password !== confirmPassword) {
+      result.errors.confirmPassword = "Passwords do not match";
     }
 
     if (+age < 13) {
@@ -37,3 +41,6 @@ export const validation = {
     // Skipping 44, 45, 46
   },
 };
+
+const isValidString = (string) =>
+  typeof string === "string" && string.trim().length;

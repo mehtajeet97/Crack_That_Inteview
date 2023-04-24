@@ -209,7 +209,7 @@ export const Register = () => {
               type="submit"
               className="w-full text-white border-2 border-solid border-white hover:bg-white hover:text-cyan-600 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm mt-3 px-5 py-2.5 text-center"
             >
-              Register
+              Continue
             </button>
             {/* </Link> */}
           </form>
