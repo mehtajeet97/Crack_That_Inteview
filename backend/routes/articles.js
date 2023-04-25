@@ -20,12 +20,12 @@ router
       data.content = helpers.stringCheck(data.content);
       data.tag = helpers.arrayCheck(data.tag);
       data.title = helpers.stringCheck(data.title);
-      const newArticle = {
-        title: data.title,
-        content: data.content,
-        tag: data.tag,
-      };
-      const addArticle = await articles.createArticle(newArticle);
+
+      const addArticle = await articles.createArticle(
+        data.title,
+        data.content,
+        data.tag
+      );
       res.status(200).json(addArticle);
     } catch (e) {
       res.status(400).send("error adding the article");

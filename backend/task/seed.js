@@ -9,20 +9,16 @@ await db.dropDatabase();
 async function main() {
   try {
     let userDetails1 = await users.createUser(
-      "Siddharth",
-      "Prabhakaran",
+      "bhanu",
+      "srni",
       24,
-      "sidduprabhak@gmail.com",
-      "abc12345",
+      "test@test.com",
+      "Test@123",
       9083319047,
       `C:\Users\siddu\OneDrive\Desktop\New Resume\Siddharth Prabhakaran - Resume.pdf`,
       ["Java", "AWS", "SQL"],
-      ["AI", "Machine Learning", "Big Data"],
-      `C:\Users\siddu\OneDrive\Pictures\Siddharth.jpg`,
-      ["Rise of AI: Boon or Bane?", "Fundamentals of Machine Learning"],
-      ["Article1", "Article2"],
-      ["Interview1", "Interview2"],
-      ["Interview3", "Interview4"]
+      "google",
+      "admin"
     );
     console.log(userDetails1);
   } catch (e) {

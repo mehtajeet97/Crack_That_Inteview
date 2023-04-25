@@ -8,11 +8,24 @@ let idCheck = (id) => {
   if (!ObjectId.isValid(id)) throw "Invalid Id";
   return id;
 };
+let emailCheck = (email) => {
+  if (!email) throw "invalid email";
+  if (typeof email != "string") throw "email is not a valid string";
+  email = email.toLowerCase().trim();
+  if (!email) throw "email must not be empty spaces";
+  return email;
+};
 
-let stringCheck = (str) => {
+let stringCheck = (str, strName) => {
+  if (!str) throw `${strName} must be provided`;
   if (typeof str !== "string") throw "Type not string";
-  if (str.trim().length === 0) throw "String cannot be empty";
+  str = str.trim();
+  if (!str) throw "String cannot be empty";
   return str;
+};
+let isRoleValid = (role) => {
+  const roles = ["admin", "interviewee", "interviewer"];
+  return roles.includes(role.trim().toLowerCase());
 };
 
 let passwordCheck = (pwd) => {
@@ -82,6 +95,17 @@ let scoreCheck = (score) => {
   if (score < 0 || score > 100) throw "Please enter a valid user score";
   return score;
 };
+let sendResponse = (message, data) => {
+  return {
+    message,
+    data,
+  };
+};
+let sendError = (error) => {
+  return {
+    error,
+  };
+};
 
 export {
   idCheck,
@@ -95,4 +119,8 @@ export {
   dateCheck,
   booleanCheck,
   scoreCheck,
+  emailCheck,
+  sendResponse,
+  sendError,
+  isRoleValid,
 };

@@ -7,14 +7,17 @@ const router = Router();
 router
   .route("/")
   .get(async (req, res) => {
+    //todo only admin can get
     const allUsers = await users.getAllUsers();
+
     if (!allUsers) {
-      res.status(400).json("there are no users");
+      res.status(400).json(helpers.sendError("there are no users"));
     } else {
-      res.status(200).json(allUsers);
+      res.status(200).json(helpers.sendResponse("ok", allUsers));
     }
   })
   .post(async (req, res) => {
+    //todo any one
     let data = req.body;
     try {
       data.firstName = helpers.stringCheck(data.firstName);
@@ -25,55 +28,53 @@ router
       data.phoneNumber = helpers.phoneNumberCheck(data.phoneNumber);
       data.resume = helpers.stringCheck(data.resume);
       data.skills = helpers.arrayCheck(data.skills);
-      data.tags = helpers.arrayCheck(data.tags);
-      data.profilePhoto = helpers.stringCheck(data.profilePhoto);
-      data.blogs = helpers.arrayCheck(data.blogs);
-      data.articlesRead = helpers.arrayCheck(data.articlesRead);
-      data.pastInterviews = helpers.arrayCheck(data.pastInterviews);
-      data.upcomingInterview = helpers.arrayCheck(data.upcomingInterview);
+      data.role = helpers.stringCheck(data.role);
+      data.organization = helpers.stringCheck(data.organization);
+      // data.profilePhoto = helpers.stringCheck(data.profilePhoto);
+      // data.blogs = helpers.arrayCheck(data.blogs);
+      // data.articlesRead = helpers.arrayCheck(data.articlesRead);
+      // data.pastInterviews = helpers.arrayCheck(data.pastInterviews);
+      // data.upcomingInterviews = helpers.arrayCheck(data.upcomingInterviews);
+
+      const addUser = await users.createUser(
+        data.firstName,
+        data.lastName,
+        data.age,
+        data.email,
+        data.password,
+        data.phoneNumber,
+        data.resume,
+        data.skills,
+        data.organization,
+        data.role
+      );
+
+      res.status(200).json(helpers.sendResponse("added user successFully"));
     } catch (e) {
-      res.status(400).json("error with the data");
-    }
-    try {
-      let newUser = {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        age: data.age,
-        email: data.email,
-        password: data.password,
-        phoneNumber: data.phoneNumber,
-        resume: data.resume,
-        skills: data.skills,
-        tags: data.tags,
-        profilePhoto: data.profilePhoto,
-        blogs: data.blogs,
-        articlesRead: data.articlesRead,
-        pastInterviews: data.pastInterviews,
-        upcomingInterview: data.upcomingInterview,
-        isPremiumUser: 0,
-        userScore: 0,
-        isBanned: 0,
-      };
-      const addUser = await users.createUser(newUser);
-      res.json(addUser);
-    } catch (e) {
-      res.status(400).json(e);
+      console.log(e);
+      res.status(500).json(helpers.sendError(e));
     }
   });
+
 router
   .route("/:id")
   .get(async (req, res) => {
+    //todo any one
     try {
       req.params.id = helpers.idCheck(req.params.id);
       const user = await users.getUserById(req.params.id);
-
+      delete user.password;
+      if (user.isBanned) {
+        throw "USER IS BANNED";
+      }
       res.json(user);
     } catch (e) {
       console.log(e);
-      res.status(400).json("error with the id");
+      res.status(400).json(helpers.sendError(e));
     }
   })
   .delete(async (req, res) => {
+    //todo  only an admin can delete the user
     req.params.id = helpers.idCheck(req.params.id);
 
     try {
@@ -87,6 +88,11 @@ router
     } catch (e) {
       res.status(400).json(e);
     }
+  })
+  .put(async (req, res) => {
+    //todo
+    //only an user and an admin can change the user details
+    req.params.id = helpers.idCheck(req.params.id);
   });
 
 export default router;

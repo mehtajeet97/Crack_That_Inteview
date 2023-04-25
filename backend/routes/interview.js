@@ -21,14 +21,14 @@ router
     try {
       data.interviewee = helpers.idCheck(data.interviewee);
       data.interviewer = helpers.idCheck(data.interviewer);
-      const newInterview = {
-        interviewer: data.interviewer,
-        interviewee: data.interviewee,
-        interviewerRemarks: [{ "skill knowledgs": "good", rating: 0 }],
-        intervieweeRemarks: [{ "level of difficuly": "good" }],
-        interviewDate: "04/11/2022",
-      };
-      const addInterview = await interview.createInterview(newInterview);
+
+      const addInterview = await interview.createInterview(
+        data.interviewer,
+        data.interviewee,
+        [{ "skill knowledgs": "good", rating: 0 }],
+        [{ "level of difficuly": "good" }],
+        "04/11/2022"
+      );
       res.status(200).json(addInterview);
     } catch (e) {
       res.status(400).send("problem adding the interviews");

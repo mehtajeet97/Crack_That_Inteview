@@ -7,6 +7,7 @@ import {
   phoneNumberCheck,
   arrayCheck,
   stringCheck,
+  isRoleValid,
 } from "../helpers.js";
 import bcrypt from "bcryptjs";
 
@@ -22,40 +23,42 @@ const createUser = async (
   phoneNumber,
   resume,
   skills,
-  tags,
-  profilePhoto,
-  blogs,
-  articlesRead,
-  pastInterviews,
-  upcomingInterviews
+  // tags,
+  // profilePhoto = "", //remove profile photo
+  // blogs = [], //no blogs
+  // articlesRead = [], //none
+  // pastInterviews = [], //none
+  // upcomingInterviews = [] //none
+  organization,
+  role
 ) => {
-  if (!firstName) throw "First Name must be provided";
-  if (!lastName) throw "Last Name must be provided";
   if (!email) throw "Email must be provided";
   if (!password) throw "Password must be provided";
   if (!phoneNumber) throw "Phone Number must be provided";
-  stringCheck(firstName);
-  firstName = firstName.trim();
-  stringCheck(lastName);
-  lastName = lastName.trim();
+  firstName = stringCheck(firstName);
+  lastName = stringCheck(lastName);
+  organization = stringCheck(organization);
+  role = stringCheck(role);
+  if (!isRoleValid(role)) throw "invalid role";
   ageCheck(age);
   stringCheck(email);
-  email = email.trim();
+  email = email.toLowerCase().trim();
   passwordCheck(password);
   password = password.trim();
   password = await bcrypt.hash(password, saltRounds);
   phoneNumberCheck(phoneNumber);
   stringCheck(resume);
   arrayCheck(skills);
-  arrayCheck(tags);
-  stringCheck(profilePhoto);
-  arrayCheck(blogs);
-  arrayCheck(articlesRead);
-  arrayCheck(pastInterviews);
-  arrayCheck(upcomingInterviews);
-  let day = date.getDate();
-  let month = date.getMonth()+1;
-  let year = date.getFullYear();
+
+  // arrayCheck(tags);
+  // stringCheck(profilePhoto);
+  // arrayCheck(blogs);
+  // arrayCheck(articlesRead);
+  // arrayCheck(pastInterviews);
+  // arrayCheck(upcomingInterviews);
+  // let day = date.getDate();
+  // let month = date.getMonth() + 1;
+  // let year = date.getFullYear();
   let user = {};
   user = {
     firstName,
@@ -64,20 +67,21 @@ const createUser = async (
     email,
     password,
     phoneNumber,
-    resume,
+    resume: "",
     skills,
-    tags,
-    profilePhoto,
-    role: ["Interviewee", "Interviewer", "Admin"],
-    blogs,
-    articlesRead,
-    pastInterviews,
-    upcomingInterviews,
-    createdAt: `${month}/${day}/${year}`,
-    updatedAt: `${month}/${day}/${year}`,
+    tags: skills,
+    profilePhoto: "",
+    role,
+    blogs: [],
+    articlesRead: [],
+    pastInterviews: [],
+    upcomingInterviews: [],
+    createdAt: new Date().toUTCString(),
+    updatedAt: new Date().toUTCString(),
     isPremiumUser: false,
     userScore: 0,
     isBanned: false,
+    organization,
   };
   const userCollection = await users();
   const insertUser = await userCollection.insertOne(user);
@@ -99,9 +103,20 @@ const getUserById = async (id) => {
   return listOfUsers;
 };
 
+const getUserByEmail = async (email) => {
+  if (!email) throw "invalid email";
+  email = email.trim();
+  const userCollection = await users();
+  let user = await userCollection.findOne({ email: email });
+  if (user === null) throw "there are no user with this email";
+  user._id = user._id.toString();
+  return user;
+};
 const getAllUsers = async () => {
   const userCollection = await users();
-  let listOfUsers = await userCollection.find({}).toArray();
+  let listOfUsers = await userCollection
+    .find({}, { projection: { password: 0 } })
+    .toArray();
   listOfUsers = listOfUsers.map((element) => {
     element._id = element._id.toString();
     return element;
@@ -147,7 +162,7 @@ const updateUser = async (id, key, value) => {
     updatedUser.password = value;
   }
   let day = date.getDate();
-  let month = date.getMonth()+1;
+  let month = date.getMonth() + 1;
   let year = date.getFullYear();
   updatedUser.updatedAt = `${month}/${day}/${year}`;
   const userCollection = await users();
@@ -178,4 +193,11 @@ const removeUser = async (id) => {
   return `User with ${id} has been successfully deleted!`;
 };
 
-export default { createUser, getUserById, getAllUsers, updateUser, removeUser };
+export default {
+  createUser,
+  getUserById,
+  getAllUsers,
+  updateUser,
+  removeUser,
+  getUserByEmail,
+};
