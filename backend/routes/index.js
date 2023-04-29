@@ -9,16 +9,25 @@ import * as helpers from "../helpers.js";
 const resp = (app) => {
   app.post("/login", async (req, res) => {
     try {
-      let email = helpers.emailCheck(req.body.email);
-      let password = req.body.password;
-      let user = await users.getUserByEmail(email);
-      if (!(await bcrypt.compare(password, user.password)))
-        throw "problem with email or password";
-      const accessToken = auth.createToken(user._id, user.role);
-      const refreshToken = auth.createRefreshToken(user._id, user.role);
-      res.json({ id: user._id, accessToken, refreshToken });
+      let { email, password } = req.body;
+      let validationResult = helpers.validate.login(req.body);
+      if (validationResult.validationPassed) {
+        let user = await users.getUserByEmail(email);
+        try {
+          await bcrypt.compare(password, user.password);
+          const accessToken = auth.createToken(user._id, user.role);
+          const refreshToken = auth.createRefreshToken(user._id, user.role);
+          res.json({ id: user._id, accessToken, refreshToken });
+        } catch (e) {
+          res
+            .status(400)
+            .json({ data: [], errors: "Invalid email or password" });
+        }
+      } else {
+        res.status(400).json({ data: [], errors: validationResult.errors });
+      }
     } catch (e) {
-      res.status(400).json(helpers.sendError(e));
+      res.status(500).json(helpers.sendError(e));
     }
   });
   app.use("/users", userRoutes);

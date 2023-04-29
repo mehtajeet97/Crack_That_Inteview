@@ -1,7 +1,6 @@
 import Router from "express";
 import users from "../data/users.js";
 import * as helpers from "../helpers.js";
-
 const router = Router();
 
 router
@@ -18,40 +17,36 @@ router
   })
   .post(async (req, res) => {
     //todo any one
-    let data = req.body;
+    let payload = req.body;
     try {
-      data.firstName = helpers.stringCheck(data.firstName);
-      data.lastName = helpers.stringCheck(data.lastName);
-      data.age = helpers.ageCheck(data.age);
-      data.email = helpers.stringCheck(data.email);
-      data.password = helpers.passwordCheck(data.password);
-      data.phoneNumber = helpers.phoneNumberCheck(data.phoneNumber);
-      data.resume = helpers.stringCheck(data.resume);
-      data.skills = helpers.arrayCheck(data.skills);
-      data.role = helpers.stringCheck(data.role);
-      data.organization = helpers.stringCheck(data.organization);
+      let validationResult = helpers.validate.register(payload);
+      // data.firstName = helpers.stringCheck(data.firstName);
+      // data.lastName = helpers.stringCheck(data.lastName);
+      // data.age = helpers.ageCheck(+data.age);
+      // data.email = helpers.stringCheck(data.email);
+      // data.password = helpers.passwordCheck(data.password);
+      // data.phoneNumber = helpers.phoneNumberCheck(+data.phoneNumber);
+      // // data.resume = helpers.stringCheck(data.resume);
+      // console.log(data.resume);
+      // data.skills = helpers.arrayCheck(data.skills);
+      // data.role = helpers.stringCheck(data.role);
+      // data.school = helpers.stringCheck(data.school);
       // data.profilePhoto = helpers.stringCheck(data.profilePhoto);
       // data.blogs = helpers.arrayCheck(data.blogs);
       // data.articlesRead = helpers.arrayCheck(data.articlesRead);
       // data.pastInterviews = helpers.arrayCheck(data.pastInterviews);
       // data.upcomingInterviews = helpers.arrayCheck(data.upcomingInterviews);
-
-      const addUser = await users.createUser(
-        data.firstName,
-        data.lastName,
-        data.age,
-        data.email,
-        data.password,
-        data.phoneNumber,
-        data.resume,
-        data.skills,
-        data.organization,
-        data.role
-      );
-
-      res.status(200).json(helpers.sendResponse("added user successFully"));
+      if (!validationResult.validationPassed) {
+        res.status(400).json({ data: [], errors: validationResult.errors });
+      } else {
+        const newUser = await users.createUser(validationResult.data);
+        console.log(newUser);
+        res
+          .status(200)
+          .json({ message: "User registered successfully", data: newUser });
+      }
     } catch (e) {
-      console.log(e);
+      console.log(`POST /users: ${e}`);
       res.status(500).json(helpers.sendError(e));
     }
   });
