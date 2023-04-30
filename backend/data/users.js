@@ -64,6 +64,7 @@ const createUser = async (userDetails) => {
     articlesRead: [],
     pastInterviews: [],
     upcomingInterviews: [],
+    availableSlots: [],
     createdAt: new Date().toUTCString(),
     updatedAt: new Date().toUTCString(),
     isPremiumUser: false,
@@ -183,6 +184,55 @@ const removeUser = async (id) => {
   return `User with ${id} has been successfully deleted!`;
 };
 
+// Functions for Interview Scheduling
+const getAllInterviewers = async () => {
+  const userCollection = await users();
+  let listOfInterviewers = await userCollection
+    .find(
+      { role: "Interviewer" },
+      {
+        projection: {
+          firstName: 1,
+          lastName: 1,
+          skills: 1,
+          organization: 1,
+          yoe: 1,
+        },
+      }
+    )
+    .toArray();
+  return listOfInterviewers; //returns array of objects
+};
+
+const updateAvailableSlots = async (userId, slots) => {
+  const userCollection = await users();
+
+  // Update the availableSlots array for the specified user
+  await userCollection.updateOne(
+    { _id: ObjectId(userId) },
+    { $addToSet: { availableSlots: slots } }
+  );
+
+  // Sort the availableSlots array by date in ascending order
+  await userCollection.updateOne(
+    { _id: ObjectId(userId) },
+    { $sort: { "availableSlots.date": 1 } }
+  );
+
+  return { Success: true }; //Returns Success Message
+};
+
+const getAvailableSlots = async (id) => {
+  const userCollection = await users();
+  // Find the user with the specified ID
+  const user = await userCollection.findOne({ _id: ObjectId(id) });
+
+  // Extract the availableSlots array from the user document
+  const availableSlots = user.availableSlots;
+
+  return availableSlots; //returns array of objects
+};
+
 export default {
   createUser,
   getUserById,
@@ -190,4 +240,7 @@ export default {
   updateUser,
   removeUser,
   getUserByEmail,
+  getAllInterviewers,
+  updateAvailableSlots,
+  getAvailableSlots,
 };
