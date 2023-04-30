@@ -7,7 +7,7 @@ function App() {
   return (
     <>
       <Navbar></Navbar>
-      <div className="p-4 bg-cyan-50 h-screen">
+      <div className="p-4 bg-cyan-50">
         <Outlet></Outlet>
       </div>
     </>

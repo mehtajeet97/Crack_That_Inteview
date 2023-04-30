@@ -14,53 +14,38 @@ import bcrypt from "bcryptjs";
 const saltRounds = 10;
 const date = new Date();
 
-const createUser = async (
-  firstName,
-  lastName,
-  age,
-  email,
-  password,
-  phoneNumber,
-  resume,
-  skills,
-  // tags,
-  // profilePhoto = "", //remove profile photo
-  // blogs = [], //no blogs
-  // articlesRead = [], //none
-  // pastInterviews = [], //none
-  // upcomingInterviews = [] //none
-  organization,
-  role
-) => {
-  if (!email) throw "Email must be provided";
-  if (!password) throw "Password must be provided";
-  if (!phoneNumber) throw "Phone Number must be provided";
-  firstName = stringCheck(firstName);
-  lastName = stringCheck(lastName);
-  organization = stringCheck(organization);
-  role = stringCheck(role);
-  if (!isRoleValid(role)) throw "invalid role";
-  ageCheck(age);
-  stringCheck(email);
-  email = email.toLowerCase().trim();
+const createUser = async (userDetails) => {
+  let {
+    firstName,
+    lastName,
+    age,
+    email,
+    password,
+    phoneNumber,
+    resume,
+    yoe,
+    careerRole,
+    skills,
+    organization,
+    role,
+    school,
+  } = userDetails;
+  // if (!email) throw "Email must be provided";
+  // if (!password) throw "Password must be provided";
+  // if (!phoneNumber) throw "Phone Number must be provided";
+  // firstName = stringCheck(firstName);
+  // lastName = stringCheck(lastName);
+  // organization = stringCheck(organization);
+  // role = stringCheck(role);
+  // if (!isRoleValid(role)) throw "invalid role";
+  // ageCheck(+age);
+  // stringCheck(email);
+  // email = email.toLowerCase().trim();
   passwordCheck(password);
   password = password.trim();
   password = await bcrypt.hash(password, saltRounds);
-  phoneNumberCheck(phoneNumber);
-  stringCheck(resume);
-  arrayCheck(skills);
 
-  // arrayCheck(tags);
-  // stringCheck(profilePhoto);
-  // arrayCheck(blogs);
-  // arrayCheck(articlesRead);
-  // arrayCheck(pastInterviews);
-  // arrayCheck(upcomingInterviews);
-  // let day = date.getDate();
-  // let month = date.getMonth() + 1;
-  // let year = date.getFullYear();
-  let user = {};
-  user = {
+  let user = {
     firstName,
     lastName,
     age,
@@ -70,6 +55,9 @@ const createUser = async (
     resume: "",
     skills,
     tags: skills,
+    yoe,
+    school,
+    careerRole,
     profilePhoto: "",
     role,
     blogs: [],
@@ -84,11 +72,13 @@ const createUser = async (
     organization,
   };
   const userCollection = await users();
-  const insertUser = await userCollection.insertOne(user);
-  if (!insertUser.acknowledged || !insertUser.insertedId)
+  const insertedUserInfo = await userCollection.insertOne(user);
+
+  if (!insertedUserInfo.acknowledged || !insertedUserInfo.insertedId)
     throw "Cannot add user";
-  const newId = insertUser.insertedId.toString();
-  user._id = newId;
+
+  // const newId = insertedUserInfo.insertedId.toString();
+  user._id = insertedUserInfo.insertedId.toString();
   return user;
 };
 
