@@ -3,6 +3,13 @@
 1. Submit Logic : Get interviewer ID, Trigger Function update user(id, availableslots, Value)
 2. Order of display and insertion ['3 pm to 3.45 pm', '10 am to 10.45 am', '12 pm to 12.45 pm', '1 pm to 1.45 pm']
 3. Render Calendar and Checkboxes side-by-side 
+
+
+//Logic for Backend:
+1. Check UserId exists, if not status 400
+2. If User exists, then update availableslots
+3. If existing avialable slots, append but sort the slots based on the dates
+4. On clicking submit, take interviewer 
 */
 
 import { useState } from "react";

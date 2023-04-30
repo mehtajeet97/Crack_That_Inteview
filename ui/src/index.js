@@ -1,20 +1,24 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
-import App from "./App";
-import reportWebVitals from "./reportWebVitals";
+import App from "./App.js";
+import reportWebVitals from "./reportWebVitals.js";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { NotFound404 } from "./components/NotFound404";
-import { Feed } from "./components/Feed";
-import { Interview } from "./components/Interview.js";
-import { TestYourself } from "./components/TestYourself";
-import { Blog } from "./components/Blog";
-import { Trending } from "./components/Trending";
-import { Profile } from "./components/Profile";
-import { Login } from "./components/Login";
-import { Signup } from "./components/Signup";
-import { Landing } from "./components/Landing";
-import { Register } from "./components/Register";
+import { NotFound404 } from "./components/NotFound404.js";
+import { Feed } from "./components/Feed.js";
+import { Interview } from "./components/ScheduleInterview.js";
+import { AvailableSlots } from "./components/AvailableSlots.js";
+import { SchedulingScreen1 } from "./components/SchedulingScreen1.js";
+import { SchedulingScreen2 } from "./components/SchedulingScreen2.js";
+import { SchedulingScreen3 } from "./components/SchedulingScreen3.js";
+import { TestYourself } from "./components/TestYourself.js";
+import { Blog } from "./components/Blog.js";
+import { Trending } from "./components/Trending.js";
+import { Profile } from "./components/Profile.js";
+import { Login } from "./components/Login.js";
+import { Signup } from "./components/Signup.js";
+import { Landing } from "./components/Landing.js";
+import { Register } from "./components/Register.js";
 
 const router = createBrowserRouter([
   {
@@ -33,6 +37,22 @@ const router = createBrowserRouter([
       {
         path: "interview",
         element: <Interview />,
+      },
+      {
+        path: "availableslots",
+        element: <AvailableSlots />,
+      },
+      {
+        path: "schedulingscreen1",
+        element: <SchedulingScreen1 />,
+      },
+      {
+        path: "schedulingscreen2",
+        element: <SchedulingScreen2 />,
+      },
+      {
+        path: "schedulingscreen3",
+        element: <SchedulingScreen3 />,
       },
       {
         path: "test-yourself",
