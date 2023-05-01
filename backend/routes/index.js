@@ -9,15 +9,37 @@ import * as helpers from "../helpers.js";
 const resp = (app) => {
   app.post("/login", async (req, res) => {
     try {
+      // Get the email and password from request body.
       let { email, password } = req.body;
+
+      // Validate the credentials
       let validationResult = helpers.validate.login(req.body);
+
+      // Check Validation result
       if (validationResult.validationPassed) {
+        // Check if user with provided email exists
         let user = await users.getUserByEmail(email);
+        if (!user) throw { error: "Email not found", status: 404 };
         try {
           await bcrypt.compare(password, user.password);
           const accessToken = auth.createToken(user._id, user.role);
           const refreshToken = auth.createRefreshToken(user._id, user.role);
-          res.json({ id: user._id, accessToken, refreshToken });
+          let userDetails = {
+            firstName,
+            lastName,
+            age,
+            email,
+            role,
+            isBanned,
+            isPremium,
+            userScore,
+            _id,
+          };
+          res.json({
+            accessToken,
+            refreshToken,
+            userDetails,
+          });
         } catch (e) {
           res
             .status(400)
@@ -27,7 +49,11 @@ const resp = (app) => {
         res.status(400).json({ data: [], errors: validationResult.errors });
       }
     } catch (e) {
-      res.status(500).json(helpers.sendError(e));
+      if (e.status === 404) {
+        res.status(400).json({ errors: "Email not found" });
+      } else {
+        res.status(500).json(helpers.sendError(e));
+      }
     }
   });
   app.use("/users", userRoutes);

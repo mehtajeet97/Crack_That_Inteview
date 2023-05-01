@@ -12,7 +12,7 @@ const isValidName = (name) =>
 const isValidSocialLink = (link) =>
   !isUndefinedOrNull(link) && isValidString(link);
 
-const isValidEmail = (email) =>
+export const isValidEmail = (email) =>
   !isUndefinedOrNull(email) &&
   isValidString(email) &&
   !!/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]{4,}@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(

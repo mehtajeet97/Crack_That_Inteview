@@ -1,21 +1,21 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
-import App from "./App";
-import reportWebVitals from "./reportWebVitals";
+import App from "./App.js";
+import reportWebVitals from "./reportWebVitals.js";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { NotFound404 } from "./components/NotFound404";
-import { Feed } from "./components/Feed";
+import { NotFound404 } from "./components/NotFound404.js";
+import { Feed } from "./components/Feed.js";
 import { Interview } from "./components/Interview.js";
-import { TestYourself } from "./components/TestYourself";
-import { Blog } from "./components/Blog";
-import { Trending } from "./components/Trending";
-import { Profile } from "./components/Profile";
-import { Login } from "./components/Login";
-import { Signup } from "./components/Signup";
-import { Landing } from "./components/Landing";
-import { Register } from "./components/Register";
-
+import { TestYourself } from "./components/TestYourself.js";
+import { Blog } from "./components/Blog.js";
+import { Trending } from "./components/Trending.js";
+import { Profile } from "./components/Profile.js";
+import { Login } from "./components/Login.js";
+import { Signup } from "./components/Signup.js";
+import { Landing } from "./components/Landing.js";
+import { Register } from "./components/Register.js";
+import { ProtectedRoutes } from "./components/ProtectedRoutes.js";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -28,27 +28,51 @@ const router = createBrowserRouter([
       },
       {
         path: "feed",
-        element: <Feed />,
+        element: (
+          <ProtectedRoutes>
+            <Feed />
+          </ProtectedRoutes>
+        ),
       },
       {
         path: "interview",
-        element: <Interview />,
+        element: (
+          <ProtectedRoutes>
+            <Interview />
+          </ProtectedRoutes>
+        ),
       },
       {
         path: "test-yourself",
-        element: <TestYourself />,
+        element: (
+          <ProtectedRoutes>
+            <TestYourself />
+          </ProtectedRoutes>
+        ),
       },
       {
         path: "blog",
-        element: <Blog />,
+        element: (
+          <ProtectedRoutes>
+            <Blog />
+          </ProtectedRoutes>
+        ),
       },
       {
         path: "trending",
-        element: <Trending />,
+        element: (
+          <ProtectedRoutes>
+            <Trending />
+          </ProtectedRoutes>
+        ),
       },
       {
         path: "profile",
-        element: <Profile />,
+        element: (
+          <ProtectedRoutes>
+            <Profile />
+          </ProtectedRoutes>
+        ),
       },
       {
         path: "login",

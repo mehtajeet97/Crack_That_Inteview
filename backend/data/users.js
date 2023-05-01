@@ -8,6 +8,7 @@ import {
   arrayCheck,
   stringCheck,
   isRoleValid,
+  isValidEmail,
 } from "../helpers.js";
 import bcrypt from "bcryptjs";
 
@@ -94,11 +95,13 @@ const getUserById = async (id) => {
 };
 
 const getUserByEmail = async (email) => {
-  if (!email) throw "invalid email";
+  if (!isValidEmail(email)) {
+    return { error: "Invalid email format provided" };
+  }
   email = email.trim();
   const userCollection = await users();
   let user = await userCollection.findOne({ email: email });
-  if (user === null) throw "there are no user with this email";
+  if (user === null) return null;
   user._id = user._id.toString();
   return user;
 };

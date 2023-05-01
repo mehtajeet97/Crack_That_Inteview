@@ -10,11 +10,14 @@ dont use redirect
  */
 
 // Main logic
+
 import express from "express";
 import resp from "./routes/index.js";
 import cookieParser from "cookie-parser";
 import auth from "./authFile.js";
 import cors from "cors";
+import dotenv from "dotenv";
+dotenv.config();
 
 const app = express();
 
@@ -59,6 +62,7 @@ app.use((req, res, next) => {
 
 resp(app);
 
-app.listen(3000, () => {
-  console.log("The server is online");
+app.listen(process.env.EXPRESS_PORT, () => {
+  console.log(`Express server on port ${process.env.EXPRESS_PORT}!`);
+  // console.log("The server is online");
 });

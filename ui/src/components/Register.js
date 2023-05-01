@@ -18,7 +18,7 @@ export const Register = () => {
 
   const registerUser = async (payload) => {
     try {
-      const registerURL = "http://localhost:3000/users";
+      const registerURL = "http://localhost:4000/users";
       let { data } = await axios.post(registerURL, payload);
       navigate("/login");
     } catch (e) {
@@ -115,8 +115,8 @@ export const Register = () => {
   const onFormBack = (event) => setFormStep((prev) => prev - 1);
 
   const firstForm = (
-    <div className="p-6 space-y-4 md:space-y-4 sm:p-8">
-      <h1 className="text-xl font-bold text-center leading-tight tracking-tight text-white">
+    <div className="p-4 space-y-4 md:space-y-4 sm:p-6">
+      <h1 className="text-2xl font-bold text-center leading-tight tracking-tight text-white">
         Register with us as
       </h1>
       <div className="flex justify-around w-full">
@@ -481,7 +481,7 @@ export const Register = () => {
         className="w-3/5 lg:block hidden"
         alt="Register with us"
       ></img>
-      <div className="w-full rounded-lg shadow max-w-md sm:max-w-md xl:p-0 bg-blue-500">
+      <div className="w-full rounded-lg shadow max-w-md xl:p-0 bg-blue-500">
         {forms[formStep]}
       </div>
     </div>

@@ -12,9 +12,7 @@ const isValidSocialLink = (link) =>
 const isValidEmail = (email) =>
   !isUndefinedOrNull(email) &&
   isValidString(email) &&
-  !!/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]{4,}@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(
-    email
-  );
+  /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]{3,}\.[a-zA-Z0-9-.]{2,4}$/.test(email);
 const isValidRole = (role) =>
   !isUndefinedOrNull(role) &&
   ["admin", "student", "interviewer"].includes(role.trim().toLowerCase());

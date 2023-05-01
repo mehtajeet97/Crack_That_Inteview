@@ -7,9 +7,11 @@ import axios from "axios";
 export const Login = () => {
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
+  const [responseError, setResponseError] = useState("");
   const [formState, setFormState] = useState({ email: "", password: "" });
 
   const handleFieldChange = (event) => {
+    setResponseError(null);
     const updatedField = {
       ...formState,
       [event.target.name]: event.target.value,
@@ -35,24 +37,24 @@ export const Login = () => {
 
   const login = async (payload) => {
     try {
-      const loginURL = "http://localhost:3000/login";
+      const loginURL = "http://localhost:4000/login";
       let { data, status } = await axios.post(loginURL, payload);
       if (status === 200) {
         setAuthToken(data);
         navigate("/feed");
-      } else {
-        console.log(data.errors);
       }
     } catch (e) {
-      console.log(e.response.data);
-      return false;
+      console.log(e);
+      if (e.response.status === 400) {
+        // let { errors } = e.response.data;
+        setResponseError(e.response.data.errors);
+      }
     }
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
     let validationResult = validation.login(formState);
-    console.log(validationResult);
     if (!validationResult.validationPassed) {
       setErrors(validationResult.errors);
     } else {
@@ -103,7 +105,7 @@ export const Login = () => {
                 id="password"
                 placeholder="••••••••••"
                 className="bg-gray-50 border border-gray-400 text-gray-800 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 "
-                required=""
+                required
                 value={formState?.password}
                 onChange={handleFieldChange}
               />
@@ -111,6 +113,9 @@ export const Login = () => {
                 <p className="text-sm text-red-800">{errors.password}</p>
               )}
             </div>
+            {responseError && (
+              <p className="text-yellow-200 text-sm">{responseError}</p>
+            )}
             <div className="flex items-center justify-between">
               <div className="flex items-start">
                 <div className="flex items-center h-5">
