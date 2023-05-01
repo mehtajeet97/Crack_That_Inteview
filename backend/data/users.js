@@ -23,6 +23,9 @@ const createUser = async (
   phoneNumber,
   resume,
   skills,
+  linkedin,
+  twitter,
+  github,
   // tags,
   // profilePhoto = "", //remove profile photo
   // blogs = [], //no blogs
@@ -49,7 +52,6 @@ const createUser = async (
   phoneNumberCheck(phoneNumber);
   stringCheck(resume);
   arrayCheck(skills);
-
   // arrayCheck(tags);
   // stringCheck(profilePhoto);
   // arrayCheck(blogs);
@@ -69,6 +71,9 @@ const createUser = async (
     phoneNumber,
     resume: "",
     skills,
+    linkedin,
+    twitter,
+    github,
     tags: skills,
     profilePhoto: "",
     role,

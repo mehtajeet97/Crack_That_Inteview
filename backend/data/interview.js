@@ -34,11 +34,14 @@ const createInterview = async (
     interviewLink: "Zoom Link",
     interviewDate,
     recordingLink: "Recording Link",
+    //Remove Interviewee remarks
     intervieweeRemarks,
     interviewerRemarks,
+    //Date()
     createdAt: `${month}/${day}/${year}`,
     updatedAt: `${month}/${day}/${year}`,
-    interviewStatus: ["Completed", "Scheduled", "Pending"],
+    //Change Interview Status to String
+    interviewStatus: ["Completed", "Scheduled", "In Progress"],
   };
   const interviewCollection = await interviews();
   const insertInterview = await interviewCollection.insertOne(interview);

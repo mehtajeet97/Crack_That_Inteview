@@ -35,7 +35,6 @@ router
       // data.articlesRead = helpers.arrayCheck(data.articlesRead);
       // data.pastInterviews = helpers.arrayCheck(data.pastInterviews);
       // data.upcomingInterviews = helpers.arrayCheck(data.upcomingInterviews);
-
       const addUser = await users.createUser(
         data.firstName,
         data.lastName,
