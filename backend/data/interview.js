@@ -38,10 +38,9 @@ const createInterview = async (
     intervieweeRemarks,
     interviewerRemarks,
     //Date()
-    createdAt: `${month}/${day}/${year}`,
-    updatedAt: `${month}/${day}/${year}`,
-    //Change Interview Status to String
-    interviewStatus: ["Completed", "Scheduled", "In Progress"],
+    createdAt: date,
+    updatedAt: date,
+    interviewStatus: "Completed",
   };
   const interviewCollection = await interviews();
   const insertInterview = await interviewCollection.insertOne(interview);

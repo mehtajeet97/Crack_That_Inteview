@@ -27,29 +27,29 @@ app.use(cookieParser());
 app.use(cors());
 let imagePath = path.join(__dirname, 'public');
 app.use(express.static(imagePath));
-// app.use((req, res, next) => {
-//   let method = req.method;
-//   let path = req.originalUrl;
-//   let skipPath = ["/login", "/users"];
-//   if (!skipPath.includes(path)) {
-//     let token = req.header("Authorization");
-//     if (token) {
-//       console.log("in token");
-//       if (auth.authChecker(token)) {
-//         console.log("in auth checker");
-//         next();
-//       } else {
-//         res.status(401).json({ message: "missing authorization token" });
-//       }
-//     } else {
-//       res.status(401).json({ message: "missing authorization token" });
-//     }
-//   } else if (path === "/users" && method == "POST") {
-//     next();
-//   } else {
-//     next();
-//   }
-// });
+app.use((req, res, next) => {
+  let method = req.method;
+  let path = req.originalUrl;
+  let skipPath = ["/login", "/users"];
+  if (!skipPath.includes(path)) {
+    let token = req.header("Authorization");
+    if (token) {
+      console.log("in token");
+      if (auth.authChecker(token)) {
+        console.log("in auth checker");
+        next();
+      } else {
+        res.status(401).json({ message: "missing authorization token" });
+      }
+    } else {
+      res.status(401).json({ message: "missing authorization token" });
+    }
+  } else if (path === "/users" && method == "POST") {
+    next();
+  } else {
+    next();
+  }
+});
 
 app.use((req, res, next) => {
   console.log(
