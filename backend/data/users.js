@@ -223,6 +223,9 @@ const updateAvailableSlots = async (userId, slots) => {
 };
 
 const getAvailableSlots = async (id) => {
+  //Validation
+  id = helpers.idCheck(id);
+
   const userCollection = await users();
   // Find the user with the specified ID
   const user = await userCollection.findOne({ _id: ObjectId(id) });

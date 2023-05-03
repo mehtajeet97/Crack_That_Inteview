@@ -2,6 +2,7 @@ import userRoutes from "./users.js";
 import users from "../data/users.js";
 import interviewRoutes from "./interview.js";
 import articleRoutes from "./articles.js";
+import scheduleRoutes from "./schedule.js";
 import auth from "../authFile.js";
 import bcrypt from "bcryptjs";
 import * as helpers from "../helpers.js";
@@ -35,6 +36,7 @@ const resp = (app) => {
   app.use("/articles", articleRoutes);
   // app.use("/exams",examRoutes)
   // app.use("/trending",trending)
+  app.use("/schedule", scheduleRoutes);
   app.get("/logout", (req, res) => {
     res.status(200).json(helpers.sendResponse("user successfully logged out"));
   });
