@@ -11,7 +11,7 @@ router.route("/").get(async (req, res) => {
   if (!interviewerList) {
     res.status(400).json(helpers.sendError("there are no users"));
   } else {
-    res.status(200).json(helpers.sendResponse("ok", allUsers));
+    res.status(200).json(helpers.sendResponse("ok", interviewerList));
   }
 });
 
@@ -24,7 +24,7 @@ router
       req.params.id = helpers.idCheck(req.params.id);
       const userSlots = await users.getAvailableSlots(req.params.id);
 
-      res.json(userSlots);
+      res.status(200).json(userSlots);
     } catch (e) {
       console.log(e);
       res.status(400).json(helpers.sendError(e));
@@ -40,7 +40,7 @@ router
 
       const slots = updateAvailableSlots(payload.id, payload.slots);
       if (slots.success) {
-        res.json("Updated Successfully!");
+        res.status(200).json("Updated Successfully!");
       } else {
         throw `Update unsuccessful!`;
       }
