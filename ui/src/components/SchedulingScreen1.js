@@ -1,16 +1,33 @@
 import { Link } from "react-router-dom";
+import axios from "axios";
 
 /*
 TO-DO :
+
+2. Provide the path to each interviewer as opposed to the current dummy path : "interview"
+
+To-Test:
+
 1. Populate the List of interviwers to choose from (database)
     Logic : create a function getallInterviewers where users are selected based on their role (interviewer)
     Make that function populate the array with values for everything except path
     change the path to Scheduling Screen 2 where user can select a date from available slots
-    
-2. Provide the path to each interviewer as opposed to the current dummy path : "interview"
 */
 
 export const SchedulingScreen1 = () => {
+  const populate = async () => {
+    const scheduleURL = "http://localhost:3000/schedule";
+    const cards1 = await axios.get(scheduleURL);
+    /*
+  Values to update:
+  firstName: 1,
+  lastName: 1,
+  skills: 1,
+  organization: 1,
+  yoe: 1,
+   */
+  };
+
   const cards = [
     {
       title: "Interviewer 1",
