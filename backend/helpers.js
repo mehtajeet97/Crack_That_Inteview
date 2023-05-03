@@ -78,6 +78,7 @@ export const validate = {
       email,
       password,
       confirmPassword,
+      organisation,
       age,
       school,
       yoe,

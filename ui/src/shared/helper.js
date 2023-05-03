@@ -66,6 +66,9 @@ const isValidPhoneNumber = (phoneNumber) => {
   return true;
 };
 
+const isValidOrganisation = (organisation) =>
+  !isUndefinedOrNull(organisation) && isValidString(organisation);
+
 export const validation = {
   registerFirstForm: (payload) => {
     let { firstName, lastName, email, password, confirmPassword, age } =
@@ -128,6 +131,7 @@ export const validation = {
       confirmPassword,
       age,
       school,
+      organisation,
       yoe,
       careerRole,
       skills,
@@ -183,16 +187,23 @@ export const validation = {
       result.data.age = age;
     }
 
-    if (!isValidSchool(school)) {
-      result.errors.school = "Select your school";
-    } else {
-      result.data.school = school;
-    }
-
-    if (!isResumeUploaded(resume)) {
-      result.errors.resume = "Invalid email provided!";
-    } else {
-      result.data.resume = resume;
+    if (role === "student") {
+      if (!isValidSchool(school)) {
+        result.errors.school = "Select your school";
+      } else {
+        result.data.school = school;
+      }
+      if (!isResumeUploaded(resume)) {
+        result.errors.resume = "Please provide your resume!";
+      } else {
+        result.data.resume = resume;
+      }
+    } else if (role === "interviewer") {
+      if (!isValidOrganisation(organisation)) {
+        result.errors.organisation = "Select your school";
+      } else {
+        result.data.organisation = organisation;
+      }
     }
 
     if (!isValidYoe(yoe)) {

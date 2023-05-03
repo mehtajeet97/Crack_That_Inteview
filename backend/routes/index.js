@@ -2,7 +2,7 @@ import userRoutes from "./users.js";
 import users from "../data/users.js";
 import interviewRoutes from "./interview.js";
 import articleRoutes from "./articles.js";
-import auth from "../authFile.js";
+import auth from "../middleware/auth.js";
 import bcrypt from "bcryptjs";
 import * as helpers from "../helpers.js";
 
@@ -22,9 +22,9 @@ const resp = (app) => {
         if (!user) throw { error: "Email not found", status: 404 };
         try {
           await bcrypt.compare(password, user.password);
-          const accessToken = auth.createToken(user._id, user.role);
+          const accessToken = auth.createAccessToken(user._id, user.role);
           const refreshToken = auth.createRefreshToken(user._id, user.role);
-          let userDetails = {
+          let {
             firstName,
             lastName,
             age,
@@ -34,13 +34,24 @@ const resp = (app) => {
             isPremium,
             userScore,
             _id,
-          };
+          } = user;
           res.json({
             accessToken,
             refreshToken,
-            userDetails,
+            userDetails: {
+              firstName,
+              lastName,
+              age,
+              email,
+              role,
+              isBanned,
+              isPremium,
+              userScore,
+              _id,
+            },
           });
         } catch (e) {
+          console.log(e);
           res
             .status(400)
             .json({ data: [], errors: "Invalid email or password" });
@@ -65,7 +76,7 @@ const resp = (app) => {
     res.status(200).json(helpers.sendResponse("user successfully logged out"));
   });
   app.use("*", (req, res) => {
-    res.status(404).json(helpers.sendError("page not found"));
+    res.status(404).json(helpers.sendError("Not found"));
   });
 };
 

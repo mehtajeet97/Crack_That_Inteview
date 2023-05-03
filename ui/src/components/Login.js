@@ -1,12 +1,14 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { validation } from "../shared/helper.js";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { AuthContext } from "../context/AuthContext.js";
 
 export const Login = () => {
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
+  const { state, updateState } = useContext(AuthContext);
   const [responseError, setResponseError] = useState("");
   const [formState, setFormState] = useState({ email: "", password: "" });
 
@@ -29,10 +31,11 @@ export const Login = () => {
     setFormState(updatedField);
   };
 
-  const setAuthToken = (tokenData) => {
-    localStorage.setItem("accessToken", tokenData.accessToken);
-    localStorage.setItem("refreshToken", tokenData.refreshToken);
-    localStorage.setItem("userID", tokenData.id);
+  const setUserDetails = (data) => {
+    updateState({ ...state, isLoggedIn: true, userDetails: data.userDetails });
+    localStorage.setItem("userDetails", JSON.stringify(data.userDetails));
+    localStorage.setItem("accessToken", data.accessToken);
+    localStorage.setItem("refreshToken", data.refreshToken);
   };
 
   const login = async (payload) => {
@@ -40,13 +43,12 @@ export const Login = () => {
       const loginURL = "http://localhost:4000/login";
       let { data, status } = await axios.post(loginURL, payload);
       if (status === 200) {
-        setAuthToken(data);
+        setUserDetails(data);
         navigate("/feed");
       }
     } catch (e) {
       console.log(e);
       if (e.response.status === 400) {
-        // let { errors } = e.response.data;
         setResponseError(e.response.data.errors);
       }
     }

@@ -39,11 +39,22 @@ router
       if (!validationResult.validationPassed) {
         res.status(400).json({ data: [], errors: validationResult.errors });
       } else {
-        const newUser = await users.createUser(validationResult.data);
-        console.log(newUser);
-        res
-          .status(200)
-          .json({ message: "User registered successfully", data: newUser });
+        // Check if user with same email exists
+
+        let user = users.getUserByEmail(payload.email.trim().toLowerCase());
+        if (!user) {
+          const { password, ...rest } = await users.createUser(
+            validationResult.data
+          );
+          console.log(rest);
+          res
+            .status(200)
+            .json({ message: "User registered successfully", data: rest });
+        } else {
+          res
+            .status(400)
+            .json({ data: [], errors: "User already exists, try signing in." });
+        }
       }
     } catch (e) {
       console.log(`POST /users: ${e}`);

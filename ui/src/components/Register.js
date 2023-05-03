@@ -1,17 +1,20 @@
 // Correlation NEsted Sub queries to join queries.
 import { validation, skills, formInitialState } from "../shared/helper.js";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import picture from "../joinus.jpg";
 import Select from "react-select";
 import makeAnimated from "react-select/animated";
 import axios from "axios";
 import { cleanList } from "../shared/schoolList.js";
+import "react-toastify/dist/ReactToastify.css";
+import { AuthContext } from "../context/AuthContext.js";
 
 const animatedComponents = makeAnimated();
 export const Register = () => {
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
+  const { state, updateState } = useContext(AuthContext);
   const [role, setRole] = useState("student");
   const [formStep, setFormStep] = useState(0);
   const [formState, setFormState] = useState(formInitialState);
@@ -22,7 +25,8 @@ export const Register = () => {
       let { data } = await axios.post(registerURL, payload);
       navigate("/login");
     } catch (e) {
-      console.log(e.response.data);
+      let error = e.response.data;
+      state.triggerToast(error.errors, "error");
       return false;
     }
   };
@@ -106,7 +110,9 @@ export const Register = () => {
       setErrors(validationResult.errors);
     } else {
       let payload = validationResult.data;
-      payload.school = payload.school.value;
+      if (role === "student") {
+        payload.school = payload.school.value;
+      }
       payload.skills = payload.skills.map((skill) => skill.label);
       registerUser(payload);
     }
