@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import axios from "axios";
-
+import { useState } from "react";
 /*
 TO-DO :
 
@@ -15,82 +15,79 @@ To-Test:
 */
 
 export const SchedulingScreen1 = () => {
-  const populate = async () => {
-    const scheduleURL = "http://localhost:3000/schedule";
-    const cards1 = await axios.get(scheduleURL);
-    /*
+  /*
   Values to update:
+  _id: 1
   firstName: 1,
   lastName: 1,
   skills: 1,
   organization: 1,
   yoe: 1,
    */
-  };
+  const [cards1, setcards1] = useState([]);
 
-  const cards = [
-    {
-      title: "Interviewer 1",
-      path: "http://localhost:3000/interview",
-      skills: "Java, Python",
-      company: "Google",
-      yoe: "5",
-    },
-    {
-      title: "Interviewer 2",
-      path: "http://localhost:3000/interview",
-      skills: "DevOps",
-      company: "Microsoft",
-      yoe: "3",
-    },
-    {
-      title: "Interviewer 3",
-      path: "http://localhost:3000/interview",
-      skills: "Machine Learning",
-      company: "Meta",
-      yoe: "7",
-    },
-  ];
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    const scheduleURL = "http://localhost:3000/schedule";
+    let { data, status } = await axios.get(scheduleURL);
+    if (status === 200) {
+      setcards1(data);
+    } else {
+      console.log("Error!!!");
+    }
+  };
 
   return (
     <div>
       <div>
-        <h1>Avaialable Interviewers</h1>
+        <h1>Avaialable Interviewers : </h1>
+        <button
+          onClick={handleSubmit}
+          type="submit"
+          className="w-full text-black border-2 border-solid border-black hover:bg-white hover:text-cyan-600 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm mt-2 px-5 py-2.5 text-center"
+        >
+          Click Here
+        </button>
       </div>
-      <div className="grid lg:grid-cols-4 sm:grid-cols-2 gap-4 grid-cols-1">
-        {cards.map((card, idx) => (
-          <div
-            key={idx}
-            className="bg-cyan-300 basis-2/7 rounded overflow-hidden shadow-lg"
-          >
-            <div className="px-6 py-4">
-              <Link to={card.path}>
-                <div className="font-bold text-xl mb-2">{card.title}</div>
-              </Link>
-              <p className="text-gray-700 text-base">
-                Skills : {card.skills && card.skills}
-              </p>
-              <p className="text-gray-700 text-base">
-                {!card.skills && `Not Disclosed.`}
-              </p>
+      {cards1.length > 0 && (
+        <div className="grid lg:grid-cols-4 sm:grid-cols-2 gap-4 grid-cols-1">
+          {cards1.map((card, idx) => (
+            <div
+              key={idx}
+              className="bg-cyan-300 basis-2/7 rounded overflow-hidden shadow-lg"
+            >
+              <div className="px-6 py-4">
+                <Link to="http://localhost:3001/schedulingscreen2">
+                  <div className="font-bold text-xl mb-2">
+                    {card.firstName} {card.lastName}
+                  </div>
+                </Link>
+                <p className="text-gray-700 text-base">
+                  Skills : {card.skills && card.skills}
+                </p>
+                <p className="text-gray-700 text-base">
+                  {!card.skills && `Not Disclosed.`}
+                </p>
 
-              <p className="text-gray-700 text-base">
-                Company : {card.company && card.company}
-              </p>
-              <p className="text-gray-700 text-base">
-                {!card.company && `Not Disclosed.`}
-              </p>
+                <p className="text-gray-700 text-base">
+                  Company : {card.organization && card.organization}
+                </p>
+                <p className="text-gray-700 text-base">
+                  {!card.organization && `Not Disclosed.`}
+                </p>
 
-              <p className="text-gray-700 text-base">
-                Years of Experience: {card.yoe && card.yoe}
-              </p>
-              <p className="text-gray-700 text-base">
-                {!card.yoe && `Not Disclosed.`}
-              </p>
+                <p className="text-gray-700 text-base">
+                  Years of Experience: {card.yoe && card.yoe}
+                </p>
+                <p className="text-gray-700 text-base">
+                  {!card.yoe && `Not Disclosed.`}
+                </p>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
