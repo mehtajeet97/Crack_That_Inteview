@@ -77,6 +77,7 @@ export const Navbar2 = () => {
   const handleProfileDropdown = (name) => {
     switch (name) {
       case "profile":
+        navigate(`/${name}`);
         break;
       case "score":
         break;
