@@ -16,6 +16,7 @@ import { Signup } from "./components/Signup.js";
 import { Landing } from "./components/Landing.js";
 import { Register } from "./components/Register.js";
 import { ProtectedRoutes } from "./components/ProtectedRoutes.js";
+import { Admin } from "./components/Admin.js";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -86,6 +87,14 @@ const router = createBrowserRouter([
         path: "register",
         element: <Register />,
       },
+      {
+        path: "admin",
+        element:(
+          <ProtectedRoutes>
+            <Admin/>
+          </ProtectedRoutes>
+        )
+      }
     ],
   },
 ]);

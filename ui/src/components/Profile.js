@@ -29,7 +29,7 @@ export const Profile = () => {
 	}, [])
 
   const getUserCall = async(id) => {
-    const { data } = await axios.get('http://localhost:8080/users/644d957a4691d76f7592a504')
+    const { data } = await axios.get(`http://localhost:8080/users/${id}`)
     console.log(data);
     return data;
   }
@@ -56,7 +56,7 @@ export const Profile = () => {
 
   const userProfile = async (payload, id) => {
     try {
-      const userProfileURL = "http://localhost:3000/user/644d957a4691d76f7592a504";
+      const userProfileURL = `http://localhost:8080/users/${id}`;
       let { data, status } = await axios.put(userProfileURL, payload);
       if (status === 200) {
         navigate("/feed");
@@ -181,7 +181,7 @@ return(
     </div>
     <div className="w-full rounded-lg sm:max-w-md xl:p-0">
       <label className="text-black-700 text-black-700 font-bold mb-2" for="organization">Organization</label>
-        <input className="appearance-none block w-half bg-gray-200 text-black-700 border border-black-500 rounded py-3 px-10 mb-5 focus:outline-none focus:bg-gray opacity-300 cursor-not-allowed" id="organization" type="text" value={currentProfileState?.organization || ''} placeholder="Role" disabled></input>
+        <input className="appearance-none block w-half bg-gray-200 text-black-700 border border-black-500 rounded py-3 px-10 mb-5 focus:outline-none focus:bg-gray opacity-300 cursor-not-allowed" id="organization" type="text" value={currentProfileState?.organization || ''} placeholder="Organization" disabled></input>
     </div>
     <div className="w-full rounded-lg sm:max-w-md xl:p-0">
       <label className="text-black-700 text-black-700 font-bold mb-2" for="upcoming-interviews">Upcoming Interviews</label>
