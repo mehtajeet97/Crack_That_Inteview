@@ -1,22 +1,23 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
-import App from "./App";
-import reportWebVitals from "./reportWebVitals";
+import App from "./App.js";
+import reportWebVitals from "./reportWebVitals.js";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { NotFound404 } from "./components/NotFound404";
-import { Feed } from "./components/Feed";
+import { NotFound404 } from "./components/NotFound404.js";
+import { Feed } from "./components/Feed.js";
 import { Interview } from "./components/Interview.js";
-import { TestYourself } from "./components/TestYourself";
-import { Blogs } from "./components/Blogs";
-import { Trending } from "./components/Trending";
-import { Profile } from "./components/Profile";
-import { Login } from "./components/Login";
-import { Signup } from "./components/Signup";
-import { Landing } from "./components/Landing";
-import { Register } from "./components/Register";
-import { Premium } from "./components/Premium";
-import { DetailBlog } from "./components/DetailBlog";
+import { TestYourself } from "./components/TestYourself.js";
+import { Blogs } from "./components/Blogs.js";
+import { Trending } from "./components/Trending.js";
+import { Profile } from "./components/Profile.js";
+import { Login } from "./components/Login.js";
+import { Signup } from "./components/Signup.js";
+import { Landing } from "./components/Landing.js";
+import { Register } from "./components/Register.js";
+import { ProtectedRoutes } from "./components/ProtectedRoutes.js";
+import { Premium } from "./components/Premium.js";
+import { DetailBlog } from "./components/DetailBlog.js";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -29,31 +30,59 @@ const router = createBrowserRouter([
       },
       {
         path: "feed",
-        element: <Feed />,
+        element: (
+          <ProtectedRoutes>
+            <Feed />
+          </ProtectedRoutes>
+        ),
       },
       {
         path: "interview",
-        element: <Interview />,
+        element: (
+          <ProtectedRoutes>
+            <Interview />
+          </ProtectedRoutes>
+        ),
       },
       {
         path: "test-yourself",
-        element: <TestYourself />,
+        element: (
+          <ProtectedRoutes>
+            <TestYourself />
+          </ProtectedRoutes>
+        ),
       },
       {
         path: "blogs",
-        element: <Blogs />,
+        element: (
+          <ProtectedRoutes>
+            <Blogs />
+          </ProtectedRoutes>
+        ),
       },
       {
         path: "blogs/:blogId",
-        element: <DetailBlog />,
+        element: (
+          <ProtectedRoutes>
+            <DetailBlog />
+          </ProtectedRoutes>
+        ),
       },
       {
         path: "trending",
-        element: <Trending />,
+        element: (
+          <ProtectedRoutes>
+            <Trending />
+          </ProtectedRoutes>
+        ),
       },
       {
         path: "profile",
-        element: <Profile />,
+        element: (
+          <ProtectedRoutes>
+            <Profile />
+          </ProtectedRoutes>
+        ),
       },
       {
         path: "login",
@@ -69,7 +98,12 @@ const router = createBrowserRouter([
       },
       {
         path: "join-premium",
-        element: <Premium />,
+
+        element: (
+          <ProtectedRoutes>
+            <Premium />
+          </ProtectedRoutes>
+        ),
       },
     ],
   },
