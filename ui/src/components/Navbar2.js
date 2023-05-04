@@ -9,27 +9,35 @@ export const Navbar2 = () => {
   const [showLoginBtn, setShowLoginBtn] = useState(false);
   const navigate = useNavigate();
   const [openMenuDropdown, setMenuDropdown] = useState(false);
-  const userDetails = JSON.parse(localStorage.getItem("userDetails"));
   const { state, updateState } = useContext(AuthContext);
+  const userDetails = state.userDetails;
 
-  const navTabs = [
+  let navTabs = [
     {
       name: "Interviews",
       path: "/interview",
+      role: ["student", "interviewer"],
     },
     {
       name: "Blogs",
       path: "/blog",
+      role: ["student", "interviewer"],
     },
     {
       name: "AI Exam",
       path: "/test-yourself",
+      role: ["student"],
     },
     {
       name: "Go Premium",
       path: "/premium",
+      role: ["student"],
     },
   ];
+
+  let activeNavTabs = navTabs.filter((tab) =>
+    tab.role.includes(userDetails.role)
+  );
 
   const profileTabs = [
     {
@@ -57,7 +65,6 @@ export const Navbar2 = () => {
   ];
 
   useEffect(() => {
-    console.log(pathname);
     if (!hideNavbarAt.includes(pathname)) {
       setHideNavigationTabs(true);
       setShowLoginBtn(false);
@@ -120,7 +127,7 @@ export const Navbar2 = () => {
                   tabIndex={0}
                   className="menu menu-compact dropdown-content mt-3 p-2 shadow bg-blue-700 text-white font-semibold rounded-box w-52"
                 >
-                  {navTabs.map((tab, idx) => (
+                  {activeNavTabs.map((tab, idx) => (
                     <Link key={idx} to={tab.path}>
                       <li>
                         <a>{tab.name}</a>
@@ -137,7 +144,7 @@ export const Navbar2 = () => {
           <div className="hidden lg:flex">
             <ul className="menu menu-horizontal px-1">
               {hideNavigationTabs &&
-                navTabs.map((tab, idx) => (
+                activeNavTabs.map((tab, idx) => (
                   <Link key={idx} to={tab.path}>
                     <li>
                       <span>{tab.name}</span>
