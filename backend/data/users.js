@@ -1,3 +1,5 @@
+//error with projecttion in get top for trending
+
 import { users } from "../config/mongoCollections.js";
 import { ObjectId } from "mongodb";
 import {
@@ -192,7 +194,107 @@ const removeUser = async (id) => {
   }
   return `User with ${id} has been successfully deleted!`;
 };
+const patchUser = async (id, data) => {
+  //just added this function to
+  try {
+    const error = [];
 
+    if (data.method == "premium-request") {
+      try {
+        id = idCheck(id);
+      } catch (e) {
+        error.push(e);
+      }
+      try {
+        data.data = stringCheck(data.data);
+      } catch (e) {
+        error.push(e);
+      }
+      try {
+        data.status = stringCheck(data.status);
+      } catch (e) {
+        error.push(e);
+      }
+    } else {
+      try {
+        id = idCheck(id);
+      } catch (e) {
+        error.push(e);
+      }
+      try {
+        data.blogId = idCheck(data.blogId);
+      } catch (e) {
+        error.push(e);
+      }
+    }
+
+    const userCollection = await users();
+    let user = await userCollection.find({ _id: new ObjectId(id) }).toArray();
+    user = user[0];
+    if (!user) throw "user not found";
+    if (data.method == "premium-request") {
+      delete data.method;
+      user.request = data;
+      user = { ...user };
+    } else {
+      if (!user.blogs.includes(data.blogId)) user.blogs.push(data.blogId);
+    }
+
+    const updatedInfo = await userCollection.findOneAndUpdate(
+      { _id: new ObjectId(id) },
+      { $set: user },
+      {
+        returnDocument: "after",
+        projection: {
+          password: 0,
+          phoneNumber: 0,
+          pastInterviews: 0,
+          upcomingInterviews: 0,
+        },
+      }
+    );
+
+    // console.log(updatedInfo)
+    if (updatedInfo.lastErrorObject.n === 0) {
+      throw "could not update the user details";
+    }
+    updatedInfo.value._id = updatedInfo.value._id.toString();
+    return { data: updatedInfo.value, error: false };
+  } catch (e) {
+    return { data: e, error: true };
+  }
+};
+const getTopPerformers = async () => {
+  try {
+    const userCollection = await users();
+    let listOfUsers = await userCollection
+      .find({})
+      .project({
+        _id: 1,
+        firstName: 1,
+        lastName: 1,
+        skills: 1,
+        tags: 1,
+        profilePhoto: 1,
+        isPremiumUser: 1,
+        userScore: 1,
+        organization: 1,
+      })
+      .sort({ userScore: -1 })
+      .limit(3)
+      .toArray();
+    if (!listOfUsers.length) throw "error fetching the data";
+
+    listOfUsers = listOfUsers.map((element) => {
+      element._id = element._id.toString();
+      return element;
+    });
+
+    return { data: listOfUsers, error: false };
+  } catch (e) {
+    return { data: e, error: true };
+  }
+};
 export default {
   createUser,
   getUserById,
@@ -200,4 +302,6 @@ export default {
   updateUser,
   removeUser,
   getUserByEmail,
+  patchUser,
+  getTopPerformers,
 };

@@ -39,16 +39,6 @@ async function main() {
   }
 
   try {
-    let articleDetails1 = await articles.createArticle(
-      "Fundamentals of AI",
-      "AI is cool",
-      ["AI", "ML"]
-    );
-    console.log(articleDetails1);
-  } catch (e) {
-    console.log(e);
-  }
-  try {
     let userDetails = await users.createUser(
       "han",
       "solo",

@@ -8,14 +8,15 @@ import { NotFound404 } from "./components/NotFound404";
 import { Feed } from "./components/Feed";
 import { Interview } from "./components/Interview.js";
 import { TestYourself } from "./components/TestYourself";
-import { Blog } from "./components/Blog";
+import { Blogs } from "./components/Blogs";
 import { Trending } from "./components/Trending";
 import { Profile } from "./components/Profile";
 import { Login } from "./components/Login";
 import { Signup } from "./components/Signup";
 import { Landing } from "./components/Landing";
 import { Register } from "./components/Register";
-
+import { Premium } from "./components/Premium";
+import { DetailBlog } from "./components/DetailBlog";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -39,8 +40,12 @@ const router = createBrowserRouter([
         element: <TestYourself />,
       },
       {
-        path: "blog",
-        element: <Blog />,
+        path: "blogs",
+        element: <Blogs />,
+      },
+      {
+        path: "blogs/:blogId",
+        element: <DetailBlog />,
       },
       {
         path: "trending",
@@ -61,6 +66,10 @@ const router = createBrowserRouter([
       {
         path: "register",
         element: <Register />,
+      },
+      {
+        path: "join-premium",
+        element: <Premium />,
       },
     ],
   },

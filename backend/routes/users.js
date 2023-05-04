@@ -13,7 +13,7 @@ router
     if (!allUsers) {
       res.status(400).json(helpers.sendError("there are no users"));
     } else {
-      res.status(200).json(helpers.sendResponse("ok", allUsers));
+      res.status(200).json(helpers.sendResponse(allUsers));
     }
   })
   .post(async (req, res) => {
@@ -51,7 +51,6 @@ router
 
       res.status(200).json(helpers.sendResponse("added user successFully"));
     } catch (e) {
-      console.log(e);
       res.status(500).json(helpers.sendError(e));
     }
   });
@@ -67,32 +66,78 @@ router
       if (user.isBanned) {
         throw "USER IS BANNED";
       }
-      res.json(user);
+      res.status(200).json(helpers.sendResponse(user));
     } catch (e) {
-      console.log(e);
       res.status(400).json(helpers.sendError(e));
     }
   })
   .delete(async (req, res) => {
     //todo  only an admin can delete the user
-    req.params.id = helpers.idCheck(req.params.id);
-
-    try {
-      const deletionInfo = await users.removeUser(req.params.id);
-
-      if (deletionInfo.lastErrorObject.n === 0) {
-        throw `Could not delete user with id of ${id}`;
-      }
-      let mssg = `deleted user with id ${id}`;
-      res.status(200).json(mssg);
-    } catch (e) {
-      res.status(400).json(e);
-    }
+    // req.params.id = helpers.idCheck(req.params.id);
+    // try {
+    //   const deletionInfo = await users.removeUser(req.params.id);
+    //   if (deletionInfo.lastErrorObject.n === 0) {
+    //     throw `Could not delete user with id of ${id}`;
+    //   }
+    //   let mssg = `deleted user with id ${id}`;
+    //   res.status(200).json(mssg);
+    // } catch (e) {
+    //   res.status(400).json(e);
+    // }
   })
   .put(async (req, res) => {
     //todo
     //only an user and an admin can change the user details
-    req.params.id = helpers.idCheck(req.params.id);
+    // req.params.id = helpers.idCheck(req.params.id);
+  })
+  .patch(async (req, res) => {
+    try {
+      const data = req.body;
+      const errors = [];
+      if (req.headers["reqtype"] == "premium-request") {
+        data.method = "premium-request";
+
+        try {
+          req.params.id = helpers.idCheck(req.params.id);
+        } catch (e) {
+          errors.push(e);
+        }
+        try {
+          data.data = helpers.stringCheck(data.data);
+        } catch (e) {
+          errors.push(e);
+        }
+        try {
+          data.status = helpers.stringCheck(data.status);
+        } catch (e) {
+          errors.push(e);
+        }
+      } else {
+        if (!data || Object.keys(data).length === 0) {
+          return "error while liking the blog";
+        }
+        try {
+          req.params.id = helpers.idCheck(req.params.id);
+        } catch (e) {
+          errors.push(e);
+        }
+        try {
+          data.blogId = helpers.idCheck(req.body.blogId);
+        } catch (e) {
+          errors.push(e);
+        }
+      }
+      if (errors.length > 0) throw errors;
+
+      const updatedUser = await users.patchUser(req.params.id, data);
+      if (updatedUser.error) {
+        throw updatedUser.data;
+      }
+
+      res.status(200).json(helpers.sendResponse(updatedUser));
+    } catch (e) {
+      res.status(400).json(helpers.sendError(e));
+    }
   });
 
 export default router;
