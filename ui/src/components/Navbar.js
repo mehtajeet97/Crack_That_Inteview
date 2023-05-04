@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 export const Navbar = () => {
   const hideNavbarAt = ["/", "/register", "/login"];
   const [hideNavigationTabs, setHideNavigationTabs] = useState(false);
   const [showLoginBtn, setShowLoginBtn] = useState(false);
-
+  const navigate = useNavigate();
   const { pathname } = useLocation();
 
   useEffect(() => {
@@ -18,6 +18,12 @@ export const Navbar = () => {
     }
   }, [pathname]);
 
+  const onClickHome = () => {
+    if (pathname !== "/feed") {
+      navigate("/feed");
+    }
+  };
+
   const tabs = [
     { title: "Home", path: "/feed" },
     { title: "Trending", path: "/trending" },
@@ -26,8 +32,11 @@ export const Navbar = () => {
   ];
 
   return (
-    <nav className="flex md:flex-row flex-col justify-between bg-blue-500 p-3">
-      <div className="flex flex-row items-center text-white mr-4">
+    <nav className="flex flex-row justify-between bg-blue-500 p-3 sticky top-0">
+      <div
+        className="flex flex-row items-center text-white mr-4 cursor-pointer"
+        onClick={onClickHome}
+      >
         <svg
           className="fill-current h-8 w-8 mr-2"
           width="54"
@@ -55,7 +64,11 @@ export const Navbar = () => {
         </div>
       )}
       {showLoginBtn && (
-        <button className="bg-white py-2 px-6 text-sm rounded-lg">Login</button>
+        <Link to={pathname === "/register" ? "/login" : "/register"}>
+          <button className="bg-white py-2 px-6 text-sm font-medium rounded-lg">
+            {pathname === "/register" ? "Login" : "Sign up"}
+          </button>
+        </Link>
       )}
     </nav>
   );

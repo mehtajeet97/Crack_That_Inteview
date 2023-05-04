@@ -1,5 +1,212 @@
 import { ObjectId } from "mongodb";
 import moment from "moment";
+export const isValidObjectId = (id) =>
+  !isUndefinedOrNull(id) && ObjectId.isValid(ObjectId);
+const isUndefinedOrNull = (value) => !value || value === null;
+const isValidString = (string) =>
+  typeof string === "string" && string.trim().length;
+const isAlphaOnly = (value) => !!value.match(/^[a-zA-Z]+$/);
+
+const isValidName = (name) =>
+  !isUndefinedOrNull(name) && isValidString(name) && isAlphaOnly(name);
+
+const isValidSocialLink = (link) =>
+  !isUndefinedOrNull(link) && isValidString(link);
+
+export const isValidEmail = (email) =>
+  !isUndefinedOrNull(email) &&
+  isValidString(email) &&
+  !!/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]{4,}@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(
+    email
+  );
+
+String.prototype.toTitleCase = function () {
+  // return this.split(" ")
+  //   .map((w) => w[0].toUpperCase() + w.substring(1).toLowerCase())
+  //   .join(" ");
+  return this.charAt(0).toUpperCase() + this.slice(1);
+};
+
+const isValidPassword = (password) =>
+  !isUndefinedOrNull(password) &&
+  isValidString(password) &&
+  !!/(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}/.test(password);
+
+const isValidAge = (age) =>
+  typeof age === "number" && !isNaN(age) && age >= 13 && age <= 100;
+
+const isResumeUploaded = (resume) => !isUndefinedOrNull(resume);
+
+const isOptionSelected = (value) => value !== "select";
+const isValidSchool = (school) => !isUndefinedOrNull(school);
+const isValidOrganisation = (organisation) =>
+  !isUndefinedOrNull(organisation) && isValidString(organisation);
+const isValidSkills = (skills) => !isUndefinedOrNull(skills) && skills.length;
+const isValidYoe = (yoe) =>
+  !isUndefinedOrNull(yoe) && isValidString(yoe) && isOptionSelected(yoe);
+const isValidCareerRole = (careerRole) =>
+  !isUndefinedOrNull(careerRole) &&
+  isValidString(careerRole) &&
+  isOptionSelected(careerRole);
+
+const isValidRole = (role) =>
+  !isUndefinedOrNull(role) &&
+  ["admin", "student", "interviewer"].includes(role.trim().toLowerCase());
+
+const isValidPhoneNumber = (phoneNumber) => {
+  if (isUndefinedOrNull(phoneNumber)) return false;
+  if (
+    typeof phoneNumber === "string" &&
+    (phoneNumber.trim().length !== 10 || !phoneNumber.match(/[\d]{10}/))
+  ) {
+    return false;
+  }
+  if (
+    typeof phoneNumber === "number" &&
+    (phoneNumber.trim().length !== 10 || !phoneNumber.match(/[\d]{10}/))
+  ) {
+    return false;
+  }
+  return true;
+};
+
+export const validate = {
+  register: (payload) => {
+    let {
+      role,
+      firstName,
+      lastName,
+      email,
+      password,
+      confirmPassword,
+      organisation,
+      age,
+      school,
+      yoe,
+      careerRole,
+      skills,
+      phoneNumber,
+      resume,
+    } = payload;
+    let result = { validationPassed: true, errors: {}, data: {} };
+
+    if (!isValidRole(role)) {
+      result.errors.role = "Invalid role provided!";
+    } else {
+      result.data.role = role.trim().toLowerCase();
+    }
+
+    if (!isValidName(firstName)) {
+      result.errors.firstName = "Invalid first name provided!";
+    } else {
+      result.data.firstName = firstName.trim().toTitleCase();
+    }
+
+    if (!isValidName(lastName)) {
+      result.errors.lastName = "Invalid last name provided!";
+    } else {
+      result.data.lastName = lastName.trim().toTitleCase();
+    }
+
+    if (!isValidEmail(email)) {
+      result.errors.email = "Invalid email provided!";
+    } else {
+      result.data.email = email.trim().toLowerCase();
+    }
+
+    if (!isValidPassword(password)) {
+      result.errors.password = "Invalid password provided!";
+    } else {
+      result.data.password = password;
+    }
+
+    // if (!isValidPassword(confirmPassword)) {
+    //   result.errors.confirmPassword = "Invalid confirm password provided!";
+    // } else {
+    //   result.data.confirmPassword = confirmPassword;
+    // }
+
+    // if (confirmPassword && password !== confirmPassword) {
+    //   result.errors.confirmPassword = "Passwords do not match";
+    // }
+
+    if (!isValidAge(+age)) {
+      result.errors.age =
+        "Person above the age of 13 can register for this application.";
+    } else {
+      result.data.age = age;
+    }
+
+    if (role === "student") {
+      if (!isValidSchool(school)) {
+        result.errors.school = "Invalid school provided";
+      } else {
+        result.data.school = school;
+      }
+    } else if (role === "interviewer") {
+      if (!isValidOrganisation(organisation)) {
+        result.errors.school = "Invalid organisation provided";
+      } else {
+        result.data.organisation = organisation;
+      }
+    }
+
+    // if (!isResumeUploaded(resume)) {
+    //   result.errors.resume = "Invalid email provided!";
+    // } else {
+    //   result.data.resume = resume;
+    // }
+
+    if (!isValidYoe(yoe)) {
+      result.errors.yoe = "Invalid year of experience";
+    } else {
+      result.data.yoe = yoe.trim();
+    }
+
+    if (!isValidCareerRole(careerRole)) {
+      result.errors.careerRole = "Invalid career role";
+    } else {
+      result.data.careerRole = careerRole.trim();
+    }
+
+    if (!isValidSkills(skills)) {
+      result.errors.skills = "Invalid skills provided";
+    } else {
+      result.data.skills = skills;
+    }
+
+    if (!isValidPhoneNumber(phoneNumber)) {
+      result.errors.phoneNumber = "Number should be 10 digits";
+    } else {
+      result.data.phoneNumber = phoneNumber;
+    }
+
+    if (Object.keys(result.errors).length) {
+      result.validationPassed = false;
+    }
+
+    return result;
+    // Skipping 44, 45, 46
+  },
+  login: (payload) => {
+    let { email, password } = payload;
+    let result = { validationPassed: true, errors: {} };
+
+    if (!isValidEmail(email)) {
+      result.errors.email = "Invalid email provided!";
+    }
+
+    if (!isValidPassword(password)) {
+      result.errors.password = "Invalid password provided!";
+    }
+
+    if (Object.keys(result.errors).length) {
+      result.validationPassed = false;
+    }
+
+    return result;
+  },
+};
 
 let idCheck = (id) => {
   if (!id) throw "Id must be provided";
