@@ -16,22 +16,22 @@ export const Navbar2 = () => {
     {
       name: "Interviews",
       path: "/interview",
-      role: ["student", "interviewer"],
+      role: ["student", "interviewer", "admin"],
     },
     {
       name: "Blogs",
       path: "/blog",
-      role: ["student", "interviewer"],
+      role: ["student", "interviewer", "admin"],
     },
     {
       name: "AI Exam",
       path: "/test-yourself",
-      role: ["student"],
+      role: ["student", "admin"],
     },
     {
       name: "Go Premium",
       path: "/premium",
-      role: ["student"],
+      role: ["student", "admin"],
     },
   ];
 
@@ -64,7 +64,20 @@ export const Navbar2 = () => {
     },
   ];
 
+  const onClickHome = () => {
+    if (userDetails?._id) {
+      navigate("/feed");
+    } else {
+      navigate("/");
+    }
+  };
+
   useEffect(() => {
+    if (userDetails._id) {
+      if (["/", "/login", "/register"].includes(pathname)) {
+        navigate("/feed");
+      }
+    }
     if (!hideNavbarAt.includes(pathname)) {
       setHideNavigationTabs(true);
       setShowLoginBtn(false);
@@ -75,9 +88,9 @@ export const Navbar2 = () => {
   }, [pathname]);
 
   const logout = () => {
-    updateState({ ...state, isLoggedIn: false });
-    console.log(state);
     localStorage.clear();
+    updateState({ ...state, isLoggedIn: false, userDetails: {} });
+    state.triggerToast("User Successfully Logged Out!", "success");
     navigate("/");
   };
 
@@ -138,9 +151,14 @@ export const Navbar2 = () => {
               )}
             </div>
           )}
-          <a className="btn btn-ghost normal-case text-xl">
+
+          <button
+            onClick={onClickHome}
+            className="btn btn-ghost normal-case text-xl"
+          >
             Crack That Interview
-          </a>
+          </button>
+
           <div className="hidden lg:flex">
             <ul className="menu menu-horizontal px-1">
               {hideNavigationTabs &&
@@ -226,9 +244,17 @@ export const Navbar2 = () => {
         )}
         {showLoginBtn && (
           <div className="w-full justify-end">
-            <Link to={pathname === "/register" ? "/login" : "/register"}>
+            <Link
+              to={
+                pathname === "/register" || pathname === "/"
+                  ? "/login"
+                  : "/register"
+              }
+            >
               <button className="bg-white text-blue-700 py-2 px-6 text-sm font-medium rounded-lg">
-                {pathname === "/register" ? "Login" : "Sign up"}
+                {pathname === "/register" || pathname === "/"
+                  ? "Login"
+                  : "Sign up"}
               </button>
             </Link>
           </div>

@@ -1,5 +1,6 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 export const NotFound404 = () => {
+  const navigate = useNavigate();
   return (
     <>
       <main className="grid min-h-screen place-items-center bg-white px-6 py-24 sm:py-32 lg:px-8">
@@ -11,16 +12,15 @@ export const NotFound404 = () => {
           <p className="mt-6 text-base leading-7 text-gray-600">
             Sorry, we couldn’t find the page you’re looking for.
           </p>
-          <Link to={"/feed"}>
-            <div className="mt-10 flex items-center justify-center gap-x-6">
-              <button
-                href="#"
-                className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-              >
-                Go back home
-              </button>
-            </div>
-          </Link>
+
+          <div className="mt-10 flex items-center justify-center gap-x-6">
+            <button
+              onClick={() => navigate(-1)}
+              className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            >
+              Go back
+            </button>
+          </div>
         </div>
       </main>
     </>
