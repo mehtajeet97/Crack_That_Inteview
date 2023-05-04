@@ -33,7 +33,7 @@ const resp = (app) => {
             email,
             role,
             isBanned,
-            isPremium,
+            isPremiumUser,
             userScore,
             _id,
           } = user;
@@ -49,7 +49,7 @@ const resp = (app) => {
               email,
               role,
               isBanned,
-              isPremium,
+              isPremiumUser,
               userScore,
               _id,
             },
