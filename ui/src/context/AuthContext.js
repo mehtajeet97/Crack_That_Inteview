@@ -17,8 +17,17 @@ const showToastMessage = (message, type) => {
   }
 };
 
-export const AuthContext = createContext({
+let initialState = {
   userDetails: {},
   isLoggedIn: false,
   triggerToast: (message, type) => showToastMessage(message, type),
-});
+};
+if (localStorage.getItem("userDetails")) {
+  initialState = {
+    ...initialState,
+    isLoggedIn: true,
+    userDetails: JSON.parse(localStorage.getItem("userDetails")),
+  };
+}
+
+export const AuthContext = createContext(initialState);

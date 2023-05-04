@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import moment from "moment";
-
+export const isValidObjectId = (id) =>
+  !isUndefinedOrNull(id) && ObjectId.isValid(ObjectId);
 const isUndefinedOrNull = (value) => !value || value === null;
 const isValidString = (string) =>
   typeof string === "string" && string.trim().length;

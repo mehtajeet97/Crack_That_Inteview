@@ -50,8 +50,13 @@ export const authenticateRequests = async (req, res, next) => {
   let skipAuthAt = ["/login"];
   let path = req.originalUrl;
   let method = req.method;
-  console.log("in middleware", { path, method });
-  if (!skipAuthAt.includes(path) && path !== "/users" && method !== "POST") {
+  let forUserCreate = path === "/users" && method === "POST";
+  console.log("in middleware", { path, method, forUserCreate });
+
+  if (path === "/login" || forUserCreate) {
+    next();
+  } else {
+    console.log("Checking for Authorization");
     let accessToken = req.headers.authorization;
     let refreshToken = req.headers.refreshtoken;
     if (accessToken) {
@@ -75,30 +80,12 @@ export const authenticateRequests = async (req, res, next) => {
             res.status(401).json({ error: "Refresh Token expired" });
           } else {
             next();
-            // console.log(decodedToken, "decoded token from refresh cookie");
-            // const newToken = createToken(decodedToken.id, decodedToken.role);
-
-            // const newRefreshtoken = createRefreshToken(
-            //   decodedToken.id,
-            //   decodedToken.role
-            // );
-            // res.cookie("refresh", newRefreshtoken, {
-            //   httpOnly: true,
-            //   maxAge: refreshTokenMaxAge * 1000,
-            // });
-            // res.cookie("auth", newRefreshtoken, {
-            //   httpOnly: true,
-            //   maxAge: refreshTokenMaxAge * 1000,
-            // });
-            // next();
           }
         }
       );
     } else {
       res.status(401).json({ error: "Missing Authorization Token" });
     }
-  } else {
-    next();
   }
 };
 

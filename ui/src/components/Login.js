@@ -73,31 +73,36 @@ export const Login = () => {
             Sign in to your account
           </h1>
           <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
-            <div>
+            <div className="w-full">
               <label
                 htmlFor="email"
                 className="block mb-2 text-sm font-medium text-white"
               >
                 Email
               </label>
-              <input
-                type="email"
-                name="email"
-                id="email"
-                value={formState?.email}
-                onChange={handleFieldChange}
-                className="bg-gray-50 border border-gray-400 text-gray-800 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                placeholder="name@company.com"
-                required
-              />
+              <div>
+                <input
+                  type="email"
+                  name="email"
+                  id="email"
+                  value={formState?.email}
+                  onChange={handleFieldChange}
+                  className="bg-gray-50 border border-gray-400 text-gray-800 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                  placeholder="name@company.com"
+                  required
+                />
+              </div>
               {!!errors.email && (
                 <p className="text-sm text-red-800">{errors.email}</p>
               )}
             </div>
-            <div>
+            <div
+              className="w-full tooltip tooltip-top"
+              data-tip="1 Uppercase Letter * 1 Lowercase Letter * 1 Number"
+            >
               <label
                 htmlFor="password"
-                className="block mb-2 text-sm font-medium text-white"
+                className="text-left block mb-2 text-sm font-medium text-white"
               >
                 Password
               </label>

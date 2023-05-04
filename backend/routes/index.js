@@ -2,9 +2,11 @@ import userRoutes from "./users.js";
 import users from "../data/users.js";
 import interviewRoutes from "./interview.js";
 import articleRoutes from "./articles.js";
+import examRoutes from "./exam.js";
 import auth from "../middleware/auth.js";
 import bcrypt from "bcryptjs";
 import * as helpers from "../helpers.js";
+import { sendEmail } from "../config/mail.js";
 
 const resp = (app) => {
   app.post("/login", async (req, res) => {
@@ -35,7 +37,9 @@ const resp = (app) => {
             userScore,
             _id,
           } = user;
-          res.json({
+          await sendEmail(user, "login");
+
+          res.status(200).json({
             accessToken,
             refreshToken,
             userDetails: {
@@ -70,7 +74,7 @@ const resp = (app) => {
   app.use("/users", userRoutes);
   app.use("/interviews", interviewRoutes);
   app.use("/articles", articleRoutes);
-  // app.use("/exams",examRoutes)
+  app.use("/exams", examRoutes);
   // app.use("/trending",trending)
   app.get("/logout", (req, res) => {
     res.status(200).json(helpers.sendResponse("user successfully logged out"));
