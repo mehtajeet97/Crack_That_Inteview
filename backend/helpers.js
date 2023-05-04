@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import moment from "moment";
-
+export const isValidObjectId = (id) =>
+  !isUndefinedOrNull(id) && ObjectId.isValid(ObjectId);
 const isUndefinedOrNull = (value) => !value || value === null;
 const isValidString = (string) =>
   typeof string === "string" && string.trim().length;
@@ -12,7 +13,7 @@ const isValidName = (name) =>
 const isValidSocialLink = (link) =>
   !isUndefinedOrNull(link) && isValidString(link);
 
-const isValidEmail = (email) =>
+export const isValidEmail = (email) =>
   !isUndefinedOrNull(email) &&
   isValidString(email) &&
   !!/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]{4,}@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(
@@ -78,6 +79,7 @@ export const validate = {
       email,
       password,
       confirmPassword,
+      organisation,
       age,
       school,
       yoe,

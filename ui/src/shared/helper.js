@@ -12,9 +12,7 @@ const isValidSocialLink = (link) =>
 const isValidEmail = (email) =>
   !isUndefinedOrNull(email) &&
   isValidString(email) &&
-  !!/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]{4,}@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(
-    email
-  );
+  /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]{3,}\.[a-zA-Z0-9-.]{2,4}$/.test(email);
 const isValidRole = (role) =>
   !isUndefinedOrNull(role) &&
   ["admin", "student", "interviewer"].includes(role.trim().toLowerCase());
@@ -67,6 +65,9 @@ const isValidPhoneNumber = (phoneNumber) => {
   }
   return true;
 };
+
+const isValidOrganisation = (organisation) =>
+  !isUndefinedOrNull(organisation) && isValidString(organisation);
 
 export const validation = {
   registerFirstForm: (payload) => {
@@ -130,6 +131,7 @@ export const validation = {
       confirmPassword,
       age,
       school,
+      organisation,
       yoe,
       careerRole,
       skills,
@@ -185,16 +187,23 @@ export const validation = {
       result.data.age = age;
     }
 
-    if (!isValidSchool(school)) {
-      result.errors.school = "Select your school";
-    } else {
-      result.data.school = school;
-    }
-
-    if (!isResumeUploaded(resume)) {
-      result.errors.resume = "Invalid email provided!";
-    } else {
-      result.data.resume = resume;
+    if (role === "student") {
+      if (!isValidSchool(school)) {
+        result.errors.school = "Select your school";
+      } else {
+        result.data.school = school;
+      }
+      if (!isResumeUploaded(resume)) {
+        result.errors.resume = "Please provide your resume!";
+      } else {
+        result.data.resume = resume;
+      }
+    } else if (role === "interviewer") {
+      if (!isValidOrganisation(organisation)) {
+        result.errors.organisation = "Select your school";
+      } else {
+        result.data.organisation = organisation;
+      }
     }
 
     if (!isValidYoe(yoe)) {

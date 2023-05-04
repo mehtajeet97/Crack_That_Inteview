@@ -20,6 +20,7 @@ import { Signup } from "./components/Signup.js";
 import { Landing } from "./components/Landing.js";
 import { Register } from "./components/Register.js";
 
+import { ProtectedRoutes } from "./components/ProtectedRoutes.js";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -32,37 +33,71 @@ const router = createBrowserRouter([
       },
       {
         path: "feed",
-        element: <Feed />,
+        element: (
+          <ProtectedRoutes>
+            <Feed />
+          </ProtectedRoutes>
+        ),
       },
 
       {
         path: "scheduleforinterviewer",
         element: <ScheduleForInterviewer />,
+        path: "interview",
+        element: (
+          <ProtectedRoutes>
+            <Interview />
+          </ProtectedRoutes>
+        ),
       },
       {
         path: "scheduleforstudent",
-        element: <ScheduleForStudent />,
+        element: (
+          <ProtectedRoutes>
+            <ScheduleForStudent />
+          </ProtectedRoutes>
+        ),
       },
       {
         path: "schedulingscreen2",
-        element: <SchedulingScreen2 />,
+        element: (
+          <ProtectedRoutes>
+            <SchedulingScreen2 />
+          </ProtectedRoutes>
+        ),
       },
 
       {
         path: "test-yourself",
-        element: <TestYourself />,
+        element: (
+          <ProtectedRoutes>
+            <TestYourself />
+          </ProtectedRoutes>
+        ),
       },
       {
         path: "blog",
-        element: <Blog />,
+        element: (
+          <ProtectedRoutes>
+            <Blog />
+          </ProtectedRoutes>
+        ),
       },
       {
         path: "trending",
-        element: <Trending />,
+        element: (
+          <ProtectedRoutes>
+            <Trending />
+          </ProtectedRoutes>
+        ),
       },
       {
         path: "profile",
-        element: <Profile />,
+        element: (
+          <ProtectedRoutes>
+            <Profile />
+          </ProtectedRoutes>
+        ),
       },
       {
         path: "login",

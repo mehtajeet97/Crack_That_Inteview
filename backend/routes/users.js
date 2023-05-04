@@ -20,30 +20,25 @@ router
     let payload = req.body;
     try {
       let validationResult = helpers.validate.register(payload);
-      // data.firstName = helpers.stringCheck(data.firstName);
-      // data.lastName = helpers.stringCheck(data.lastName);
-      // data.age = helpers.ageCheck(+data.age);
-      // data.email = helpers.stringCheck(data.email);
-      // data.password = helpers.passwordCheck(data.password);
-      // data.phoneNumber = helpers.phoneNumberCheck(+data.phoneNumber);
-      // // data.resume = helpers.stringCheck(data.resume);
-      // console.log(data.resume);
-      // data.skills = helpers.arrayCheck(data.skills);
-      // data.role = helpers.stringCheck(data.role);
-      // data.school = helpers.stringCheck(data.school);
-      // data.profilePhoto = helpers.stringCheck(data.profilePhoto);
-      // data.blogs = helpers.arrayCheck(data.blogs);
-      // data.articlesRead = helpers.arrayCheck(data.articlesRead);
-      // data.pastInterviews = helpers.arrayCheck(data.pastInterviews);
-      // data.upcomingInterviews = helpers.arrayCheck(data.upcomingInterviews);
+
       if (!validationResult.validationPassed) {
         res.status(400).json({ data: [], errors: validationResult.errors });
       } else {
-        const newUser = await users.createUser(validationResult.data);
-        console.log(newUser);
-        res
-          .status(200)
-          .json({ message: "User registered successfully", data: newUser });
+        // Check if user with same email exists
+        let user = users.getUserByEmail(payload.email.trim().toLowerCase());
+
+        if (user) {
+          const { password, ...rest } = await users.createUser(
+            validationResult.data
+          );
+          res
+            .status(200)
+            .json({ message: "User registered successfully", data: rest });
+        } else {
+          res
+            .status(400)
+            .json({ data: [], errors: "User already exists, try signing in." });
+        }
       }
     } catch (e) {
       console.log(`POST /users: ${e}`);

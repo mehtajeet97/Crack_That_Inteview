@@ -1,15 +1,19 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { validation } from "../shared/helper.js";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { AuthContext } from "../context/AuthContext.js";
 
 export const Login = () => {
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
+  const { state, updateState } = useContext(AuthContext);
+  const [responseError, setResponseError] = useState("");
   const [formState, setFormState] = useState({ email: "", password: "" });
 
   const handleFieldChange = (event) => {
+    setResponseError(null);
     const updatedField = {
       ...formState,
       [event.target.name]: event.target.value,
@@ -27,32 +31,32 @@ export const Login = () => {
     setFormState(updatedField);
   };
 
-  const setAuthToken = (tokenData) => {
-    localStorage.setItem("accessToken", tokenData.accessToken);
-    localStorage.setItem("refreshToken", tokenData.refreshToken);
-    localStorage.setItem("userID", tokenData.id);
+  const setUserDetails = (data) => {
+    updateState({ ...state, isLoggedIn: true, userDetails: data.userDetails });
+    localStorage.setItem("userDetails", JSON.stringify(data.userDetails));
+    localStorage.setItem("accessToken", data.accessToken);
+    localStorage.setItem("refreshToken", data.refreshToken);
   };
 
   const login = async (payload) => {
     try {
-      const loginURL = "http://localhost:3000/login";
+      const loginURL = "http://localhost:4000/login";
       let { data, status } = await axios.post(loginURL, payload);
       if (status === 200) {
-        setAuthToken(data);
+        setUserDetails(data);
         navigate("/feed");
-      } else {
-        console.log(data.errors);
       }
     } catch (e) {
-      console.log(e.response.data);
-      return false;
+      console.log(e);
+      if (e.response.status === 400) {
+        setResponseError(e.response.data.errors);
+      }
     }
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
     let validationResult = validation.login(formState);
-    console.log(validationResult);
     if (!validationResult.validationPassed) {
       setErrors(validationResult.errors);
     } else {
@@ -69,31 +73,36 @@ export const Login = () => {
             Sign in to your account
           </h1>
           <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
-            <div>
+            <div className="w-full">
               <label
                 htmlFor="email"
                 className="block mb-2 text-sm font-medium text-white"
               >
                 Email
               </label>
-              <input
-                type="email"
-                name="email"
-                id="email"
-                value={formState?.email}
-                onChange={handleFieldChange}
-                className="bg-gray-50 border border-gray-400 text-gray-800 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                placeholder="name@company.com"
-                required
-              />
+              <div>
+                <input
+                  type="email"
+                  name="email"
+                  id="email"
+                  value={formState?.email}
+                  onChange={handleFieldChange}
+                  className="bg-gray-50 border border-gray-400 text-gray-800 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                  placeholder="name@company.com"
+                  required
+                />
+              </div>
               {!!errors.email && (
                 <p className="text-sm text-red-800">{errors.email}</p>
               )}
             </div>
-            <div>
+            <div
+              className="w-full tooltip tooltip-top"
+              data-tip="1 Uppercase Letter * 1 Lowercase Letter * 1 Number"
+            >
               <label
                 htmlFor="password"
-                className="block mb-2 text-sm font-medium text-white"
+                className="text-left block mb-2 text-sm font-medium text-white"
               >
                 Password
               </label>
@@ -103,7 +112,7 @@ export const Login = () => {
                 id="password"
                 placeholder="••••••••••"
                 className="bg-gray-50 border border-gray-400 text-gray-800 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 "
-                required=""
+                required
                 value={formState?.password}
                 onChange={handleFieldChange}
               />
@@ -111,6 +120,9 @@ export const Login = () => {
                 <p className="text-sm text-red-800">{errors.password}</p>
               )}
             </div>
+            {responseError && (
+              <p className="text-yellow-200 text-sm">{responseError}</p>
+            )}
             <div className="flex items-center justify-between">
               <div className="flex items-start">
                 <div className="flex items-center h-5">
