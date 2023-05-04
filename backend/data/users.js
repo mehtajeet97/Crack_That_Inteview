@@ -185,11 +185,13 @@ const removeUser = async (id) => {
 };
 
 // Functions for Interview Scheduling
+
+// Route : schedule.js | ("/").get |  returns array of objects (interviewers who have updated their available slots)
 const getAllInterviewers = async () => {
   const userCollection = await users();
   let listOfInterviewers = await userCollection
     .find(
-      { role: "Interviewer" },
+      { role: "interviewer", availableSlots: { $ne: [] } },
       {
         projection: {
           firstName: 1,
@@ -204,36 +206,47 @@ const getAllInterviewers = async () => {
   return listOfInterviewers; //returns array of objects
 };
 
-const updateAvailableSlots = async (userId, slots) => {
-  const userCollection = await users();
-
-  // Update the availableSlots array for the specified user
-  await userCollection.updateOne(
-    { _id: ObjectId(userId) },
-    { $addToSet: { availableSlots: slots } }
-  );
-
-  // Sort the availableSlots array by date in ascending order
-  await userCollection.updateOne(
-    { _id: ObjectId(userId) },
-    { $sort: { "availableSlots.date": 1 } }
-  );
-
-  return { Success: true }; //Returns Success Message
-};
-
+// Route : schedule.js | ("/").post |  returns availableSlots[] (For rendering the Calendar for user to select matching slot)
 const getAvailableSlots = async (id) => {
   //Validation
-  id = helpers.idCheck(id);
+  id = idCheck(id);
 
   const userCollection = await users();
   // Find the user with the specified ID
-  const user = await userCollection.findOne({ _id: ObjectId(id) });
+  const user = await userCollection.findOne({ _id: new ObjectId(id) });
 
   // Extract the availableSlots array from the user document
   const availableSlots = user.availableSlots;
 
   return availableSlots; //returns array of objects
+};
+
+// Route : schedule.js | ("/:id").post |  returns {success: true} or error (For succesful updation of availableSlots[] of interviewers)
+const updateAvailableSlots = async (userId, newSlot) => {
+  try {
+    //Validation through prior function
+    const user = await getUserById(userId);
+    const userCollection = await users();
+
+    // If the user does not exist, throw an error
+    if (!user) {
+      throw `User with id ${userId} not found`;
+    }
+
+    // Push the newSlot object to the availableSlots array
+    user.availableSlots.push(newSlot);
+
+    // Update the user in the database
+    const result = await userCollection.updateOne(
+      { _id: new ObjectId(userId) },
+      { $set: { availableSlots: user.availableSlots } }
+    );
+    if (result.modifiedCount === 1) {
+      return { success: true }; //Succesful updation
+    }
+  } catch (e) {
+    throw e; //Errors otherwise
+  }
 };
 
 export default {

@@ -6,11 +6,11 @@ import reportWebVitals from "./reportWebVitals.js";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { NotFound404 } from "./components/NotFound404.js";
 import { Feed } from "./components/Feed.js";
-import { Interview } from "./components/ScheduleInterview.js";
-import { AvailableSlots } from "./components/AvailableSlots.js";
-import { SchedulingScreen1 } from "./components/SchedulingScreen1.js";
+
+import { ScheduleForInterviewer } from "./components/ScheduleForInterviewer.js";
+import { ScheduleForStudent } from "./components/ScheduleForStudent.js";
 import { SchedulingScreen2 } from "./components/SchedulingScreen2.js";
-import { SchedulingScreen3 } from "./components/SchedulingScreen3.js";
+
 import { TestYourself } from "./components/TestYourself.js";
 import { Blog } from "./components/Blog.js";
 import { Trending } from "./components/Trending.js";
@@ -34,26 +34,20 @@ const router = createBrowserRouter([
         path: "feed",
         element: <Feed />,
       },
+
       {
-        path: "interview",
-        element: <Interview />,
+        path: "scheduleforinterviewer",
+        element: <ScheduleForInterviewer />,
       },
       {
-        path: "availableslots",
-        element: <AvailableSlots />,
-      },
-      {
-        path: "schedulingscreen1",
-        element: <SchedulingScreen1 />,
+        path: "scheduleforstudent",
+        element: <ScheduleForStudent />,
       },
       {
         path: "schedulingscreen2",
         element: <SchedulingScreen2 />,
       },
-      {
-        path: "schedulingscreen3",
-        element: <SchedulingScreen3 />,
-      },
+
       {
         path: "test-yourself",
         element: <TestYourself />,

@@ -4,7 +4,8 @@ import { useState } from "react";
 /*
 TO-DO :
 
-2. Provide the path to each interviewer as opposed to the current dummy path : "interview"
+2. Provide the ID of clicked interviewer when jumping to path : "schedulingscreen2"
+3. Render it properly
 
 To-Test:
 
@@ -14,9 +15,17 @@ To-Test:
     change the path to Scheduling Screen 2 where user can select a date from available slots
 */
 
-export const SchedulingScreen1 = () => {
-  /*
-  Values to update:
+export const ScheduleforStudent = () => {
+  const [cards1, setcards1] = useState([]); //Array variable that will hold the list of interviewers
+
+  const handleSubmit = async (event) => {
+    //Button click will populate the array
+    event.preventDefault();
+
+    const scheduleURL = "http://localhost:3000/schedule";
+    let { data, status } = await axios.get(scheduleURL);
+    /*
+  Values returned:
   _id: 1
   firstName: 1,
   lastName: 1,
@@ -24,13 +33,6 @@ export const SchedulingScreen1 = () => {
   organization: 1,
   yoe: 1,
    */
-  const [cards1, setcards1] = useState([]);
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    const scheduleURL = "http://localhost:3000/schedule";
-    let { data, status } = await axios.get(scheduleURL);
     if (status === 200) {
       setcards1(data);
     } else {
@@ -58,7 +60,7 @@ export const SchedulingScreen1 = () => {
               className="bg-cyan-300 basis-2/7 rounded overflow-hidden shadow-lg"
             >
               <div className="px-6 py-4">
-                <Link to="http://localhost:3001/schedulingscreen2">
+                <Link to="/schedulingscreen2">
                   <div className="font-bold text-xl mb-2">
                     {card.firstName} {card.lastName}
                   </div>
