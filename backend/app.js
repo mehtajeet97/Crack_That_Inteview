@@ -18,9 +18,11 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
-
 app.use(express.json());
 app.use(cors());
+
+// Static files to render
+app.use("/static", express.static("uploads"));
 
 // This middleware allows the server to run with JWT Role Authentication.
 app.use(authenticateRequests);

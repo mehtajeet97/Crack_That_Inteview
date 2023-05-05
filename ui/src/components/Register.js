@@ -22,7 +22,11 @@ export const Register = () => {
   const registerUser = async (payload) => {
     try {
       const registerURL = "http://localhost:4000/users";
-      let { data } = await axios.post(registerURL, payload);
+      let { data } = await axios.post(registerURL, payload, {
+        headers: {
+          "content-type": "multipart/form-data",
+        },
+      });
       navigate("/login");
     } catch (e) {
       let error = e.response.data;
@@ -30,10 +34,6 @@ export const Register = () => {
       return false;
     }
   };
-
-  // useEffect(() => {
-  //   // registerUser();
-  // });
 
   const handleAgeChange = (event) => {
     let value = +event.target.value;

@@ -42,7 +42,7 @@ const createUser = async (userDetails) => {
     email,
     password,
     phoneNumber,
-    resume: "",
+    resume,
     skills,
     linkedin,
     twitter,
@@ -88,7 +88,7 @@ const getUserById = async (id) => {
 
 const getUserByEmail = async (email) => {
   if (!isValidEmail(email)) {
-    return { error: "Invalid email format provided" };
+    return { error: "Invalid email provided" };
   }
   email = email.trim();
   const userCollection = await users();

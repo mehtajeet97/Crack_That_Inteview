@@ -16,7 +16,7 @@ export const Landing = () => {
           </p>
 
           <div className="mt-4 md:mt-8">
-            <Link to={"login"}>
+            <Link to={"/register"}>
               <span className="inline-block rounded bg-blue-600 px-12 py-3 text-sm font-medium text-white transition hover:bg-blue-700 focus:outline-none focus:ring focus:ring-yellow-400">
                 Get Started Today
               </span>
