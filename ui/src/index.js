@@ -7,7 +7,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { NotFound404 } from "./components/NotFound404.js";
 import { Feed } from "./components/Feed.js";
 import { Interview } from "./components/Interview.js";
-import { TestYourself } from "./components/TestYourself.js";
+import { TestYourself } from "./components/Exam/TestYourself.js";
 import { Blog } from "./components/Blog.js";
 import { Trending } from "./components/Trending.js";
 import { Profile } from "./components/Profile.js";

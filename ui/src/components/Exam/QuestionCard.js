@@ -28,7 +28,7 @@ export const QuestionCard = ({
 
   return (
     <div className="w-full flex justify-center">
-      <div className="flex flex-col gap-4 bg-white px-6 py-4 rounded-lg shadow-lg min-w-md">
+      <div className="flex flex-col gap-4 bg-white text-blue-700 px-6 py-4 rounded-lg shadow-lg min-w-[50%]">
         <div
           className={`flex items-center ${
             isFirst ? "justify-center" : "justify-between"
@@ -42,16 +42,16 @@ export const QuestionCard = ({
               ←
             </button>
           )}
-          <span className="block">Question {qNo}</span>
+          <span className="block font-bold">Question {qNo}</span>
           {!isFirst && <span className="pr-6"></span>}
         </div>
-        <span className="block">{question}</span>
+        <span className="block font-bold">{question}</span>
         {options.map((option, idx) => {
           return (
             <div
               key={idx}
               id={`option${idx}`}
-              className="flex items-center p-3 w-full bg-yellow-50 cursor-pointer"
+              className="flex items-center p-3 w-full bg-blue-100 rounded-md cursor-pointer"
               onClick={onOptionSelect}
             >
               <input
@@ -59,12 +59,12 @@ export const QuestionCard = ({
                 id={question + idx}
                 value={option}
                 name={`question${qNo}`}
-                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
+                className="radio radio-primary radio-xs"
                 defaultChecked={option === userAnswer}
               />
               <label
                 htmlFor={`question${qNo}`}
-                className="ml-2 cursor-pointer text-sm font-medium text-gray-900"
+                className="ml-2 cursor-pointer text-sm font-bold text-blue-700"
                 id={`label${idx}`}
               >
                 {option}
