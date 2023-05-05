@@ -151,11 +151,11 @@ export const validate = {
       }
     }
 
-    // if (!isResumeUploaded(resume)) {
-    //   result.errors.resume = "Invalid email provided!";
-    // } else {
-    //   result.data.resume = resume;
-    // }
+    if (!isValidString(resume)) {
+      result.errors.resume = "Invalid resume provided!";
+    } else {
+      result.data.resume = resume;
+    }
 
     if (!isValidYoe(yoe)) {
       result.errors.yoe = "Invalid year of experience";

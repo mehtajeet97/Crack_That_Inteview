@@ -1,6 +1,25 @@
 import Router from "express";
 import users from "../data/users.js";
 import * as helpers from "../helpers.js";
+import multer from "multer";
+import { v4 as uuidv4 } from "uuid";
+import fs from "fs";
+
+const storageConfig = multer.diskStorage({
+  destination: function (req, file, cb) {
+    let uuid = uuidv4();
+    req.body.tempFilePath = uuid;
+    let tempFilePath = "uploads/" + uuid;
+    fs.mkdirSync(tempFilePath, { recursive: true });
+    cb(null, tempFilePath);
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  },
+});
+
+let upload = multer({ storage: storageConfig });
+
 const router = Router();
 
 router
@@ -15,9 +34,13 @@ router
       res.status(200).json(helpers.sendResponse("ok", allUsers));
     }
   })
-  .post(async (req, res) => {
-    //todo any one
+  .post(upload.single("resume"), async (req, res) => {
+    let file = req.file;
     let payload = req.body;
+    let fileLocationDisk = `./uploads/${req.body.tempFilePath}`;
+    let fileLocationDB = `static/${req.body.tempFilePath}/${file.originalname}`;
+    payload.resume = fileLocationDB;
+
     try {
       let validationResult = helpers.validate.register(payload);
 
@@ -25,8 +48,9 @@ router
         res.status(400).json({ data: [], errors: validationResult.errors });
       } else {
         // Check if user with same email exists
-        let user = users.getUserByEmail(payload.email.trim().toLowerCase());
-
+        let user = await users.getUserByEmail(
+          payload.email.trim().toLowerCase()
+        );
         if (user) {
           const { password, ...rest } = await users.createUser(
             validationResult.data
@@ -35,6 +59,7 @@ router
             .status(200)
             .json({ message: "User registered successfully", data: rest });
         } else {
+          fs.rmSync(fileLocationDisk, { recursive: true, force: true });
           res
             .status(400)
             .json({ data: [], errors: "User already exists, try signing in." });
