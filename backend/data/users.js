@@ -96,7 +96,7 @@ const getUserById = async (id) => {
 
 const getUserByEmail = async (email) => {
   if (!isValidEmail(email)) {
-    return null;
+    return { error: "Invalid email provided" };
   }
   email = email.trim();
   const userCollection = await users();

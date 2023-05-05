@@ -51,7 +51,7 @@ router
         let user = await users.getUserByEmail(
           payload.email.trim().toLowerCase()
         );
-        if (user) {
+        if (user === null) {
           const { password, ...rest } = await users.createUser(
             validationResult.data
           );
@@ -60,9 +60,16 @@ router
             .json({ message: "User registered successfully", data: rest });
         } else {
           fs.rmSync(fileLocationDisk, { recursive: true, force: true });
-          res
-            .status(400)
-            .json({ data: [], errors: "User already exists, try signing in." });
+          if (user.error === "Invalid email provided") {
+            res.status(400).json({ data: [], errors: user.error });
+          } else {
+            res
+              .status(400)
+              .json({
+                data: [],
+                errors: "User already exists, try signing in.",
+              });
+          }
         }
       }
     } catch (e) {
