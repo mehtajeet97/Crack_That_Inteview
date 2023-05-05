@@ -21,6 +21,9 @@ import { Landing } from "./components/Landing.js";
 import { Register } from "./components/Register.js";
 
 import { ProtectedRoutes } from "./components/ProtectedRoutes.js";
+import { OnGoingInterview } from "./components/Interview/OnGoingInterview.js";
+import { InterviewerSlots } from "./components/Interview/InterviewerSlots.js";
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -42,11 +45,25 @@ const router = createBrowserRouter([
 
       {
         path: "scheduleforinterviewer",
-        element: <ScheduleForInterviewer />,
-        path: "interview",
         element: (
           <ProtectedRoutes>
-            <Interview />
+            <ScheduleForInterviewer />
+          </ProtectedRoutes>
+        ),
+      },
+      {
+        path: "interviewerslots",
+        element: (
+          <ProtectedRoutes>
+            <InterviewerSlots />
+          </ProtectedRoutes>
+        ),
+      },
+      {
+        path: "ongoing",
+        element: (
+          <ProtectedRoutes>
+            <OnGoingInterview />
           </ProtectedRoutes>
         ),
       },

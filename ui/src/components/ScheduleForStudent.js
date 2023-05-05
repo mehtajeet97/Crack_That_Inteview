@@ -15,7 +15,7 @@ To-Test:
     change the path to Scheduling Screen 2 where user can select a date from available slots
 */
 
-export const ScheduleforStudent = () => {
+export const ScheduleForStudent = () => {
   const [cards1, setcards1] = useState([]); //Array variable that will hold the list of interviewers
 
   const handleSubmit = async (event) => {
