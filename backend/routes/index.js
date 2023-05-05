@@ -67,6 +67,7 @@ const resp = (app) => {
       if (e.status === 404) {
         res.status(400).json({ errors: "Email not found" });
       } else {
+        console.log(e);
         res.status(500).json(helpers.sendError(e));
       }
     }
