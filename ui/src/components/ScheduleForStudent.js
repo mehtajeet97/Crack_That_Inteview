@@ -1,6 +1,7 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useState } from "react";
+
 /*
 TO-DO :
 
@@ -17,12 +18,12 @@ To-Test:
 
 export const ScheduleForStudent = () => {
   const [cards1, setcards1] = useState([]); //Array variable that will hold the list of interviewers
-
+  const navigate = useNavigate();
   const handleSubmit = async (event) => {
     //Button click will populate the array
     event.preventDefault();
 
-    const scheduleURL = "http://localhost:3000/schedule";
+    const scheduleURL = "http://localhost:4000/schedule";
     let { data, status } = await axios.get(scheduleURL);
     /*
   Values returned:
@@ -40,10 +41,15 @@ export const ScheduleForStudent = () => {
     }
   };
 
+  const handleSelectInterviewer = (interviewer) => {
+    console.log(interviewer);
+    navigate(`${interviewer._id}`);
+  };
+
   return (
     <div>
       <div>
-        <h1>Avaialable Interviewers : </h1>
+        <h1>Available Interviewers : </h1>
         <button
           onClick={handleSubmit}
           type="submit"
@@ -59,12 +65,14 @@ export const ScheduleForStudent = () => {
               key={idx}
               className="bg-cyan-300 basis-2/7 rounded overflow-hidden shadow-lg"
             >
-              <div className="px-6 py-4">
-                <Link to="/schedulingscreen2">
-                  <div className="font-bold text-xl mb-2">
-                    {card.firstName} {card.lastName}
-                  </div>
-                </Link>
+              <div
+                onClick={() => handleSelectInterviewer(card)}
+                className="px-6 py-4 cursor-pointer"
+              >
+                <div className="font-bold text-xl mb-2">
+                  {card.firstName} {card.lastName}
+                </div>
+
                 <p className="text-gray-700 text-base">
                   Skills : {card.skills && card.skills}
                 </p>

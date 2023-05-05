@@ -20,8 +20,8 @@ router
     // Get the available slots by providing id of interviewer selected | UI : SchedulingScreen2.js
     try {
       //Validation
-      let userID = JSON.stringify(req.body.interID);
-      userID = idCheck(req.body.interID);
+      let userID = JSON.stringify(req.body.interviewerId);
+      userID = idCheck(req.body.interviewerId);
 
       const userSlots = await users.getAvailableSlots(userID);
 

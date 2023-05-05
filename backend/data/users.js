@@ -252,6 +252,33 @@ const updateAvailableSlots = async (userId, newSlot) => {
   }
 };
 
+const updateUpcomingInterview = async (userId, newSlot) => {
+  try {
+    //Validation through prior function
+    const user = await getUserById(userId);
+    const userCollection = await users();
+    console.log("I am in the Data : User");
+    // If the user does not exist, throw an error
+    if (!user) {
+      throw `User with id ${userId} not found`;
+    }
+
+    // Push the newSlot object to the availableSlots array
+    user.upcomingInterviews.push(newSlot);
+
+    // Update the user in the database
+    const result = await userCollection.updateOne(
+      { _id: new ObjectId(userId) },
+      { $set: { upcomingInterviews: user.upcomingInterviews } }
+    );
+    if (result.modifiedCount === 1) {
+      return { success: true }; //Succesful updation
+    }
+  } catch (e) {
+    throw e; //Errors otherwise
+  }
+};
+
 export default {
   createUser,
   getUserById,
@@ -262,4 +289,5 @@ export default {
   getAllInterviewers,
   updateAvailableSlots,
   getAvailableSlots,
+  updateUpcomingInterview,
 };

@@ -18,12 +18,17 @@ To-Test:
 3. Buttons disabled until atleast one checkbox is checked
 */
 
-import { useState } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import axios from "axios";
+import { useState, useContext } from "react";
+import { AuthContext } from "../context/AuthContext.js";
 
 export const ScheduleForInterviewer = () => {
+  //For UserDetails -- like UserID & Tokens to obtain it from AuthContext/ State Management
+  const { state, updateState } = useContext(AuthContext);
+  const userDetails = state.userDetails;
+
   //Members for Calendar
   const [selectedDate, setSelectedDate] = useState(new Date()); //To store the selected date
   const [isDateSelected, setIsDateSelected] = useState(false); //To make the calendar selectable
@@ -57,9 +62,10 @@ export const ScheduleForInterviewer = () => {
   //Schedule Function
   const schedule = async (payload) => {
     try {
-      const userDetails = JSON.parse(localStorage.getItem("userDetails"));
-      const scheduleURL = "http://localhost:3000/schedule/" + userDetails._id;
-      let { data, status } = await axios.post(scheduleURL, payload);
+      const scheduleURL = "http://localhost:4000/schedule/" + userDetails._id;
+      let { data, status } = await axios.post(scheduleURL, payload, {
+        headers: { Authorization: localStorage.getItem("accessToken") },
+      });
       if (status === 200) {
         //Display the selected date to the user for edit / Inform the user of success through alert/ toast
         console.log(data, status);

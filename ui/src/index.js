@@ -76,7 +76,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "schedulingscreen2",
+        path: "scheduleforstudent/:interviewerId",
         element: (
           <ProtectedRoutes>
             <SchedulingScreen2 />

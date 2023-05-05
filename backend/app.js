@@ -24,7 +24,7 @@ app.use(express.json());
 app.use(cors());
 
 // This middleware allows the server to run with JWT Role Authentication.
-app.use(authenticateRequests);
+// app.use(authenticateRequests);
 app.use((req, res, next) => {
   console.log(
     "[",
