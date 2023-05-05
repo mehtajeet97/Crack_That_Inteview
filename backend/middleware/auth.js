@@ -34,29 +34,16 @@ const createRefreshToken = (id, role, expiresIn = expirationTime.week) => {
     }
   );
 };
-// const authChecker = (token) => {
-//   return jwt.verify(token, "let's crack that interview", (error, password) => {
-//     console.log({ error, password });
-//     // if (error) {
-//     //   console.log({ error });
-//     //   return false;
-//     // } else {
-//     //   console.log({ password });
-//     //   return { password };
-//     // }
-//   });
-// };
+
 export const authenticateRequests = async (req, res, next) => {
-  let skipAuthAt = ["/login"];
   let path = req.originalUrl;
   let method = req.method;
   let forUserCreate = path === "/users" && method === "POST";
-  console.log("in middleware", { path, method, forUserCreate });
+  let staticAssetsRoute = path.includes("/static");
 
-  if (path === "/login" || forUserCreate) {
+  if (path === "/login" || forUserCreate || staticAssetsRoute) {
     next();
   } else {
-    console.log("Checking for Authorization");
     let accessToken = req.headers.authorization;
     let refreshToken = req.headers.refreshtoken;
     if (accessToken) {
