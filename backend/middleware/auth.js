@@ -15,11 +15,7 @@ const refreshTokenMaxAge = expirationTime.minute;
 
 // export const assignToken = (id, role, expr);
 
-const createAccessToken = (
-  id,
-  role,
-  expiresIn = expirationTime.week
-) => {
+const createAccessToken = (id, role, expiresIn = expirationTime.week) => {
   return jwt.sign(
     { id, role, type: "accessToken" },
     "let's crack that interview",

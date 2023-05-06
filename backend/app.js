@@ -26,7 +26,7 @@ app.use(cors());
 app.use("/static", express.static("uploads"));
 
 // This middleware allows the server to run with JWT Role Authentication.
-app.use(authenticateRequests);
+// app.use(authenticateRequests);
 app.use((req, res, next) => {
   console.log(
     "[",

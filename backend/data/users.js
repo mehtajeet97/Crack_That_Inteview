@@ -67,6 +67,7 @@ const createUser = async (userDetails) => {
     articlesRead: [],
     pastInterviews: [],
     upcomingInterviews: [],
+    availableSlots: [],
     createdAt: new Date().toUTCString(),
     updatedAt: new Date().toUTCString(),
     isPremiumUser: false,
@@ -289,6 +290,137 @@ const getTopPerformers = async () => {
     return { data: e, error: true };
   }
 };
+// Functions for Interview Scheduling
+
+// Route : schedule.js | ("/").get |  returns array of objects (interviewers who have updated their available slots)
+const getAllInterviewers = async () => {
+  const userCollection = await users();
+  let listOfInterviewers = await userCollection
+    .find(
+      { role: "interviewer", availableSlots: { $ne: [] } },
+      {
+        projection: {
+          firstName: 1,
+          lastName: 1,
+          skills: 1,
+          organization: 1,
+          yoe: 1,
+        },
+      }
+    )
+    .toArray();
+  return listOfInterviewers; //returns array of objects
+};
+
+// Route : schedule.js | ("/").post |  returns availableSlots[] (For rendering the Calendar for user to select matching slot)
+const getAvailableSlots = async (id) => {
+  //Validation
+  id = idCheck(id);
+
+  const userCollection = await users();
+  // Find the user with the specified ID
+  const user = await userCollection.findOne({ _id: new ObjectId(id) });
+
+  // Extract the availableSlots array from the user document
+  const availableSlots = user.availableSlots;
+
+  return availableSlots; //returns array of objects
+};
+
+// Route : schedule.js | ("/:id").post |  returns {success: true} or error (For succesful updation of availableSlots[] of interviewers)
+const updateAvailableSlots = async (userId, newSlot) => {
+  try {
+    //Validation through prior function
+    const user = await getUserById(userId);
+    const userCollection = await users();
+
+    // If the user does not exist, throw an error
+    if (!user) {
+      throw `User with id ${userId} not found`;
+    }
+
+    // Check if the object with the same date already exists
+    const existingObject = user.availableSlots.find(
+      (obj) => obj.date === newSlot[0].date
+    );
+
+    // If the object already exists, do something
+    if (existingObject) {
+      // Do something
+      throw `User ${userId} has an entry for the same date`;
+    } else {
+      // The object does not exist, so push it to the available slots array
+      user.availableSlots.push(...newSlot);
+    }
+
+    // Update the user in the database
+    const result = await userCollection.updateOne(
+      { _id: new ObjectId(userId) },
+      { $set: { availableSlots: user.availableSlots } }
+    );
+    if (result.modifiedCount === 1) {
+      return { success: true }; //Succesful updation
+    } else {
+      return { success: false }; // Unsucessful updation
+    }
+  } catch (e) {
+    return e; //Errors otherwise
+  }
+};
+
+const updateUpcomingInterview = async (userId, newSlot) => {
+  try {
+    //Validation through prior function
+    const user = await getUserById(userId);
+    const userCollection = await users();
+
+    // If the user does not exist, throw an error
+    if (!user) {
+      throw `User with id ${userId} not found`;
+    }
+    // Check if the object with the same date already exists
+    const existingObject = user.upcomingInterviews.find(
+      (obj) => obj.date === newSlot.date
+    );
+
+    // If the object already exists, do something
+    if (existingObject) {
+      // Do something
+
+      throw `User ${userId} has an entry for the same date`;
+    } else {
+      // The object does not exist, so push it to the available slots array
+      user.upcomingInterviews.push(newSlot);
+    }
+    // Update the user in the database
+    const result = await userCollection.updateOne(
+      { _id: new ObjectId(userId) },
+      { $set: { upcomingInterviews: user.upcomingInterviews } }
+    );
+    if (result.modifiedCount === 1) {
+      return { success: true }; //Succesful updation
+    } else {
+      return { success: false }; // Unsucessful updation
+    }
+  } catch (e) {
+    return e; //Errors otherwise
+  }
+};
+
+const getUpcomingInterviews = async (id) => {
+  //Validation
+  id = idCheck(id);
+
+  const userCollection = await users();
+  // Find the user with the specified ID
+  const user = await userCollection.findOne({ _id: new ObjectId(id) });
+
+  // Extract the upcomingInterviews array from the user document
+  const upcomingInterviews = user.upcomingInterviews;
+
+  return upcomingInterviews; //returns array of objects
+};
+
 export default {
   createUser,
   getUserById,
@@ -298,4 +430,9 @@ export default {
   getUserByEmail,
   patchUser,
   getTopPerformers,
+  getAllInterviewers,
+  updateAvailableSlots,
+  getAvailableSlots,
+  updateUpcomingInterview,
+  getUpcomingInterviews,
 };

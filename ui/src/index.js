@@ -9,15 +9,27 @@ import { Feed } from "./components/Feed.js";
 import { Interview } from "./components/Interview.js";
 import { TestYourself } from "./components/Exam/TestYourself.js";
 import { Blogs } from "./components/Blogs.js";
+
+import { ScheduleForInterviewer } from "./components/ScheduleForInterviewer.js";
+import { ScheduleForStudent } from "./components/ScheduleForStudent.js";
+import { SchedulingScreen2 } from "./components/SchedulingScreen2.js";
+
+import { TestYourself } from "./components/TestYourself.js";
+import { Blogs } from "./components/Blog.js";
 import { Trending } from "./components/Trending.js";
 import { Profile } from "./components/Profile.js";
 import { Login } from "./components/Login.js";
 import { Signup } from "./components/Signup.js";
 import { Landing } from "./components/Landing.js";
 import { Register } from "./components/Register.js";
+
 import { ProtectedRoutes } from "./components/ProtectedRoutes.js";
 import { Premium } from "./components/Premium.js";
 import { DetailBlog } from "./components/DetailBlog.js";
+import { OnGoingInterview } from "./components/Interview/OnGoingInterview.js";
+import { InterviewerSlots } from "./components/Interview/InterviewerSlots.js";
+import { StudentSlots } from "./components/Interview/StudentSlots.js";
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -36,14 +48,56 @@ const router = createBrowserRouter([
           </ProtectedRoutes>
         ),
       },
+
       {
-        path: "interview",
+        path: "scheduleforinterviewer",
         element: (
           <ProtectedRoutes>
-            <Interview />
+            <ScheduleForInterviewer />
           </ProtectedRoutes>
         ),
       },
+      {
+        path: "interviewerslots",
+        element: (
+          <ProtectedRoutes>
+            <InterviewerSlots />
+          </ProtectedRoutes>
+        ),
+      },
+      {
+        path: "studentslots",
+        element: (
+          <ProtectedRoutes>
+            <StudentSlots />
+          </ProtectedRoutes>
+        ),
+      },
+      {
+        path: "ongoing",
+        element: (
+          <ProtectedRoutes>
+            <OnGoingInterview />
+          </ProtectedRoutes>
+        ),
+      },
+      {
+        path: "scheduleforstudent",
+        element: (
+          <ProtectedRoutes>
+            <ScheduleForStudent />
+          </ProtectedRoutes>
+        ),
+      },
+      {
+        path: "scheduleforstudent/:interviewerId",
+        element: (
+          <ProtectedRoutes>
+            <SchedulingScreen2 />
+          </ProtectedRoutes>
+        ),
+      },
+
       {
         path: "test-yourself",
         element: (
