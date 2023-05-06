@@ -1,5 +1,6 @@
 import Router from "express";
 import { interviewData as interview } from "../data/index.js";
+import users from "../data/users.js";
 import * as helpers from "../helpers.js";
 const router = Router();
 
@@ -15,23 +16,27 @@ router
   })
   .post(async (req, res) => {
     let data = req.body;
-    if (!data || Object.keys(data).length === 0) {
-      return res.status(400).send("the input fields are empty");
-    }
     try {
-      data.interviewee = helpers.idCheck(data.interviewee);
-      data.interviewer = helpers.idCheck(data.interviewer);
+      data.userId = helpers.idCheck(data.userId);
+      data.interviewerId = helpers.idCheck(data.interviewerId);
 
+      let user = await users.getUserById(data.userId);
+      let userName = user.firstName + " " + user.lastName;
+      let interviewer = await users.getUserById(data.interviewerId);
+      let interviewerName = interviewer.firstName + " " + interviewer.lastName;
       const addInterview = await interview.createInterview(
-        data.interviewer,
-        data.interviewee,
-        [{ "skill knowledgs": "good", rating: 0 }],
-        [{ "level of difficuly": "good" }],
-        "04/11/2022"
+        userName,
+        interviewerName,
+        data.payload
       );
-      res.status(200).json(addInterview);
+
+      if (addInterview.success) {
+        res.status(200).json("Created Interview");
+      } else {
+        throw `Interview already Created`;
+      }
     } catch (e) {
-      res.status(400).send("problem adding the interviews");
+      res.status(400).json(sendError(e)); //SendError necessary for toast
     }
   });
 

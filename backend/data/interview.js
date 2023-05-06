@@ -7,23 +7,23 @@ const date = new Date();
 const createInterview = async (
   interviewee,
   interviewer,
-  interviewDate,
-  intervieweeRemarks,
-  interviewerRemarks
+  interviewDate
+  // intervieweeRemarks,
+  // interviewerRemarks
 ) => {
   if (!interviewee) throw "First Name must be provided";
   if (!interviewer) throw "Last Name must be provided";
   if (!interviewDate) throw "Email must be provided";
-  if (!intervieweeRemarks) throw "Remarks must be provided";
-  if (!interviewerRemarks) throw "Remarks Number must be provided";
+  // if (!intervieweeRemarks) throw "Remarks must be provided";
+  // if (!interviewerRemarks) throw "Remarks Number must be provided";
   stringCheck(interviewee);
   interviewee = interviewee.trim();
   stringCheck(interviewer);
   interviewer = interviewer.trim();
-  dateCheck(interviewDate);
-  interviewDate = interviewDate.trim();
-  arrayCheck(intervieweeRemarks);
-  arrayCheck(interviewerRemarks);
+  // dateCheck(interviewDate);
+  // interviewDate = interviewDate.trim();
+  // arrayCheck(intervieweeRemarks);
+  // arrayCheck(interviewerRemarks);
   let day = date.getDate();
   let month = date.getMonth() + 1;
   let year = date.getFullYear();
@@ -34,8 +34,8 @@ const createInterview = async (
     interviewLink: "Zoom Link",
     interviewDate,
     recordingLink: "Recording Link",
-    intervieweeRemarks,
-    interviewerRemarks,
+    intervieweeRemarks: [],
+    interviewerRemarks: [],
     createdAt: `${month}/${day}/${year}`,
     updatedAt: `${month}/${day}/${year}`,
     interviewStatus: ["Completed", "Scheduled", "Pending"],
@@ -46,7 +46,7 @@ const createInterview = async (
     throw "Cannot add interview";
   const newId = insertInterview.insertedId.toString();
   interview._id = newId;
-  return interview;
+  return { success: true };
 };
 
 const getInterviewById = async (id) => {

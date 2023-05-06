@@ -2,7 +2,7 @@ import Router from "express";
 const router = Router();
 
 import users from "../data/users.js";
-import { idCheck } from "../helpers.js";
+import { idCheck, sendError } from "../helpers.js";
 
 router
   .route("/")
@@ -35,7 +35,6 @@ router.route("/:id").post(async (req, res) => {
     //Validation
     req.params.id = idCheck(req.params.id);
     let payload = req.body;
-
     const slots = await users.updateUpcomingInterview(req.params.id, payload); //returns {success:true} or error
     if (slots.success) {
       res.status(200).json("Updated Successfully!");

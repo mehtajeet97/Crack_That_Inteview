@@ -277,18 +277,18 @@ const updateUpcomingInterview = async (userId, newSlot) => {
     }
     // Check if the object with the same date already exists
     const existingObject = user.upcomingInterviews.find(
-      (obj) => obj.date === newSlot[0].date
+      (obj) => obj.date === newSlot.date
     );
 
     // If the object already exists, do something
     if (existingObject) {
       // Do something
+
       throw `User ${userId} has an entry for the same date`;
     } else {
       // The object does not exist, so push it to the available slots array
-      user.upcomingInterviews.push(...newSlot);
+      user.upcomingInterviews.push(newSlot);
     }
-
     // Update the user in the database
     const result = await userCollection.updateOne(
       { _id: new ObjectId(userId) },
@@ -304,6 +304,20 @@ const updateUpcomingInterview = async (userId, newSlot) => {
   }
 };
 
+const getUpcomingInterviews = async (id) => {
+  //Validation
+  id = idCheck(id);
+
+  const userCollection = await users();
+  // Find the user with the specified ID
+  const user = await userCollection.findOne({ _id: new ObjectId(id) });
+
+  // Extract the upcomingInterviews array from the user document
+  const upcomingInterviews = user.upcomingInterviews;
+
+  return upcomingInterviews; //returns array of objects
+};
+
 export default {
   createUser,
   getUserById,
@@ -315,4 +329,5 @@ export default {
   updateAvailableSlots,
   getAvailableSlots,
   updateUpcomingInterview,
+  getUpcomingInterviews,
 };

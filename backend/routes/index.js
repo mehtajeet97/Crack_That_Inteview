@@ -74,7 +74,7 @@ const resp = (app) => {
     }
   });
   app.use("/users", userRoutes);
-  app.use("/interviews", interviewRoutes);
+  app.use("/interview", interviewRoutes);
   app.use("/articles", articleRoutes);
   app.use("/exams", examRoutes);
   // app.use("/trending",trending)
