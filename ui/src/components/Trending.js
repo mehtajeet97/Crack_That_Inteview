@@ -6,11 +6,12 @@ user premium
 */
 import axios from "axios";
 import { useEffect, useState, useContext } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import picture from "../profilePicture.jpg";
 import { AuthContext } from "../context/AuthContext.js";
 
 export const Trending = () => {
+  const navigate = useNavigate();
   const { state, updateState } = useContext(AuthContext);
   const userPremium = state.userDetails.isPremiumUser;
   const userName = state.userDetails.firstName;
@@ -21,12 +22,25 @@ export const Trending = () => {
       Authorization: localStorage.getItem("accessToken"),
     },
   };
+  // const logoutUser = () => {
+  //   try {
+  //     console.log("1..................");
+  //     updateState({ ...state, isLoggedIn: false, userDetails: {} });
+  //     console.log("2..................");
+  //     localStorage.clear();
+  //     navigate("/login");
+  //     console.log("3..................");
+  //   } catch (e) {
+  //     console.log(e);
+  //   }
+  // };
   useEffect(() => {
     async function fetchData() {
       try {
         console.log("hello");
         let data = await axios.get(`http://localhost:4000/trending`, headers);
         if (data.data.message === "error") throw "error";
+        console.log(data.data.data.article);
         setBlogs(data.data.data.article);
         setUsers(data.data.data.topUsers);
       } catch (e) {
@@ -36,13 +50,6 @@ export const Trending = () => {
     }
     fetchData();
   }, []);
-
-  if (!users || !blogs) {
-    return <p>Loading........</p>;
-  }
-  if (users == "error" || blogs == "error") {
-    return <p>Error while loading this page</p>;
-  }
 
   return (
     <div>
@@ -111,7 +118,7 @@ export const Trending = () => {
                   </div>
                 </div>
               ))}
-            {Boolean(!blogs.length) && (
+            {blogs.length === 0 && (
               <>
                 <p>there are no blogs to display</p>
               </>
