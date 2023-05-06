@@ -4,28 +4,34 @@ upvotes or downvotes or submission of userread blogs gets updated when the compo
 /* // todo : userid user premium
 problem : when the user upvotes or downvote or doesnt vote when going back to the blogs page it is sending the request
 event if there is no change in votes
-
+fixed that problem while updating the blog
 */
 
 import { useLocation } from "react-router-dom";
 import { useNavigate, useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
+import { AuthContext } from "../context/AuthContext.js";
 import axios from "axios";
+
 export const DetailBlog = () => {
-  const userId = "6451f523e05636011d7018bf";
-  const userPremium = true;
+  const { state, updateState } = useContext(AuthContext);
+  console.log(state.userDetails);
+  const userId = state.userDetails._id;
+  const userPremium = state.userDetails.isPremiumUser;
+  console.log(userId, userPremium);
 
   const location = useLocation();
   const navigate = useNavigate();
 
   const [blog, editBlog] = useState();
+  const [origBlog, setOrigBlog] = useState();
   const [back, setBack] = useState(false);
 
   const { blogId } = useParams();
 
   const voteController = (event) => {
-    const upVotes = blog.upVotes;
-    const downVotes = blog.downVotes;
+    const upVotes = [...blog.upVotes];
+    const downVotes = [...blog.downVotes];
     let source = event.target.id;
     if (source === "upVote") {
       if (upVotes.includes(userId)) {
@@ -56,6 +62,12 @@ export const DetailBlog = () => {
     });
   };
 
+  const headers = {
+    headers: {
+      Authorization: localStorage.getItem("accessToken"),
+    },
+  };
+
   const updateDate = () => {
     const date = blog.updatedAt.split(" ");
     return (
@@ -74,34 +86,49 @@ export const DetailBlog = () => {
     async function fetchData() {
       try {
         let { data } = await axios.get(
-          `http://localhost:4000/articles/${blogId}`
+          `http://localhost:4000/articles/${blogId}`,
+          headers
         );
+        console.log(data);
         if (data.message === "error") throw "error";
         editBlog(data.data);
+        setOrigBlog(data.data);
       } catch (e) {
         editBlog("error");
       }
     }
-    setTimeout(() => {
-      fetchData();
-    }, 1000);
+
+    fetchData();
   }, []);
   useEffect(() => {
-    if (back) {
+    if (
+      back &&
+      (origBlog.upVotes.length !== blog.upVotes.length ||
+        origBlog.downVotes.length !== blog.downVotes.length)
+    ) {
       return () => {
+        console.log("i shouldnt run");
         try {
           const errors = [];
           const id = location.pathname.split("/")[2];
           axios
-            .patch(`http://localhost:4000/articles/${id}`, {
-              upVotes: blog.upVotes,
-              downVotes: blog.downVotes,
-            })
+            .patch(
+              `http://localhost:4000/articles/${id}`,
+              {
+                upVotes: blog.upVotes,
+                downVotes: blog.downVotes,
+              },
+              headers
+            )
             .catch((e) => errors.push(e));
           axios
-            .patch(`http://localhost:4000/users/${userId}`, {
-              blogId: id,
-            })
+            .patch(
+              `http://localhost:4000/users/${userId}`,
+              {
+                blogId: id,
+              },
+              headers
+            )
             .catch((e) => errors.push(e));
         } catch (e) {
           console.log(e);

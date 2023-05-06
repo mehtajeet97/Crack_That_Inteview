@@ -3,7 +3,7 @@ import logo from "../logo.svg";
 import support from "../support.webp";
 import test from "../test.jpg";
 import blog from "../blog.png";
-import { PremiumPage2 } from "./PremiumPage2";
+import { PremiumPage2 } from "./PremiumPage2.js";
 export const PremiumPage1 = (props) => (
   <>
     <div

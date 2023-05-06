@@ -5,19 +5,27 @@ user premium
 
 */
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { Link } from "react-router-dom";
 import picture from "../profilePicture.jpg";
+import { AuthContext } from "../context/AuthContext.js";
 
 export const Trending = () => {
-  const userPremium = false;
+  const { state, updateState } = useContext(AuthContext);
+  const userPremium = state.userDetails.isPremiumUser;
+  const userName = state.userDetails.firstName;
   let [blogs, setBlogs] = useState([]);
   let [users, setUsers] = useState([]);
+  const headers = {
+    headers: {
+      Authorization: localStorage.getItem("accessToken"),
+    },
+  };
   useEffect(() => {
     async function fetchData() {
       try {
-        let data = await axios.get(`http://localhost:4000/trending`);
-
+        console.log("hello");
+        let data = await axios.get(`http://localhost:4000/trending`, headers);
         if (data.data.message === "error") throw "error";
         setBlogs(data.data.data.article);
         setUsers(data.data.data.topUsers);
@@ -40,11 +48,11 @@ export const Trending = () => {
     <div>
       <div className="px-6 py-4  mx-auto rounded-lg bg-lime-200">
         <span className="block font-bold text-xl mb-2">
-          Hello {"bhanu"}! Welcome to Trending Page
+          Hello {userName}! Welcome to Trending Page
         </span>
       </div>
       <div className="bg-cyan-100 rounded overflow-hidden shadow-lg w-full capitalize">
-        <div className="flex flex-col px-6 py-3  m-10 rounded-lg bg-lime-200">
+        <div className="flex flex-col px-6 py-3  m-5 rounded-lg bg-lime-200">
           <div className=" flex items-center justify-between font-bold my-3">
             <span className="text-xl">Top blogs of this weeks </span>
             <Link
@@ -54,15 +62,15 @@ export const Trending = () => {
               View All Blogs
             </Link>
           </div>
-          <div className="flex flex-wrap justify-between">
+          <div className="grid grid-cols-3 gap-5 ">
             {blogs &&
               Boolean(blogs.length) &&
               blogs.map((blog, idx) => (
                 <div
                   key={idx}
-                  className="flex flex-col py-2 px-5 max-h-fit space-y bg-cyan-300 basis-2/7 rounded   shadow-lg text-truncate flex-wrap"
+                  className="flex flex-col py-2 px-5 max-h-min space-y bg-cyan-300 basis-2/7 rounded   shadow-lg text-truncate flex-wrap"
                 >
-                  <div className="flex flex-row justify-between">
+                  <div className="flex flex-row justify-between items-center overflow-hidden">
                     <div className="flex">
                       <Link
                         to={
@@ -76,7 +84,7 @@ export const Trending = () => {
                         }
                         state={{ data: blog }}
                       >
-                        <h3 className="capitalize px-5 py-2 font-bold">
+                        <h3 className="capitalize w-8/9 h-1/3 px-5 py-2 font-bold overflow-scrollable">
                           {blog.title}
                         </h3>
                       </Link>
@@ -86,7 +94,7 @@ export const Trending = () => {
                       </span>
                     </div>
                     {blog.isPremium ? (
-                      <span className="self-center">👑</span>
+                      <span className="self-baselne pb-5">👑</span>
                     ) : null}
                   </div>
                   <div className="flex flex-row mt-auto">
@@ -94,7 +102,7 @@ export const Trending = () => {
                       Boolean(blog.tags.length) &&
                       blog.tags.slice(0, 3).map((tag, idx) => (
                         <button
-                          className="p-2 m-3 bg-gray-200 rounded-full px-3 py-1"
+                          className="p-2 m-3 h-10 bg-gray-200 rounded-full px-3 py-1 overflow-hidden "
                           key={idx}
                         >
                           {`#${tag}`}
@@ -114,7 +122,7 @@ export const Trending = () => {
           <div className="font-bold my-2">
             <span> Top performers of the week</span>
           </div>
-          <div className="flex justify-between flex-wrap">
+          <div className="grid grid-cols-3 gap-5">
             {users &&
               users.length &&
               users.map((user, idx) => (

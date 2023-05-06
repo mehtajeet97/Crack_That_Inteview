@@ -1,3 +1,6 @@
+//not working when tampering the access token in blogs.js
+// working when the backend is not working
+
 /*this component renderes the blogs from a list of blogs and connected to Blog.js and BlogFilter Button.js*/
 
 /*
@@ -8,111 +11,79 @@ pending added a plain loading text with css
 
 /*appearance of the card
  */
-import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState, useContext } from "react";
+
+import { AuthContext } from "../context/AuthContext.js";
 
 import axios from "axios";
 
 export const Blogs = () => {
+  const navigate = useNavigate();
+  const { state, updateState } = useContext(AuthContext);
+
   // Change the array value to proper values such 'all' to 'All'
   const skills = ["java", "AWS", "SQL", "python", "javascript"];
-  const roles = ["front-end", "back-end", "web-development"];
-  const user = "bhanu";
-  const userPremium = true;
+  const roles = ["java", "AWS", "SQL", "python", "javascript"];
+  const user = state.userDetails.firstName;
+  const userPremium = state.userDetails.isPremiumUser;
 
-  const userskills = [];
-
-  const getArticles = async () => {
-    try {
-      let { data } = await axios.get("http://localhost:4000/articles");
-      if (data.message === "error") throw "error";
-      return data.data;
-    } catch (e) {
-      console.log(e);
-      return "error";
-    }
-  };
-
-  let [skill, setSkill] = useState();
-  let [role, setrole] = useState();
+  console.log({ state });
   const [filteredBlogs, setfilteredBlogs] = useState(); //used to render the current content
   const [allBlogs, setAllBlogs] = useState(); //used to get the original content
   let [skillState, skillStateSet] = useState(skills.map((x) => 0)); //both of these to toggle css
-  let [roleState, roleStateSet] = useState(roles.map((x) => 0));
 
-  const cssToggle = (event) => {
-    const source = event.target.getAttribute("source");
-    const index = event.target.getAttribute("index");
-    if (source == "skills" && index) {
-      skillState = skillState.map((x, y) => {
-        if (y == index) return 1;
-        else return 0;
+  const logoutUser = () => {
+    try {
+      updateState((state) => {
+        return { ...state, isLoggedIn: false, userDetails: {} };
       });
-      skillStateSet(skillState);
-    } else if (source == "skills" && !index) {
-      skillState = skillState.map((x) => 0);
-      skillStateSet(skillState);
-    }
-    if (source == "roles" && index) {
-      roleState = roleState.map((x, y) => {
-        if (y == index) return 1;
-        else return 0;
-      });
-      roleStateSet(roleState);
-    } else if (source == "roles" && !index) {
-      roleState = roleState.map((x) => 0);
-      roleStateSet(roleState);
+      localStorage.clear();
+      navigate("/login");
+    } catch (e) {
+      console.log(e);
     }
   };
 
-  const filterBlogs = (filterName = "all", roleName = "all") => {
-    if (filterName === "all" && roleName === "all") {
-      setfilteredBlogs(allBlogs);
-    } else {
-      setfilteredBlogs(spliced(allBlogs, filterName, roleName));
-    }
-  };
+  const filterSelected = (selectedSkill = "all") => {
+    const filterBlogs =
+      selectedSkill === "all"
+        ? allBlogs
+        : allBlogs.filter((x) => {
+            return x.tags.includes(selectedSkill);
+          });
 
-  const spliced = (allBlogs, filterName, roleName) => {
-    const filteredBlogs = allBlogs.filter((x) => {
-      if (filterName === "all" && roleName !== "all") {
-        return x.tags.includes(roleName);
-      } else if (filterName !== "all" && roleName === "all") {
-        return x.tags.includes(filterName);
-      } else {
-        return x.tags.includes(filterName) && x.tags.includes(roleName);
-      }
-    });
-
-    return filteredBlogs;
+    setfilteredBlogs(filterBlogs);
   };
 
   useEffect(() => {
     async function fetchData() {
-      const articles = await getArticles();
+      try {
+        console.log(localStorage.getItem("accessToken"));
+        let { data } = await axios.get("http://localhost:4000/articles", {
+          headers: {
+            Authorization: localStorage.getItem("accessToken"),
+          },
+        });
 
-      if (articles == "error") {
+        // if (data.message === "error") throw "error";
+        setfilteredBlogs(data.data);
+        setAllBlogs(data.data);
+      } catch (e) {
+        console.log(e);
         setfilteredBlogs("error");
       }
-      setfilteredBlogs(articles);
-      setAllBlogs(articles);
     }
     fetchData();
   }, []);
-  useEffect(() => {
-    filterBlogs(skill, role);
-  }, [skill, role]);
+
   if (!filteredBlogs) {
     return <p>Loading........</p>;
   }
-
-  if (filteredBlogs == "error") {
-    return (
-      <>
-        <p>could'nt fetch the blogs</p>
-      </>
-    );
+  if (state.userDetails.isBanned) {
+    navigate("/login");
   }
+  if (filteredBlogs == "error") logoutUser();
   return (
     <div>
       <div className="px-6 py-4  mx-auto rounded-lg bg-lime-200">
@@ -128,118 +99,73 @@ export const Blogs = () => {
           className="bg-yellow-300 px-3 py-2 text-red-400 m-3 rounded-lg"
           key={" all"}
           source={"skills"}
-          onClick={(event) => {
-            cssToggle(event);
-            setSkill("all");
+          onClick={() => {
+            filterSelected();
           }}
         >
           All
         </button>
-
-        {!userskills.length &&
-          skills.map((skill, idx) => (
-            <button
-              className={`capitalize px-3 py-2 rounded-lg text-red-400 m-3 ${
-                skillState[idx]
-                  ? " bg-yellow-30   ring opacity-70 ring-red-400"
-                  : " bg-yellow-300 "
-              }`}
-              key={idx}
-              index={idx}
-              source={"skills"}
-              onClick={(event) => {
-                cssToggle(event);
-                setSkill(skill);
-              }}
-            >
-              {skill}
-            </button>
-          ))}
         <button
-          className="bg-yellow-300 px-3 py-2 text-red-400 m-3 rounded-lg "
-          key={"clear all"}
+          className="bg-yellow-300 px-3 py-2 text-red-400 m-3 rounded-lg"
+          key={" logout"}
           source={"skills"}
-          onClick={(event) => {
-            cssToggle(event);
-            setSkill("all");
+          onClick={() => {
+            logoutUser();
           }}
         >
-          Clear All
+          logout
         </button>
-      </div>
 
-      <div className="my-2 px-6 py-4  mx-auto rounded-lg bg-lime-200">
-        <h3 className="block font-bold text-xl mb-2">Get Blogs By Role</h3>
-        <button
-          className="bg-yellow-300 px-3 py-2 text-red-400 m-3 rounded-lg"
-          key={" all"}
-          source={"roles"}
-          onClick={(event) => {
-            cssToggle(event);
-            setrole("all");
-          }}
-        >
-          All
-        </button>
-        {roles &&
-          roles.map((role, idx) => (
-            <button
-              className={`capitalize px-3 py-2 text-red-400 m-3 ${
-                roleState[idx]
-                  ? " bg-yellow-30  rounded-lg ring opacity-70 ring-red-400"
-                  : " bg-yellow-300  rounded-lg"
-              }`}
-              key={idx}
-              index={idx}
-              source={"roles"}
-              onClick={(event) => {
-                cssToggle(event);
-                setrole(role);
-              }}
-            >
-              {role}
-            </button>
-          ))}
-        <button
-          className="bg-yellow-300 px-3 py-2 text-red-400 m-3 rounded-lg"
-          key={"clear all"}
-          source={"roles"}
-          onClick={(event) => {
-            cssToggle(event);
-            setrole("all");
-          }}
-        >
-          Clear All
-        </button>
+        {skills.map((skill, idx) => (
+          <button
+            className={`capitalize px-3 py-2 rounded-lg text-red-400 m-3 ${
+              skillState == skill
+                ? " bg-yellow-30   ring opacity-70 ring-red-400"
+                : " bg-yellow-300 "
+            }`}
+            key={idx}
+            index={idx}
+            source={"skills"}
+            onClick={() => {
+              skillStateSet(skill);
+              filterSelected(skill);
+              // cssToggle(event);
+            }}
+          >
+            {skill}
+          </button>
+        ))}
       </div>
 
       <div className="capitalize grid grid-cols-3 gap-5">
         {filteredBlogs &&
           Boolean(filteredBlogs.length) &&
           Array.isArray(filteredBlogs) &&
-          filteredBlogs.map((blog, idx) => (
+          filteredBlogs.slice(0, 9).map((blog, idx) => (
             <div
               key={idx}
               className="flex flex-col justify-between  p-3  max-h-fit min-h-1/2 bg-cyan-300 basis-2/7 rounded-2xl   shadow-lg text-truncate flex-wrap"
             >
               <div className="flex flex-row justify-between">
-                <div className="flex">
-                  <Link
-                    to={
-                      blog.isPremium
-                        ? userPremium
+                <div className="flex ">
+                  <div className="max-w-sm">
+                    <Link
+                      to={
+                        blog.isPremium
+                          ? userPremium
+                            ? `/blogs/${blog._id}`
+                            : `/join-premium`
+                          : userPremium
                           ? `/blogs/${blog._id}`
-                          : `/join-premium`
-                        : userPremium
-                        ? `/blogs/${blog._id}`
-                        : `/blogs/${blog._id}`
-                    }
-                    state={{ data: blog }}
-                  >
-                    <h3 className="capitalize px-5 py-2 max-w-3/4 overflow-hidden">
-                      {blog.title}
-                    </h3>
-                  </Link>
+                          : `/blogs/${blog._id}`
+                      }
+                      state={{ data: blog }}
+                    >
+                      <h3 className="capitalize px-5 py-2 max-w-sm overflow-hidden">
+                        {blog.title}
+                      </h3>
+                    </Link>
+                  </div>
                   <span className="self-center">👍{blog.upVotesCount}</span>
                   <span className="self-center">👎{blog.downVotesCount}</span>
                 </div>
@@ -259,6 +185,9 @@ export const Blogs = () => {
               </div>
             </div>
           ))}
+        {!Boolean(filteredBlogs.length) && (
+          <p className="self-center">no blogs with this tags</p>
+        )}
       </div>
     </div>
   );

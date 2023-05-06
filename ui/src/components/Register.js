@@ -15,6 +15,7 @@ export const Register = () => {
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
   const { state, updateState } = useContext(AuthContext);
+  console.log(state);
   const [role, setRole] = useState("student");
   const [formStep, setFormStep] = useState(0);
   const [formState, setFormState] = useState(formInitialState);
@@ -29,7 +30,8 @@ export const Register = () => {
       });
       navigate("/login");
     } catch (e) {
-      let error = e.response.data;
+      console.log(e);
+      let error = e?.response?.data;
       state.triggerToast(error.errors, "error");
       return false;
     }
@@ -428,7 +430,7 @@ export const Register = () => {
           </label>
           <Select
             className="text-sm"
-            closeMenuOnSelect={true}
+            closeMenuOnSelect={false}
             components={animatedComponents}
             isMulti
             name="skills"

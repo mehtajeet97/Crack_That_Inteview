@@ -13,6 +13,7 @@ router
       if (article.error) {
         throw article.data;
       }
+
       res.status(200).json(helpers.sendResponse(article.data));
     } catch (e) {
       res.status(400).json(helpers.sendError(e));
