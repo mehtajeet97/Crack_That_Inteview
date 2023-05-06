@@ -23,6 +23,7 @@ import { Register } from "./components/Register.js";
 import { ProtectedRoutes } from "./components/ProtectedRoutes.js";
 import { OnGoingInterview } from "./components/Interview/OnGoingInterview.js";
 import { InterviewerSlots } from "./components/Interview/InterviewerSlots.js";
+import { StudentSlots } from "./components/Interview/StudentSlots.js";
 
 const router = createBrowserRouter([
   {
@@ -56,6 +57,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoutes>
             <InterviewerSlots />
+          </ProtectedRoutes>
+        ),
+      },
+      {
+        path: "studentslots",
+        element: (
+          <ProtectedRoutes>
+            <StudentSlots />
           </ProtectedRoutes>
         ),
       },

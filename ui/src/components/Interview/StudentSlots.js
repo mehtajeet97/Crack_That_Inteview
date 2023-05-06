@@ -1,6 +1,38 @@
 /*
-1) Create slots.js in routes to updateAvailableSlots[]
-2) Data structure change from array of objects to array of arrays on multiple selection
+This file is a copy of InterviewerSlots.js, which is the screen for interviewers to provide their avaialble slots
+This file is the screen viewed by the student when trying to schedule an interview and 
+is supposed to replicate features of 2 other files : 
+ScheduleForStudent.js [First Page viewed by student for selection of Interviewer]
+SchedullingScreen2.js [Second Page which allows selection of timeslot ]
+
+Flow for StudentSlots.js in UI --> 
+1) There is a Click Here button
+2) Onclick button has a call to route "http://localhost:4000/schedule" with Get verb
+3) Route triggers the data function getAllInterviewers in users.js that returns an array of objects 
+( all users whose role is interviewer and have provided their availableSlots)
+4) These objects / interviewers are rendered as cards with clickable names, 
+clicking on which takes you to the SchedullinScreen2.js
+
+Flow for SchedullingScreen2.js in UI -->
+1) Click here button 
+2) Renders a Calender but only displays the dates provided by Interviewer as available, rest of the dates are disabled
+3) For this, onclick of the button makes a route call "http://localhost:4000/schedule" with POST verb
+4) Route triggers a data function getAvailableSlots in users.js that returns an array of objects
+(availableSlots[] of the interviewer whose Id is provided)
+5) Once a date is selected the options are rendered in a select (dropdown) 
+to provide only the time slots provided by interviewer for the corresponding date
+6) Finally there is a Submit button that triggers 2 calls to the same route with different Ids : one for the interviewer
+as scheduleinterviewer() and one for user(student) as scheduleuser()
+7) This is a call to "http://localhost:4000/schedule/" + "id" which further triggers data function updateUpcomingInterview()
+which updates the upcomingInterviews[] of the user
+
+Issues :
+
+1) Dropdown does not render on the first click of selectedDate, it requires 2 clicks
+2) Updation in the Interviews Collection in DB on clicking submit by the student
+3) Duplication is prevented by checking if the date is same, however there could be a scenario 
+where even if the date is same, the time slot could be different -- This needs to be included as a functionality
+4) Code cleanup -- Instead of console.log, display the error message to the user
 */
 
 import { useContext, useEffect, useState } from "react";
@@ -10,7 +42,7 @@ import moment from "moment";
 import axios from "axios";
 import "./Calendar.css";
 
-export const InterviewerSlots = () => {
+export const StudentSlots = () => {
   const { state, updateState } = useContext(AuthContext);
 
   const [currentDate, setCurrentDate] = useState(
@@ -147,7 +179,28 @@ export const InterviewerSlots = () => {
     );
     setCheckedState(updatedCheckedState);
   };
-
+  const selectInterviewerPage = (
+    <>
+      <div className="flex w-full justify-around items-center md:flex-row flex-col">
+        <h1 className="text-center text-2xl mb-2 text-white">
+          Available Interviewers :{" "}
+        </h1>
+        <div className="flex flex-row gap-4 mt-4">
+          {/* <button className="btn" onClick={() => setRange(!range)}>
+            Select as {range ? "single date" : "range"}
+          </button> */}
+          {selectedSlots.length > 0 && (
+            <button className="btn" onClick={() => setPageStep(2)}>
+              Review
+            </button>
+          )}
+          <button className="btn" onClick={next}>
+            Choose Timings
+          </button>
+        </div>
+      </div>
+    </>
+  );
   const selectDatePage = (
     <>
       {currentDate.length > 0 ? (
@@ -294,7 +347,12 @@ export const InterviewerSlots = () => {
       </button>
     </div>
   );
-  const pages = [selectDatePage, selectSlotsPage, reviewSlotsPage];
+  const pages = [
+    selectInterviewerPage,
+    selectDatePage,
+    selectSlotsPage,
+    reviewSlotsPage,
+  ];
   return (
     <div className="max-w-screen-md mx-auto flex-col justify-center overflow-auto items-center bg-blue-700 relative rounded-lg p-4">
       {pages[pageStep]}

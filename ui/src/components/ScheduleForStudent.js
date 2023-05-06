@@ -1,20 +1,6 @@
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useState } from "react";
-
-/*
-TO-DO :
-
-2. Provide the ID of clicked interviewer when jumping to path : "schedulingscreen2"
-3. Render it properly
-
-To-Test:
-
-1. Populate the List of interviwers to choose from (database)
-    Logic : create a function getallInterviewers where users are selected based on their role (interviewer)
-    Make that function populate the array with values for everything except path
-    change the path to Scheduling Screen 2 where user can select a date from available slots
-*/
 
 export const ScheduleForStudent = () => {
   const [cards1, setcards1] = useState([]); //Array variable that will hold the list of interviewers
@@ -42,7 +28,6 @@ export const ScheduleForStudent = () => {
   };
 
   const handleSelectInterviewer = (interviewer) => {
-    console.log(interviewer);
     navigate(`${interviewer._id}`);
   };
 

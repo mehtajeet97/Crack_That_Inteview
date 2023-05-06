@@ -1,24 +1,9 @@
 /*
-
-TO-DO:
-1. Populate the retrievedDates array so that it can be used to showcase only the available dates provided by interviewer
-2. User should be able to select one of the provided dates and subsequently one of the time slots and click on Schedule button
-
-On click of Schedule button:
-1. a new interview should be created in the interview collections
-2. update the upcomingInterviews[] for the interviewer
-3. update the upcomingInterviews[] for the student whose is currently scheduling
-4. Acknowledge the successful schedule and take the user back to the home screen
-*/
-
-/*
 Issues:
 
 Duplication of Slot selection for Interviewer as well as User(Student)
 Selection Dropdown for each user shows every due to Flat() rather render for each date of availableslots
 CSS Render on each page
-Role in post payload to differentiate based on what is needed
-No more console logs, Clean Up code
 */
 
 import Calendar from "react-calendar";
@@ -39,32 +24,43 @@ export const SchedulingScreen2 = () => {
 
   //Date retrieval
   const [retrievedDates, setretrievedDates] = useState([]);
-  const [retrievedOptions, setretrievedOptions] = useState([]);
   const [renderedOptions, setrenderedOptions] = useState([]);
 
   //Members for Calendar
-  const [selectedDate, setSelectedDate] = useState(new Date()); //To store the selected date
+  const [selectedDate, setSelectedDate] = useState(null); //To store the selected date
   const [isDateSelected, setIsDateSelected] = useState(false); //To make the calendar selectable
 
-  const handleOnChange = (date) => {
+  const handleOnChange = async (date) => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1); //To make the calendar selectable
     if (date >= tomorrow) {
       setSelectedDate(date);
       setIsDateSelected(true);
     }
-    let renderoptionarray = [];
-    renderoptionarray = retrievedOptions.flat();
-    console.log(renderoptionarray);
-    setrenderedOptions(renderoptionarray);
+    renderOptions();
+  };
+
+  const renderOptions = async () => {
+    const scheduleURL = "http://localhost:4000/schedule";
+    let { data, status } = await axios.post(
+      scheduleURL,
+      {
+        interviewerId,
+      },
+      { headers: { Authorization: localStorage.getItem("accessToken") } }
+    );
+
+    if (status === 200) {
+      const selectedData = selectedDate
+        ? data.find((item) => item.date === selectedDate.toDateString())
+        : null;
+      const selectedTimings = selectedData ? selectedData.timings : [];
+      setrenderedOptions(selectedTimings);
+    }
   };
 
   //Dropdowwn
   const [selectedOption, setSelectedOption] = useState("");
-
-  //Predefined Options
-
-  const options = ["Option 1", "Option 2", "Option 3"];
 
   const handleChange = async (event) => {
     setSelectedOption(event.target.value);
@@ -84,15 +80,8 @@ export const SchedulingScreen2 = () => {
 
     if (status === 200) {
       let datearray = [];
-      let optionarray = [];
-      datearray = data.map((item) => new Date(Object.keys(item)[0]));
-      optionarray = data.map((item) => Object.values(item)[0]);
-
+      datearray = data.map((item) => new Date(item.date));
       setretrievedDates(datearray);
-      setretrievedOptions(optionarray);
-      console.log(data);
-      console.log(retrievedDates);
-      console.log(retrievedOptions);
     } else {
       console.log("Error!!!");
     }
@@ -110,12 +99,40 @@ export const SchedulingScreen2 = () => {
     //Submits the data to backend for updation
 
     event.preventDefault();
-    let payload = { [selectedDate]: selectedOption }; //Passes object as { date : timeslot}
+    let payload = {
+      date: selectedDate.toDateString(),
+      timings: selectedOption,
+    }; //Passes object as { date : toDateString() format, timings : value}
     console.log(payload);
-    schedule(payload);
+    scheduleinterviewer(payload);
+    scheduleuser(payload);
   };
-
-  const schedule = async (payload) => {
+  const scheduleuser = async (payload) => {
+    try {
+      const studentURL = "http://localhost:4000/schedule/" + userDetails._id;
+      let { data, status } = await axios.post(studentURL, payload, {
+        headers: { Authorization: localStorage.getItem("accessToken") },
+      });
+      if (status === 200) {
+        //Display the selected date to the user for edit / Inform the user of success through alert/ toast
+        console.log(data, status);
+        state.triggerToast("Interview Scheduled Successfully!", "success");
+        navigate("/feed");
+      } else {
+        //Inform the user of errors through alert/ toast
+        console.log(data.errors);
+      }
+    } catch (e) {
+      if (e.response.data.error === "Access Token expired") {
+        localStorage.clear();
+        updateState({ ...state, isLoggedIn: false, userDetails: {} });
+        state.triggerToast("Session expired. Please log in again.", "success");
+      } else {
+        state.triggerToast(e.response.data.error, "error");
+      }
+    }
+  };
+  const scheduleinterviewer = async (payload) => {
     try {
       //   const studentURL = "http://localhost:4000/schedulestudent/" + userDetails._id;
       //   let { data, status } = await axios.post(studentURL, payload, {
@@ -128,8 +145,7 @@ export const SchedulingScreen2 = () => {
       //     //Inform the user of errors through alert/ toast
       //     console.log(data.errors);
       //   }
-      const interviewerURL =
-        "http://localhost:4000/schedulestudent/" + interviewerId;
+      const interviewerURL = "http://localhost:4000/schedule/" + interviewerId;
       let { data, status } = await axios.post(interviewerURL, payload, {
         headers: { Authorization: localStorage.getItem("accessToken") },
       });
@@ -143,8 +159,13 @@ export const SchedulingScreen2 = () => {
         console.log(data.errors);
       }
     } catch (e) {
-      console.log(e.response.data);
-      return false;
+      if (e.response.data.error === "Access Token expired") {
+        localStorage.clear();
+        updateState({ ...state, isLoggedIn: false, userDetails: {} });
+        state.triggerToast("Session expired. Please log in again.", "success");
+      } else {
+        state.triggerToast(e.response.data.error, "error");
+      }
     }
   };
 
@@ -181,7 +202,7 @@ export const SchedulingScreen2 = () => {
               <h2>Selected Time Slot : {" " + selectedOption}</h2>
               <button
                 onClick={handleSubmitButton}
-                disabled={selectedOption < 1}
+                disabled={selectedOption > 0}
                 type="submit"
                 className="w-full text-black border-2 border-solid border-black hover:bg-white hover:text-cyan-600 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm mt-2 px-5 py-2.5 text-center"
               >

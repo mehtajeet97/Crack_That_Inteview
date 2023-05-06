@@ -236,8 +236,19 @@ const updateAvailableSlots = async (userId, newSlot) => {
       throw `User with id ${userId} not found`;
     }
 
-    // Push the newSlot object to the availableSlots array
-    user.availableSlots.push(newSlot);
+    // Check if the object with the same date already exists
+    const existingObject = user.availableSlots.find(
+      (obj) => obj.date === newSlot[0].date
+    );
+
+    // If the object already exists, do something
+    if (existingObject) {
+      // Do something
+      throw `User ${userId} has an entry for the same date`;
+    } else {
+      // The object does not exist, so push it to the available slots array
+      user.availableSlots.push(...newSlot);
+    }
 
     // Update the user in the database
     const result = await userCollection.updateOne(
@@ -246,9 +257,11 @@ const updateAvailableSlots = async (userId, newSlot) => {
     );
     if (result.modifiedCount === 1) {
       return { success: true }; //Succesful updation
+    } else {
+      return { success: false }; // Unsucessful updation
     }
   } catch (e) {
-    throw e; //Errors otherwise
+    return e; //Errors otherwise
   }
 };
 
@@ -257,14 +270,24 @@ const updateUpcomingInterview = async (userId, newSlot) => {
     //Validation through prior function
     const user = await getUserById(userId);
     const userCollection = await users();
-    console.log("I am in the Data : User");
+
     // If the user does not exist, throw an error
     if (!user) {
       throw `User with id ${userId} not found`;
     }
+    // Check if the object with the same date already exists
+    const existingObject = user.upcomingInterviews.find(
+      (obj) => obj.date === newSlot[0].date
+    );
 
-    // Push the newSlot object to the availableSlots array
-    user.upcomingInterviews.push(newSlot);
+    // If the object already exists, do something
+    if (existingObject) {
+      // Do something
+      throw `User ${userId} has an entry for the same date`;
+    } else {
+      // The object does not exist, so push it to the available slots array
+      user.upcomingInterviews.push(...newSlot);
+    }
 
     // Update the user in the database
     const result = await userCollection.updateOne(
@@ -273,9 +296,11 @@ const updateUpcomingInterview = async (userId, newSlot) => {
     );
     if (result.modifiedCount === 1) {
       return { success: true }; //Succesful updation
+    } else {
+      return { success: false }; // Unsucessful updation
     }
   } catch (e) {
-    throw e; //Errors otherwise
+    return e; //Errors otherwise
   }
 };
 

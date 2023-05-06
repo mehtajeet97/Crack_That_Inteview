@@ -20,11 +20,9 @@ router
     // Get the available slots by providing id of interviewer selected | UI : SchedulingScreen2.js
     try {
       //Validation
-      let userID = JSON.stringify(req.body.interviewerId);
-      userID = idCheck(req.body.interviewerId);
+      let userID = idCheck(req.body.interviewerId);
 
       const userSlots = await users.getAvailableSlots(userID);
-
       res.status(200).json(userSlots); //Output : availableslots of provided interviewer
     } catch (e) {
       res.status(400).json(e);
@@ -32,21 +30,20 @@ router
   });
 
 router.route("/:id").post(async (req, res) => {
-  // Update the available slots for interviewer | UI : AvailableSlots.js
+  // Update the upcoming interviews for user | UI : SchedulingScreen2.js | 2 calls in the same function
   try {
     //Validation
     req.params.id = idCheck(req.params.id);
     let payload = req.body;
 
-    const slots = await users.updateAvailableSlots(req.params.id, payload); //returns {success:true} or error
+    const slots = await users.updateUpcomingInterview(req.params.id, payload); //returns {success:true} or error
     if (slots.success) {
       res.status(200).json("Updated Successfully!");
     } else {
-      throw `Update unsuccessful!`;
+      throw `Interview already scheduled!`;
     }
   } catch (e) {
-    res.status(400).json(e);
+    res.status(400).json(sendError(e)); //SendError necessary for toast
   }
 });
-
 export default router;

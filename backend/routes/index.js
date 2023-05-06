@@ -2,8 +2,8 @@ import userRoutes from "./users.js";
 import users from "../data/users.js";
 import interviewRoutes from "./interview.js";
 import articleRoutes from "./articles.js";
+import slotsRoutes from "./slots.js"; //For Interviewier Slot addition
 import scheduleRoutes from "./schedule.js"; //For Interview Scheduling
-import scheduleStudentRoutes from "./schedulestudent.js";
 import examRoutes from "./exam.js";
 import auth from "../middleware/auth.js";
 import bcrypt from "bcryptjs";
@@ -78,8 +78,9 @@ const resp = (app) => {
   app.use("/articles", articleRoutes);
   app.use("/exams", examRoutes);
   // app.use("/trending",trending)
-  app.use("/schedule", scheduleRoutes); //For Interview Scheduling
-  app.use("/schedulestudent", scheduleStudentRoutes); //For Interview Scheduling
+  app.use("/slots", slotsRoutes); //For Interviewer Available Slots
+  app.use("/schedule", scheduleRoutes); //For Student Interview Scheduling
+  //app.use("/schedulestudent", scheduleStudentRoutes);
   app.get("/logout", (req, res) => {
     res.status(200).json(helpers.sendResponse("user successfully logged out"));
   });
