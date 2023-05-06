@@ -88,10 +88,10 @@ const getAllArticles = async () => {
       element._id = element._id.toString();
       return element;
     });
-    if (listOfArticles.length === 0) throw "No Articles Found";
+
     return { data: listOfArticles, error: false };
   } catch (e) {
-    return { data: e, error: true };
+    return { message: e, error: true };
   }
 };
 //only admin can update the blog

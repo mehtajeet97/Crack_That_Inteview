@@ -1,6 +1,7 @@
 import { createContext } from "react";
 import { toast } from "react-toastify";
-const showToastMessage = (message, type) => {
+
+export const showToastMessage = (message, type) => {
   switch (type) {
     case "success":
       toast.success(message, {
@@ -29,5 +30,17 @@ if (localStorage.getItem("userDetails")) {
     userDetails: JSON.parse(localStorage.getItem("userDetails")),
   };
 }
-
 export const AuthContext = createContext(initialState);
+
+export const authReducer = (state, action) => {
+  switch (action.type) {
+    case "login":
+      return {
+        userDetails: JSON.parse(localStorage.getItem("userDetails")),
+        isLoggedIn: true,
+        accessToken: localStorage.getItem("accessToken"),
+      };
+  }
+};
+
+export const AuthContextProvider = ({ children }) => {};

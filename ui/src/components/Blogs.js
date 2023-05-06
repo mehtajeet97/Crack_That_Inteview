@@ -11,7 +11,7 @@ pending added a plain loading text with css
 
 /*appearance of the card
  */
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, redirect } from "react-router-dom";
 import { useEffect, useState, useContext } from "react";
 
 import { AuthContext } from "../context/AuthContext.js";
@@ -28,17 +28,16 @@ export const Blogs = () => {
   const user = state.userDetails.firstName;
   const userPremium = state.userDetails.isPremiumUser;
 
-  console.log({ state });
-  const [filteredBlogs, setfilteredBlogs] = useState(); //used to render the current content
-  const [allBlogs, setAllBlogs] = useState(); //used to get the original content
+  const [filteredBlogs, setfilteredBlogs] = useState([]); //used to render the current content
+  const [allBlogs, setAllBlogs] = useState([]); //used to get the original content
   let [skillState, skillStateSet] = useState(skills.map((x) => 0)); //both of these to toggle css
 
   const logoutUser = () => {
     try {
-      updateState((state) => {
-        return { ...state, isLoggedIn: false, userDetails: {} };
-      });
-      localStorage.clear();
+      // updateState((state) => {
+      //   return { ...state, isLoggedIn: false, userDetails: {} };
+      // });
+      // localStorage.clear();
       navigate("/login");
     } catch (e) {
       console.log(e);
@@ -59,31 +58,28 @@ export const Blogs = () => {
   useEffect(() => {
     async function fetchData() {
       try {
-        console.log(localStorage.getItem("accessToken"));
         let { data } = await axios.get("http://localhost:4000/articles", {
           headers: {
             Authorization: localStorage.getItem("accessToken"),
           },
         });
-
-        // if (data.message === "error") throw "error";
         setfilteredBlogs(data.data);
         setAllBlogs(data.data);
       } catch (e) {
-        console.log(e);
-        setfilteredBlogs("error");
+        // console.log(e);
+        if (e.response.data.error === "Access Token expired") {
+          state.triggerToast(
+            "Your session has been expired. Please log in.",
+            "error"
+          );
+          localStorage.clear();
+          navigate("/login");
+        }
       }
     }
     fetchData();
   }, []);
 
-  if (!filteredBlogs) {
-    return <p>Loading........</p>;
-  }
-  if (state.userDetails.isBanned) {
-    navigate("/login");
-  }
-  if (filteredBlogs == "error") logoutUser();
   return (
     <div>
       <div className="px-6 py-4  mx-auto rounded-lg bg-lime-200">
@@ -109,9 +105,7 @@ export const Blogs = () => {
           className="bg-yellow-300 px-3 py-2 text-red-400 m-3 rounded-lg"
           key={" logout"}
           source={"skills"}
-          onClick={() => {
-            logoutUser();
-          }}
+          onClick={logoutUser}
         >
           logout
         </button>
@@ -185,7 +179,7 @@ export const Blogs = () => {
               </div>
             </div>
           ))}
-        {!Boolean(filteredBlogs.length) && (
+        {filteredBlogs.length === 0 && (
           <p className="self-center">no blogs with this tags</p>
         )}
       </div>

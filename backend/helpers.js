@@ -304,13 +304,14 @@ let scoreCheck = (score) => {
 };
 let sendResponse = (data) => {
   return {
-    message: "ok",
     data,
+    error: false,
   };
 };
-let sendError = (error) => {
+let sendError = (message) => {
   return {
-    error,
+    error: true,
+    message,
   };
 };
 
