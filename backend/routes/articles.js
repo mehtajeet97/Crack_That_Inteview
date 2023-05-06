@@ -10,12 +10,10 @@ router
   .get(async (req, res) => {
     try {
       const article = await articles.getAllArticles();
-
       if (article.error) {
-        res.status(400).json({ data: article.message });
-      } else {
-        res.status(200).json(helpers.sendResponse(article.data));
+        throw article.message;
       }
+      res.status(200).json(helpers.sendResponse(article.data));
     } catch (e) {
       res.status(500).json(helpers.sendError("Internal Server Error"));
     }

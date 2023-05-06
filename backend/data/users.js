@@ -73,6 +73,7 @@ const createUser = async (userDetails) => {
     userScore: 0,
     isBanned: false,
     organization,
+    requestPremium: { message: "", status: "initial", allow: true },
   };
   const userCollection = await users();
   const insertedUserInfo = await userCollection.insertOne(user);

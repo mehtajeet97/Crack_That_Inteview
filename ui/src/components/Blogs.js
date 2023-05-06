@@ -34,10 +34,7 @@ export const Blogs = () => {
 
   const logoutUser = () => {
     try {
-      // updateState((state) => {
-      //   return { ...state, isLoggedIn: false, userDetails: {} };
-      // });
-      // localStorage.clear();
+      localStorage.clear();
       navigate("/login");
     } catch (e) {
       console.log(e);

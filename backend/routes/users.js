@@ -1,3 +1,4 @@
+import xss from "xss";
 import Router from "express";
 import users from "../data/users.js";
 import * as helpers from "../helpers.js";
@@ -63,12 +64,10 @@ router
           if (user.error === "Invalid email provided") {
             res.status(400).json({ data: [], errors: user.error });
           } else {
-            res
-              .status(400)
-              .json({
-                data: [],
-                errors: "User already exists, try signing in.",
-              });
+            res.status(400).json({
+              data: [],
+              errors: "User already exists, try signing in.",
+            });
           }
         }
       }
@@ -125,7 +124,7 @@ router
           errors.push(e);
         }
         try {
-          data.data = helpers.stringCheck(data.data);
+          data.data = xss(helpers.stringCheck(data.data));
         } catch (e) {
           errors.push(e);
         }

@@ -37,6 +37,7 @@ const resp = (app) => {
             isPremiumUser,
             userScore,
             _id,
+            requestPremium,
           } = user;
           await sendEmail(user, "login");
 
@@ -53,6 +54,7 @@ const resp = (app) => {
               isPremiumUser,
               userScore,
               _id,
+              requestPremium,
             },
           });
         } catch (e) {
