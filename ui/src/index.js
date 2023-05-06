@@ -17,6 +17,8 @@ import { Landing } from "./components/Landing.js";
 import { Register } from "./components/Register.js";
 import { ProtectedRoutes } from "./components/ProtectedRoutes.js";
 import { Admin } from "./components/Admin.js";
+import { PostInterviewRemarks } from "./components/PostInterviewRemarks.js";
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -76,6 +78,14 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: "interviewremarks",
+        element: (
+          <ProtectedRoutes>
+            <PostInterviewRemarks />
+          </ProtectedRoutes>
+        ),
+      },
+      {
         path: "login",
         element: <Login />,
       },
@@ -89,12 +99,12 @@ const router = createBrowserRouter([
       },
       {
         path: "admin",
-        element:(
+        element: (
           <ProtectedRoutes>
-            <Admin/>
+            <Admin />
           </ProtectedRoutes>
-        )
-      }
+        ),
+      },
     ],
   },
 ]);
