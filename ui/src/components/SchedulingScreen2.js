@@ -103,11 +103,13 @@ export const SchedulingScreen2 = () => {
       date: selectedDate.toDateString(),
       timings: selectedOption,
     }; //Passes object as { date : toDateString() format, timings : value}
-    console.log(payload);
-    scheduleinterviewer(payload);
-    scheduleuser(payload);
+    let userId = userDetails._id;
+    let interviewparams = { userId, interviewerId, payload };
+    scheduleInterviewer(payload);
+    scheduleUser(payload);
+    createInterview(interviewparams);
   };
-  const scheduleuser = async (payload) => {
+  const scheduleUser = async (payload) => {
     try {
       const studentURL = "http://localhost:4000/schedule/" + userDetails._id;
       let { data, status } = await axios.post(studentURL, payload, {
@@ -115,7 +117,6 @@ export const SchedulingScreen2 = () => {
       });
       if (status === 200) {
         //Display the selected date to the user for edit / Inform the user of success through alert/ toast
-        console.log(data, status);
         state.triggerToast("Interview Scheduled Successfully!", "success");
         navigate("/feed");
       } else {
@@ -132,26 +133,15 @@ export const SchedulingScreen2 = () => {
       }
     }
   };
-  const scheduleinterviewer = async (payload) => {
+  const scheduleInterviewer = async (payload) => {
     try {
-      //   const studentURL = "http://localhost:4000/schedulestudent/" + userDetails._id;
-      //   let { data, status } = await axios.post(studentURL, payload, {
-      //     headers: { Authorization: localStorage.getItem("accessToken") },
-      //   });
-      //   if (status === 200) {
-      //     //Display the selected date to the user for edit / Inform the user of success through alert/ toast
-      //     console.log(data, status);
-      //   } else {
-      //     //Inform the user of errors through alert/ toast
-      //     console.log(data.errors);
-      //   }
       const interviewerURL = "http://localhost:4000/schedule/" + interviewerId;
       let { data, status } = await axios.post(interviewerURL, payload, {
         headers: { Authorization: localStorage.getItem("accessToken") },
       });
+
       if (status === 200) {
         //Display the selected date to the user for edit / Inform the user of success through alert/ toast
-        console.log(data, status);
         state.triggerToast("Interview Scheduled Successfully!", "success");
         navigate("/feed");
       } else {
@@ -168,7 +158,31 @@ export const SchedulingScreen2 = () => {
       }
     }
   };
-
+  const createInterview = async (payload) => {
+    try {
+      const url = "http://localhost:4000/interview/";
+      let { data, status } = await axios.post(url, payload, {
+        headers: { Authorization: localStorage.getItem("accessToken") },
+      });
+      if (status === 200) {
+        //Display the selected date to the user for edit / Inform the user of success through alert/ toast
+        state.triggerToast("Interview Scheduled Successfully!", "success");
+        navigate("/feed");
+      } else {
+        //Inform the user of errors through alert/ toast
+        console.log(data.errors);
+      }
+    } catch (e) {
+      if (e.response.status === 400) {
+        localStorage.clear();
+        updateState({ ...state, isLoggedIn: false, userDetails: {} });
+        state.triggerToast("Session expired. Please log in again.", "success");
+        navigate("/login");
+      } else {
+        state.triggerToast(e.response.data.error, "error");
+      }
+    }
+  };
   return (
     <div>
       <div>
