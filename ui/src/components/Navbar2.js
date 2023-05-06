@@ -30,7 +30,7 @@ export const Navbar2 = () => {
     },
     {
       name: "Go Premium",
-      path: "/premium",
+      path: "/join-premium",
       role: ["student", "admin"],
     },
   ];
