@@ -39,9 +39,24 @@ export const Admin = () => {
         return data;
     }
 
+    const banUser = async (payload, id) => {
+      try {
+        const userURL = `http://localhost:4000/users/${id}`;
+        let { data, status } = await axios.put(userURL, payload);
+        if (status === 200) {
+          setUsersData(data);
+        } else {
+          console.log(data.errors);
+        }
+      } catch (e) {
+        console.log(e.response.data);
+        return false;
+      }
+    };
+
     //To do: Write Functionality for Ban User
-    const handleBanUser = (user) =>{
-      console.log(user)
+    const handleBanUser = () =>{
+      banUser();
     }
 
     return(
