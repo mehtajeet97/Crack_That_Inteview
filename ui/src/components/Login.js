@@ -44,6 +44,10 @@ export const Login = () => {
       let { data, status } = await axios.post(loginURL, payload);
       if (status === 200) {
         setUserDetails(data);
+        state.triggerToast(
+          `Welcome back, ${data.userDetails.firstName}!`,
+          "success"
+        );
         navigate("/feed");
       }
     } catch (e) {

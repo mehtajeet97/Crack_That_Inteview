@@ -143,18 +143,17 @@ export const validate = {
       } else {
         result.data.school = school;
       }
+      if (!isValidString(resume)) {
+        result.errors.resume = "Invalid resume provided!";
+      } else {
+        result.data.resume = resume;
+      }
     } else if (role === "interviewer") {
       if (!isValidOrganisation(organisation)) {
         result.errors.school = "Invalid organisation provided";
       } else {
         result.data.organisation = organisation;
       }
-    }
-
-    if (!isValidString(resume)) {
-      result.errors.resume = "Invalid resume provided!";
-    } else {
-      result.data.resume = resume;
     }
 
     if (!isValidYoe(yoe)) {

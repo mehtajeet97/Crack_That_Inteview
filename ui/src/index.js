@@ -6,16 +6,13 @@ import reportWebVitals from "./reportWebVitals.js";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { NotFound404 } from "./components/NotFound404.js";
 import { Feed } from "./components/Feed.js";
-import { Interview } from "./components/Interview.js";
+import { Interview } from "./components/Interview/Interview.js";
 import { TestYourself } from "./components/Exam/TestYourself.js";
-import { Blogs } from "./components/Blogs.js";
 
 import { ScheduleForInterviewer } from "./components/ScheduleForInterviewer.js";
 import { ScheduleForStudent } from "./components/ScheduleForStudent.js";
 import { SchedulingScreen2 } from "./components/SchedulingScreen2.js";
-
-import { TestYourself } from "./components/TestYourself.js";
-import { Blogs } from "./components/Blog.js";
+import { Blogs } from "./components/Blogs.js";
 import { Trending } from "./components/Trending.js";
 import { Profile } from "./components/Profile.js";
 import { Login } from "./components/Login.js";
@@ -50,7 +47,14 @@ const router = createBrowserRouter([
           </ProtectedRoutes>
         ),
       },
-
+      {
+        path: "interview",
+        element: (
+          <ProtectedRoutes>
+            <Interview />
+          </ProtectedRoutes>
+        ),
+      },
       {
         path: "scheduleforinterviewer",
         element: (

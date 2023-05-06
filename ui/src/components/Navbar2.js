@@ -89,7 +89,7 @@ export const Navbar2 = () => {
 
   const logout = () => {
     updateState({ ...state, isLoggedIn: false, userDetails: {} });
-    state.triggerToast("User Successfully Logged Out!", "success");
+    state.triggerToast(`See you again, ${userDetails.firstName}`, "success");
     localStorage.clear();
     navigate("/");
   };

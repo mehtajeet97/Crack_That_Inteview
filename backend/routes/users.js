@@ -36,11 +36,14 @@ router
     }
   })
   .post(upload.single("resume"), async (req, res) => {
-    let file = req.file;
     let payload = req.body;
-    let fileLocationDisk = `./uploads/${req.body.tempFilePath}`;
-    let fileLocationDB = `static/${req.body.tempFilePath}/${file.originalname}`;
-    payload.resume = fileLocationDB;
+
+    if (payload.role !== "interviewer") {
+      let file = req.file;
+      let fileLocationDisk = `./uploads/${req.body.tempFilePath}`;
+      let fileLocationDB = `static/${req.body.tempFilePath}/${file.originalname}`;
+      payload.resume = fileLocationDB;
+    }
 
     try {
       let validationResult = helpers.validate.register(payload);
