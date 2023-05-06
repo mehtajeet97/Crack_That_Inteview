@@ -1,6 +1,7 @@
 import Router from "express";
 import { articleData as articles } from "../data/index.js";
 import * as helpers from "../helpers.js";
+
 const router = Router();
 
 //get all articles
@@ -9,53 +10,118 @@ router
   .get(async (req, res) => {
     try {
       const article = await articles.getAllArticles();
-      res.status(200).json(article);
+      if (article.error) {
+        throw article.message;
+      }
+      res.status(200).json(helpers.sendResponse(article.data));
     } catch (e) {
-      res.status(400).send("error fetching the articles");
+      res.status(500).json(helpers.sendError("Internal Server Error"));
     }
   })
   .post(async (req, res) => {
-    let data = req.body;
     try {
-      data.content = helpers.stringCheck(data.content);
-      data.tag = helpers.arrayCheck(data.tag);
-      data.title = helpers.stringCheck(data.title);
+      let data = req.body;
+      const errors = [];
 
-      const addArticle = await articles.createArticle(
-        data.title,
-        data.content,
-        data.tag
-      );
-      res.status(200).json(addArticle);
+      try {
+        data.content = helpers.stringCheck(data.content);
+      } catch (e) {
+        errors.push(e);
+      }
+      try {
+        data.tags = helpers.arrayCheck(data.tags);
+        // data.tags = helpers.arrayCheck(["Python", "Machine Learning"]);
+      } catch (e) {
+        errors.push(e);
+      }
+      try {
+        data.title = helpers.stringCheck(data.title);
+      } catch (e) {
+        errors.push(e);
+      }
+      try {
+        data.isPremium = helpers.booleanCheck(JSON.parse(data.isPremium));
+      } catch (e) {
+        errors.push(e);
+      }
+
+      if (errors.length > 0) throw errors;
+      const addArticle = await articles.createArticle(data);
+      if (addArticle.err) {
+        throw addArticle.data;
+      }
+      res.status(200).json(helpers.sendResponse(addArticle.data));
     } catch (e) {
-      res.status(400).send("error adding the article");
+      res.status(400).json(helpers.sendError(e));
     }
   });
 
 router
   .route("/:id")
   .get(async (req, res) => {
-    req.params.id = helpers.idCheck(req.params.id);
     try {
+      req.params.id = helpers.idCheck(req.params.id);
       const article = await articles.getArticleById(req.params.id);
-      res.status(200).send(article);
+      if (article.error) {
+        throw article.data;
+      } else {
+        res.status(200).json(helpers.sendResponse(article.data));
+      }
     } catch (e) {
-      res.status(400).send(e);
+      res.status(400).json(helpers.sendError(e));
     }
   })
   .delete(async (req, res) => {
-    req.params.id = helpers.idCheck(req.params.id);
+    //only admin
+    // req.params.id = helpers.idCheck(req.params.id);
+    // try {
+    //   const deletionInfo = await articles.removeArticle(req.params.id);
+    //   if (deletionInfo.lastErrorObject.n === 0) {
+    //     throw `Could not delete interview with id of ${id}`;
+    //   }
+    //   let mssg = `deleted user with id ${id}`;
+    //   res.status(200).json(helpers.sendResponse(mssg));
+    // } catch (e) {
+    //   res.status(400).json(helpers.sendError(e));
+    // }
+  })
+  .put(async (req, res) => {
+    //only admin
+    // req.params.id = helpers.idCheck(req.params.id);
+    // try {
+    //   const update = await bands.update(_id, upVote, downVote);
+    //   res.status(200).send(update);
+    // } catch (e) {}
+  })
+  .patch(async (req, res) => {
+    //this put request is to only update the blog upvotes and downvotes
 
     try {
-      const deletionInfo = await articles.removeArticle(req.params.id);
-
-      if (deletionInfo.lastErrorObject.n === 0) {
-        throw `Could not delete interview with id of ${id}`;
+      const errors = [];
+      const data = req.body;
+      console.log({ data });
+      if (!data || Object.keys(data).length === 0) {
+        return "error while liking the blog";
       }
-      let mssg = `deleted user with id ${id}`;
-      res.status(200).json(mssg);
+      try {
+        req.params.id = helpers.idCheck(req.params.id);
+      } catch (e) {
+        errors.push(e);
+      }
+
+      if (errors.length > 0) {
+        throw errors;
+      }
+
+      const updatedPost = await articles.updateVote(req.params.id, data);
+      if (updatedPost.err) {
+        throw updatedPost.data;
+      }
+
+      res.status(200).json(helpers.sendResponse(updatedPost));
     } catch (e) {
-      res.status(400).json(e);
+      console.log(e, "errors here");
+      res.status(400).json(helpers.sendError(e));
     }
   });
 

@@ -10,7 +10,7 @@ export const Navbar2 = () => {
   const navigate = useNavigate();
   const [openMenuDropdown, setMenuDropdown] = useState(false);
   const { state, updateState } = useContext(AuthContext);
-  const userDetails = state.userDetails;
+  const userDetails = state?.userDetails;
 
   let navTabs = [
     {
@@ -20,7 +20,7 @@ export const Navbar2 = () => {
     },
     {
       name: "Blogs",
-      path: "/blog",
+      path: "/blogs",
       role: ["student", "interviewer", "admin"],
     },
     {
@@ -36,7 +36,7 @@ export const Navbar2 = () => {
   ];
 
   let activeNavTabs = navTabs.filter((tab) =>
-    tab.role.includes(userDetails.role)
+    tab.role.includes(userDetails?.role)
   );
 
   const profileTabs = [
@@ -88,9 +88,9 @@ export const Navbar2 = () => {
   }, [pathname]);
 
   const logout = () => {
-    localStorage.clear();
     updateState({ ...state, isLoggedIn: false, userDetails: {} });
     state.triggerToast("User Successfully Logged Out!", "success");
+    localStorage.clear();
     navigate("/");
   };
 
@@ -114,7 +114,7 @@ export const Navbar2 = () => {
     <>
       <div className="navbar sticky text-white bg-blue-700">
         <div className="navbar-start">
-          {state.isLoggedIn && (
+          {state?.isLoggedIn && (
             <div
               className="dropdown"
               onClick={() => setMenuDropdown(!openMenuDropdown)}

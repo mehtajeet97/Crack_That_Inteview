@@ -7,7 +7,7 @@ export const Feed = () => {
       path: "interview",
       data: "Hey this is an interview card. you will get any upcoming interviews here",
     },
-    { title: "Blogs", path: "/blog" },
+    { title: "Blogs", path: "/blogs" },
     { title: "Show me what's trending today", path: "/trending" },
     { title: "Test Yourself", path: "/test-yourself" },
     { title: "Recent Interviews", path: "/interview" },

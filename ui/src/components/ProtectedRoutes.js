@@ -1,25 +1,27 @@
 import { useEffect, useState } from "react";
 import { Login } from "./Login.js";
-import { useNavigate, Outlet } from "react-router-dom";
+import { useNavigate, Outlet, useLocation } from "react-router-dom";
 
 export const ProtectedRoutes = ({ children }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const isLoggedIn =
+    localStorage.getItem("accessToken") && localStorage.getItem("userDetails");
   const navigate = useNavigate();
+  console.log("From protected routes");
+  console.log({ isLoggedIn });
 
-  const checkUserToken = () => {
-    const accessToken = localStorage.getItem("accessToken");
-    if (!accessToken || accessToken === "undefined") {
-      setIsLoggedIn(false);
-      localStorage.clear();
-      navigate("/login");
-    } else {
-      setIsLoggedIn(true);
-    }
-  };
+  // const checkUserToken = () => {
+  //   const accessToken = localStorage.getItem("accessToken");
+  //   console.log({ accessToken });
+  //   if (isLoggedIn) {
 
-  useEffect(() => {
-    checkUserToken();
-  }, [isLoggedIn]);
+  //   } else {
+  //     setIsLoggedIn(true);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   checkUserToken();
+  // }, [isLoggedIn]);
 
   return <>{isLoggedIn ? children : <Login />}</>;
 };

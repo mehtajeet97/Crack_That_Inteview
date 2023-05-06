@@ -2,6 +2,7 @@ import userRoutes from "./users.js";
 import users from "../data/users.js";
 import interviewRoutes from "./interview.js";
 import articleRoutes from "./articles.js";
+import trending from "./trending.js";
 import examRoutes from "./exam.js";
 import auth from "../middleware/auth.js";
 import bcrypt from "bcryptjs";
@@ -36,6 +37,7 @@ const resp = (app) => {
             isPremiumUser,
             userScore,
             _id,
+            requestPremium,
           } = user;
           await sendEmail(user, "login");
 
@@ -52,6 +54,7 @@ const resp = (app) => {
               isPremiumUser,
               userScore,
               _id,
+              requestPremium,
             },
           });
         } catch (e) {
@@ -74,8 +77,8 @@ const resp = (app) => {
   app.use("/users", userRoutes);
   app.use("/interviews", interviewRoutes);
   app.use("/articles", articleRoutes);
+  app.use("/trending", trending);
   app.use("/exams", examRoutes);
-  // app.use("/trending",trending)
   app.get("/logout", (req, res) => {
     res.status(200).json(helpers.sendResponse("user successfully logged out"));
   });

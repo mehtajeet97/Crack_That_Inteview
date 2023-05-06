@@ -302,15 +302,16 @@ let scoreCheck = (score) => {
   if (score < 0 || score > 100) throw "Please enter a valid user score";
   return score;
 };
-let sendResponse = (message, data) => {
+let sendResponse = (data) => {
   return {
-    message,
     data,
+    error: false,
   };
 };
-let sendError = (error) => {
+let sendError = (message) => {
   return {
-    error,
+    error: true,
+    message,
   };
 };
 
