@@ -29,6 +29,8 @@ import { DetailBlog } from "./components/DetailBlog.js";
 import { OnGoingInterview } from "./components/Interview/OnGoingInterview.js";
 import { InterviewerSlots } from "./components/Interview/InterviewerSlots.js";
 import { StudentSlots } from "./components/Interview/StudentSlots.js";
+import { Admin } from "./components/Admin.js";
+import { PostInterviewRemarks } from "./components/PostInterviewRemarks.js";
 
 const router = createBrowserRouter([
   {
@@ -139,6 +141,14 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: "interviewremarks",
+        element: (
+          <ProtectedRoutes>
+            <PostInterviewRemarks />
+          </ProtectedRoutes>
+        ),
+      },
+      {
         path: "login",
         element: <Login />,
       },
@@ -156,6 +166,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoutes>
             <Premium />
+          </ProtectedRoutes>
+        ),
+      },
+      {
+        path: "admin",
+        element: (
+          <ProtectedRoutes>
+            <Admin />
           </ProtectedRoutes>
         ),
       },

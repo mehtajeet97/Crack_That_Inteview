@@ -44,7 +44,6 @@ router
 
     try {
       let validationResult = helpers.validate.register(payload);
-
       if (!validationResult.validationPassed) {
         res.status(400).json({ data: [], errors: validationResult.errors });
       } else {

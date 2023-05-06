@@ -33,17 +33,6 @@ const createUser = async (userDetails) => {
     role,
     school,
   } = userDetails;
-  // if (!email) throw "Email must be provided";
-  // if (!password) throw "Password must be provided";
-  // if (!phoneNumber) throw "Phone Number must be provided";
-  // firstName = stringCheck(firstName);
-  // lastName = stringCheck(lastName);
-  // organization = stringCheck(organization);
-  // role = stringCheck(role);
-  // if (!isRoleValid(role)) throw "invalid role";
-  // ageCheck(+age);
-  // stringCheck(email);
-  // email = email.toLowerCase().trim();
   passwordCheck(password);
   password = password.trim();
   password = await bcrypt.hash(password, saltRounds);
@@ -57,6 +46,9 @@ const createUser = async (userDetails) => {
     phoneNumber,
     resume,
     skills,
+    linkedin:"",
+    twitter:"",
+    github: "",
     tags: skills,
     yoe,
     school,

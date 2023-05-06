@@ -9,16 +9,19 @@ await db.dropDatabase();
 async function main() {
   try {
     let userDetails1 = await users.createUser(
-      "bhanu",
-      "srni",
+      "Siddharth",
+      "Prabhakaran",
       24,
-      "test@test.com",
-      "Test@123",
+      "sidduprabhak@gmail.com",
+      "Test@123$",
       9083319047,
       `C:\Users\siddu\OneDrive\Desktop\New Resume\Siddharth Prabhakaran - Resume.pdf`,
       ["Java", "AWS", "SQL"],
-      "google",
-      "admin"
+      "https://www.linkedin.com/in/sidprabhak/",
+      "",
+      "https://github.com/sidprabhak",
+      "Google",
+      "Admin"
     );
     console.log(userDetails1);
   } catch (e) {

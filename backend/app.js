@@ -8,7 +8,6 @@ dont use redirect
 500 - internal server error
 
  */
-
 // Main logic
 
 import express from "express";
