@@ -46,8 +46,8 @@ const createUser = async (userDetails) => {
     phoneNumber,
     resume,
     skills,
-    linkedin:"",
-    twitter:"",
+    linkedin: "",
+    twitter: "",
     github: "",
     tags: skills,
     yoe,
@@ -302,6 +302,22 @@ const getAllInterviewers = async () => {
     )
     .toArray();
   return listOfInterviewers; //returns array of objects
+};
+
+export const updateUserBanStatus = async (userDetails) => {
+  let { _id, isBanned, role, userId } = userDetails;
+  try {
+    const userCollection = await users();
+    const { lastErrorObject, value } = await userCollection.findOneAndUpdate(
+      { _id: new ObjectId(userId) },
+      { $set: { isBanned } }
+    );
+    let { password, ...rest } = value;
+    return rest;
+  } catch (e) {
+    console.log(e);
+    return false;
+  }
 };
 
 // Route : schedule.js | ("/").post |  returns availableSlots[] (For rendering the Calendar for user to select matching slot)

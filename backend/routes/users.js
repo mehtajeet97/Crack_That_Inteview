@@ -1,10 +1,11 @@
 import xss from "xss";
 import Router from "express";
-import users from "../data/users.js";
+import users, { updateUserBanStatus } from "../data/users.js";
 import * as helpers from "../helpers.js";
 import multer from "multer";
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4, validate } from "uuid";
 import fs from "fs";
+import { log } from "console";
 
 const storageConfig = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -117,7 +118,31 @@ router
     try {
       const data = req.body;
       const errors = [];
-      if (req.headers["reqtype"] == "premium-request") {
+      const headers = req.headers;
+      if (headers?.update === "banUser") {
+        try {
+          let userId = req.params.id;
+          data.userId = userId;
+          // console.log(data);
+          let validationResult = helpers.validate.banStatus(data);
+          // console.log(validationResult);
+          if (validationResult.validationPassed) {
+            let updateResult = await updateUserBanStatus(data);
+            console.log({ updateResult });
+            if (!updateResult) throw `Internal Server Error`;
+
+            // let allUsers = await users.getAllUsers();
+            res.status(200).json(helpers.sendResponse(updateResult));
+          } else {
+            res
+              .status(400)
+              .send(helpers.sendError(JSON.stringify(validationResult.errors)));
+          }
+        } catch (e) {
+          console.log(e);
+          res.status(400).send(helpers.sendError(JSON.stringify(e)));
+        }
+      } else if (req.headers["reqtype"] == "premium-request") {
         data.method = "premium-request";
 
         try {
@@ -150,14 +175,14 @@ router
           errors.push(e);
         }
       }
-      if (errors.length > 0) throw errors;
+      // if (errors.length > 0) throw errors;
 
-      const updatedUser = await users.patchUser(req.params.id, data);
-      if (updatedUser.error) {
-        throw updatedUser.data;
-      }
-
-      res.status(200).json(helpers.sendResponse(updatedUser));
+      // const updatedUser = await users.patchUser(req.params.id, data);
+      // if (updatedUser.error) {
+      //   throw updatedUser.data;
+      // }
+      console.log("waiting here");
+      // res.status(200).json(helpers.sendResponse(updatedUser));
     } catch (e) {
       res.status(400).json(helpers.sendError(e));
     }

@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
 import moment from "moment";
 export const isValidObjectId = (id) =>
-  !isUndefinedOrNull(id) && ObjectId.isValid(ObjectId);
+  !isUndefinedOrNull(id) && ObjectId.isValid(id);
 const isUndefinedOrNull = (value) => !value || value === null;
 const isValidString = (string) =>
   typeof string === "string" && string.trim().length;
@@ -48,7 +48,7 @@ const isValidCareerRole = (careerRole) =>
   !isUndefinedOrNull(careerRole) &&
   isValidString(careerRole) &&
   isOptionSelected(careerRole);
-
+const isBoolean = (value) => typeof value === "boolean";
 const isValidRole = (role) =>
   !isUndefinedOrNull(role) &&
   ["admin", "student", "interviewer"].includes(role.trim().toLowerCase());
@@ -205,6 +205,32 @@ export const validate = {
 
     return result;
   },
+  banStatus: (payload) => {
+    let { _id, isBanned, role, userId } = payload;
+
+    let result = { validationPassed: true, errors: {} };
+
+    if (!isValidObjectId(_id)) {
+      result.errors._id = "Invalid admin provided";
+    }
+
+    if (!isValidObjectId(userId)) {
+      result.errors.userId = "Invalid user Id provided";
+    }
+
+    if (!isBoolean(isBanned)) {
+      result.errors.isBanned = "Invalid Ban status provided";
+    }
+
+    if (role.toLowerCase().trim() !== "admin") {
+      result.errors.role = "Invalid role provided";
+    }
+
+    if (Object.keys(result.errors).length) {
+      result.validationPassed = false;
+    }
+    return result;
+  },
 };
 
 let idCheck = (id) => {
@@ -303,7 +329,7 @@ let scoreCheck = (score) => {
 };
 let sendResponse = (data) => {
   return {
-    data,
+    data: data,
     error: false,
   };
 };
