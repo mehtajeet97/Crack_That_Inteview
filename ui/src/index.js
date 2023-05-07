@@ -7,7 +7,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { NotFound404 } from "./components/NotFound404.js";
 import { Feed } from "./components/Feed.js";
 
-import { ScheduleForInterviewer } from "./components/ScheduleForInterviewer.js";
+// import { ScheduleForInterviewer } from "./components/ScheduleForInterviewer.js";
 import { ScheduleForStudent } from "./components/ScheduleForStudent.js";
 import { SchedulingScreen2 } from "./components/SchedulingScreen2.js";
 
@@ -44,14 +44,14 @@ const router = createBrowserRouter([
         ),
       },
 
-      {
-        path: "scheduleforinterviewer",
-        element: (
-          <ProtectedRoutes>
-            <ScheduleForInterviewer />
-          </ProtectedRoutes>
-        ),
-      },
+      // {
+      //   path: "scheduleforinterviewer",
+      //   element: (
+      //     <ProtectedRoutes>
+      //       <ScheduleForInterviewer />
+      //     </ProtectedRoutes>
+      //   ),
+      // },
       {
         path: "interviewerslots",
         element: (

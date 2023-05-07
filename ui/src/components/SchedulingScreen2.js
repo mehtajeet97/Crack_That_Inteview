@@ -105,9 +105,9 @@ export const SchedulingScreen2 = () => {
     }; //Passes object as { date : toDateString() format, timings : value}
     let userId = userDetails._id;
     let interviewparams = { userId, interviewerId, payload };
+    createInterview(interviewparams);
     scheduleInterviewer(payload);
     scheduleUser(payload);
-    createInterview(interviewparams);
   };
   const scheduleUser = async (payload) => {
     try {

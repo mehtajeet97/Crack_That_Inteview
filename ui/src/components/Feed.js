@@ -4,7 +4,7 @@ export const Feed = () => {
   const cards = [
     {
       title: "Interviews",
-      path: "/scheduleforinterviewer",
+      path: "/interviewerslots",
       data: "Hey this is an interview card. you will get any upcoming interviews here",
     },
     { title: "Blogs", path: "/blog" },

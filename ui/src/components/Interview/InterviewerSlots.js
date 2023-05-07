@@ -9,9 +9,11 @@ import Calendar from "react-calendar";
 import moment from "moment";
 import axios from "axios";
 import "./Calendar.css";
+import { useNavigate } from "react-router-dom";
 
 export const InterviewerSlots = () => {
   const { state, updateState } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const [currentDate, setCurrentDate] = useState(
     moment().add(1, "day").toDate()
@@ -118,6 +120,7 @@ export const InterviewerSlots = () => {
       let { data, status } = await axios.post(url, payload, headers);
       if (status === 200) {
         state.triggerToast("Interview slots added successfully", "success");
+        navigate("/feed");
       } else {
         state.triggerToast("Interview slots could not be added", "error");
       }
