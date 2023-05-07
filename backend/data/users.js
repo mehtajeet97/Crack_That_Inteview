@@ -202,6 +202,7 @@ const getAllInterviewers = async () => {
           skills: 1,
           organization: 1,
           yoe: 1,
+          availableSlots: 1,
         },
       }
     )
@@ -240,7 +241,7 @@ const updateAvailableSlots = async (userId, newSlot) => {
     const existingObject = user.availableSlots.find(
       (obj) => obj.date === newSlot[0].date
     );
-
+    console.log(existingObject, "here");
     // If the object already exists, do something
     if (existingObject) {
       // Do something

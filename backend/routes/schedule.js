@@ -2,7 +2,7 @@ import Router from "express";
 const router = Router();
 
 import users from "../data/users.js";
-import { idCheck, sendError } from "../helpers.js";
+import { idCheck, isValidObjectId, sendError } from "../helpers.js";
 
 router
   .route("/")
@@ -20,12 +20,16 @@ router
     // Get the available slots by providing id of interviewer selected | UI : SchedulingScreen2.js
     try {
       //Validation
-      let userID = idCheck(req.body.interviewerId);
+      let userID = req.body.interviewerId;
 
-      const userSlots = await users.getAvailableSlots(userID);
-      res.status(200).json(userSlots); //Output : availableslots of provided interviewer
+      if (isValidObjectId(userID)) {
+        const userSlots = await users.getAvailableSlots(userID);
+        res.status(200).json(userSlots); //Output : availableslots of provided interviewer
+      } else {
+        res.status(400).json(sendError("Invalid UserID"));
+      }
     } catch (e) {
-      res.status(400).json(e);
+      res.status(500).json(sendError(JSON.stringify(e)));
     }
   });
 
@@ -39,10 +43,10 @@ router.route("/:id").post(async (req, res) => {
     if (slots.success) {
       res.status(200).json("Updated Successfully!");
     } else {
-      throw `Interview already scheduled!`;
+      res.status(400).json(sendError("Check Upcoming Interviews!!!"));
     }
   } catch (e) {
-    res.status(400).json(sendError(e)); //SendError necessary for toast
+    res.status(500).json(sendError(e)); //SendError necessary for toast
   }
 });
 export default router;
