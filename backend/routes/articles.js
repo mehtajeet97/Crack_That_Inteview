@@ -1,3 +1,8 @@
+/**
+ * make sure that the articles can be created edited by admin and admin only
+ *
+ */
+
 import Router from "express";
 import { articleData as articles } from "../data/index.js";
 import * as helpers from "../helpers.js";
@@ -44,12 +49,13 @@ router
       } catch (e) {
         errors.push(e);
       }
-
+      console.log(data);
       if (errors.length > 0) throw errors;
       const addArticle = await articles.createArticle(data);
       if (addArticle.err) {
         throw addArticle.data;
       }
+
       res.status(200).json(helpers.sendResponse(addArticle.data));
     } catch (e) {
       res.status(400).json(helpers.sendError(e));
@@ -71,20 +77,7 @@ router
       res.status(400).json(helpers.sendError(e));
     }
   })
-  .delete(async (req, res) => {
-    //only admin
-    // req.params.id = helpers.idCheck(req.params.id);
-    // try {
-    //   const deletionInfo = await articles.removeArticle(req.params.id);
-    //   if (deletionInfo.lastErrorObject.n === 0) {
-    //     throw `Could not delete interview with id of ${id}`;
-    //   }
-    //   let mssg = `deleted user with id ${id}`;
-    //   res.status(200).json(helpers.sendResponse(mssg));
-    // } catch (e) {
-    //   res.status(400).json(helpers.sendError(e));
-    // }
-  })
+
   .put(async (req, res) => {
     //only admin
     // req.params.id = helpers.idCheck(req.params.id);
@@ -95,33 +88,75 @@ router
   })
   .patch(async (req, res) => {
     //this put request is to only update the blog upvotes and downvotes
-
     try {
       const errors = [];
-      const data = req.body;
-      console.log({ data });
-      if (!data || Object.keys(data).length === 0) {
-        return "error while liking the blog";
+      if (req.headers["update"] === "blog") {
+        const data = req.body;
+        console.log(data);
+        if (!data || Object.keys(data).length === 0) {
+          return "error while liking the blog";
+        }
+        try {
+          req.params.id = helpers.idCheck(req.params.id);
+        } catch (e) {
+          errors.push(e);
+        }
+
+        if (errors.length > 0) {
+          throw errors;
+        }
+        console.log("in patch route of articles");
+        try {
+          const updatedPost = await articles.update(data);
+          res.status(200).json(helpers.sendResponse(updatedPost));
+        } catch (e) {
+          throw e;
+        }
+      } else {
+        const data = req.body;
+        console.log({ data });
+        if (!data || Object.keys(data).length === 0) {
+          return "error while liking the blog";
+        }
+        try {
+          req.params.id = helpers.idCheck(req.params.id);
+        } catch (e) {
+          errors.push(e);
+        }
+
+        if (errors.length > 0) {
+          throw errors;
+        }
+
+        const updatedPost = await articles.updateVote(req.params.id, data);
+        if (updatedPost.err) {
+          throw updatedPost.data;
+        }
+
+        res.status(200).json(helpers.sendResponse(updatedPost));
       }
+    } catch (e) {
+      // console.log(e, "errors here");
+      res.status(400).json(helpers.sendError(e));
+    }
+  })
+  .delete(async (req, res) => {
+    try {
+      console.log("in delete route");
+      const errors = [];
       try {
         req.params.id = helpers.idCheck(req.params.id);
       } catch (e) {
         errors.push(e);
       }
 
-      if (errors.length > 0) {
-        throw errors;
-      }
-
-      const updatedPost = await articles.updateVote(req.params.id, data);
-      if (updatedPost.err) {
-        throw updatedPost.data;
-      }
-
-      res.status(200).json(helpers.sendResponse(updatedPost));
+      if (errors.length > 0) throw errors;
+      console.log("into deletion data");
+      const { data } = await articles.removeArticle(req.params.id);
+      let response = { id: data, deleted: true };
+      res.status(200).json(helpers.sendResponse(response));
     } catch (e) {
-      console.log(e, "errors here");
-      res.status(400).json(helpers.sendError(e));
+      res.status(404).send(e);
     }
   });
 

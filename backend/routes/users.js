@@ -119,6 +119,7 @@ router
       const data = req.body;
       const errors = [];
       const headers = req.headers;
+
       if (headers?.update === "banUser") {
         try {
           let userId = req.params.id;
@@ -126,14 +127,16 @@ router
           // console.log(data);
           let validationResult = helpers.validate.banStatus(data);
           // console.log(validationResult);
+
           if (validationResult.validationPassed) {
             let updateResult = await updateUserBanStatus(data);
-            console.log({ updateResult });
+
             if (!updateResult) throw `Internal Server Error`;
 
             // let allUsers = await users.getAllUsers();
             res.status(200).json(helpers.sendResponse(updateResult));
           } else {
+            console.log(validationResult.errors);
             res
               .status(400)
               .send(helpers.sendError(JSON.stringify(validationResult.errors)));
@@ -143,24 +146,50 @@ router
           res.status(400).send(helpers.sendError(JSON.stringify(e)));
         }
       } else if (req.headers["reqtype"] == "premium-request") {
-        data.method = "premium-request";
+        try {
+          data.method = "premium-request";
+          try {
+            req.params.id = helpers.idCheck(req.params.id);
+          } catch (e) {
+            errors.push(e);
+          }
+          try {
+            data.data = xss(helpers.stringCheck(data.data));
+          } catch (e) {
+            errors.push(e);
+          }
+          try {
+            data.status = helpers.stringCheck(data.status);
+          } catch (e) {
+            errors.push(e);
+          }
+          if (errors.length > 0) throw errors;
 
-        try {
-          req.params.id = helpers.idCheck(req.params.id);
+          const updatedUser = await users.patchUser(req.params.id, data);
+          if (updatedUser.error) {
+            throw updatedUser.data;
+          }
+          res.status(200).json(helpers.sendResponse(updatedUser));
         } catch (e) {
-          errors.push(e);
+          res.status(500).json(helpers.sendError("internal server error"));
         }
+      } else if (req.headers["update"] == "premium") {
+        // console.log("in user route updating premium", data);
         try {
-          data.data = xss(helpers.stringCheck(data.data));
+          // if (validationResult.validationPassed) {
+          if (helpers.idCheck(data.userId)) {
+            let updateResult = await users.updateUserPremiumStatus(data);
+            if (!updateResult) throw `Internal Server Error`;
+            res.status(200).json(helpers.sendResponse(updateResult));
+          } else {
+            res
+              .status(400)
+              .send(helpers.sendError(JSON.stringify(validationResult.errors)));
+          }
         } catch (e) {
-          errors.push(e);
+          res.status(400).send(helpers.sendError(JSON.stringify(e)));
         }
-        try {
-          data.status = helpers.stringCheck(data.status);
-        } catch (e) {
-          errors.push(e);
-        }
-      } else {
+      } else if (req.headers["update"] === "readBlogs") {
         if (!data || Object.keys(data).length === 0) {
           return "error while liking the blog";
         }
@@ -175,14 +204,6 @@ router
           errors.push(e);
         }
       }
-      // if (errors.length > 0) throw errors;
-
-      // const updatedUser = await users.patchUser(req.params.id, data);
-      // if (updatedUser.error) {
-      //   throw updatedUser.data;
-      // }
-      console.log("waiting here");
-      // res.status(200).json(helpers.sendResponse(updatedUser));
     } catch (e) {
       res.status(400).json(helpers.sendError(e));
     }

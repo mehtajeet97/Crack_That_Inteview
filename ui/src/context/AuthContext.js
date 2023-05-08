@@ -13,6 +13,10 @@ export const showToastMessage = (message, type) => {
         position: toast.POSITION.TOP_RIGHT,
       });
       break;
+    case "warning":
+      toast.warning(message, {
+        position: toast.POSITION.TOP_RIGHT,
+      });
     default:
       break;
   }

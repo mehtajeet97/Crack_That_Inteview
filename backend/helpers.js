@@ -231,6 +231,38 @@ export const validate = {
     }
     return result;
   },
+  updatePremium: (payload) => {
+    let { _id, role, isPremiumUser, userId, requestPremium } = payload;
+    let result = { validationPassed: true, errors: {} };
+    if (!isValidObjectId(userId)) {
+      result.errors.userId = "Invalid userId provided";
+    }
+    if (!isValidObjectId(_id)) {
+      result.errors._id = "Invalid admin provided";
+    }
+    if (!role.toLowerCase().trim() === 0) {
+      result.errors.role = "invalid role provided";
+    }
+    if (!isBoolean(isPremiumUser)) {
+      result.errors.isBanned = "Invalid Ban status provided";
+    }
+    if (!isValidString(requestPremium.message)) {
+      result.errors.requestPremium.message = "invalid message";
+    }
+    if (!isValidString(requestPremium.status)) {
+      let status = ["approved", "rejected", "new"];
+      if (!status.includes(requestPremium.status)) {
+        result.errors.requestPremium.status = "invalid status";
+      }
+    }
+    if (Object.keys(result.errors).length) {
+      result.validationPassed = false;
+    }
+    return result;
+
+    // let
+  },
+  //use this for the error handling and get the data checked in admin premium request
 };
 
 let idCheck = (id) => {
@@ -248,8 +280,8 @@ let emailCheck = (email) => {
   return email;
 };
 
-let stringCheck = (str, strName) => {
-  if (!str) throw `${strName} must be provided`;
+let stringCheck = (str) => {
+  if (!str) throw `name must be provided`;
   if (typeof str !== "string") throw "Type not string";
   str = str.trim();
   if (!str) throw "String cannot be empty";

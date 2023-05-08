@@ -6,7 +6,6 @@ const date = new Date();
 
 const createArticle = async (data) => {
   const error = [];
-
   try {
     try {
       data.title = stringCheck(data.title);
@@ -95,45 +94,22 @@ const getAllArticles = async () => {
   }
 };
 //only admin can update the blog
-const update = async (
-  id,
-  title,
-  content,
-  upVotes,
-  downVotes,
-  upVotesCount,
-  downVotesCount,
-  url,
-  type,
-  createdAt,
-  updatedAt,
-  tags,
-  isPremium
-) => {
-  if (stringCheck(id)) throw "invalid id";
-  if (!ObjectId.isValid(id)) throw "the input string is not a valid id";
+const update = async (article) => {
+  article._id = stringCheck(article._id);
 
+  if (!ObjectId.isValid(article._id))
+    throw "the input string is not a valid id";
   const updated = {
-    title,
-    content,
-    upVotes: ["User1", "User2"],
-    downVotes: ["User3", "User4"],
-    upVotesCount: 2,
-    downVotesCount: 2,
-    url: "<URL of the Blog>",
-    type: ["Article", "Blog"],
-    createdAt: `${month}/${day}/${year}`,
-    updatedAt: `${month}/${day}/${year}`,
-    tags,
-    isPremium: false,
+    title: article.title,
+    content: article.content,
   };
-  const band = await bands();
-  const updatedInfo = await band.findOneAndUpdate(
-    { _id: new ObjectId(id) },
+  const articleCollection = await articles();
+  const updatedInfo = await articleCollection.findOneAndUpdate(
+    { _id: new ObjectId(article._id) },
     { $set: updated },
     { returnDocument: "after" }
   );
-  // console.log(updatedInfo)
+
   if (updatedInfo.lastErrorObject.n === 0) {
     throw "could not update the band details";
   }
@@ -149,10 +125,11 @@ const removeArticle = async (id) => {
   const deletedArticle = await articleCollection.findOneAndDelete({
     _id: new ObjectId(id),
   });
+
   if (deletedArticle.lastErrorObject.n === 0) {
-    throw `The article with Id of ${id} could not be deleted`;
+    throw { error: true, data: "not found" };
   }
-  return `Article with ${id} has been successfully deleted!`;
+  return { data: id, error: false };
 };
 // changing the votes from the user
 const updateVote = async (id, data) => {
@@ -210,6 +187,7 @@ const getTopArticles = async () => {
   }
 };
 export default {
+  update,
   createArticle,
   getArticleById,
   getAllArticles,
