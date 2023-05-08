@@ -22,30 +22,27 @@ export const Trending = () => {
       Authorization: localStorage.getItem("accessToken"),
     },
   };
-  // const logoutUser = () => {
-  //   try {
-  //     console.log("1..................");
-  //     updateState({ ...state, isLoggedIn: false, userDetails: {} });
-  //     console.log("2..................");
-  //     localStorage.clear();
-  //     navigate("/login");
-  //     console.log("3..................");
-  //   } catch (e) {
-  //     console.log(e);
-  //   }
-  // };
+
   useEffect(() => {
     async function fetchData() {
       try {
-        console.log("hello");
         let data = await axios.get(`http://localhost:4000/trending`, headers);
         if (data.data.message === "error") throw "error";
-        console.log(data.data.data.article);
+
         setBlogs(data.data.data.article);
         setUsers(data.data.data.topUsers);
       } catch (e) {
-        setBlogs("error");
-        setUsers("error");
+        if (e.response.status === 401) {
+          state.triggerToast(
+            "Your session has been expired. Please log in.",
+            "error"
+          );
+          localStorage.clear();
+          navigate("/login");
+        } else {
+          setBlogs([]);
+          setUsers([]);
+        }
       }
     }
     fetchData();
@@ -54,28 +51,30 @@ export const Trending = () => {
   return (
     <div>
       <div className="px-6 py-4  mx-auto rounded-lg bg-lime-200">
-        <span className="block font-bold text-xl mb-2">
+        <span className="block font-bold text-xl mb-2 text-black">
           Hello {userName}! Welcome to Trending Page
         </span>
       </div>
       <div className="bg-cyan-100 rounded overflow-hidden shadow-lg w-full capitalize">
         <div className="flex flex-col px-6 py-3  m-5 rounded-lg bg-lime-200">
           <div className=" flex items-center justify-between font-bold my-3">
-            <span className="text-xl">Top blogs of this weeks </span>
-            <Link
-              className="font-bold bg-yellow-300 px-3 py-2  m-3 rounded-lg "
-              to="/blogs"
-            >
-              View All Blogs
-            </Link>
+            <span className="text-xl text-black">Top blogs of this weeks </span>
+            {blogs && blogs.length !== 0 && (
+              <Link
+                className="font-bold bg-yellow-300 px-3 py-2  m-3 rounded-lg text-black "
+                to="/blogs"
+              >
+                View All Blogs
+              </Link>
+            )}
           </div>
-          <div className="grid grid-cols-3 gap-5 ">
+          <div className="grid grid-cols-3 gap-5 justify-center">
             {blogs &&
-              Boolean(blogs.length) &&
+              blogs.length !== 0 &&
               blogs.map((blog, idx) => (
                 <div
                   key={idx}
-                  className="flex flex-col py-2 px-5 max-h-min space-y bg-cyan-300 basis-2/7 rounded   shadow-lg text-truncate flex-wrap"
+                  className="flex flex-col py-2 px-5 max-h-min space-y bg-blue-700 text-white basis-2/7 rounded-xl   shadow-lg text-truncate flex-wrap"
                 >
                   <div className="flex flex-row justify-between items-center overflow-hidden">
                     <div className="flex">
@@ -109,7 +108,7 @@ export const Trending = () => {
                       Boolean(blog.tags.length) &&
                       blog.tags.slice(0, 3).map((tag, idx) => (
                         <button
-                          className="p-2 m-3 h-10 bg-gray-200 rounded-full px-3 py-1 overflow-hidden "
+                          className="p-2 m-3 h-10 bg-gray-200 text-black rounded-full px-3 py-1 overflow-hidden "
                           key={idx}
                         >
                           {`#${tag}`}
@@ -118,24 +117,24 @@ export const Trending = () => {
                   </div>
                 </div>
               ))}
-            {blogs.length === 0 && (
-              <>
-                <p>there are no blogs to display</p>
-              </>
+            {blogs?.length === 0 && (
+              <div className="bg-blue-700 h-12 items-center p-3  text-white basis-2/7 rounded   shadow-lg text-truncate col-span-3 justify-self-center text-black font-bold capitalize">
+                <p>Error while loading the blogs</p>
+              </div>
             )}
           </div>
         </div>
         <div className="px-6 py-4  m-10 rounded-lg bg-lime-200">
-          <div className="font-bold my-2">
+          <div className="font-bold my-2 text-black">
             <span> Top performers of the week</span>
           </div>
-          <div className="grid grid-cols-3 gap-5">
+          <div className="grid grid-cols-3 gap-5 content-center">
             {users &&
-              users.length &&
+              users.length !== 0 &&
               users.map((user, idx) => (
                 <div
                   key={idx}
-                  className="flex flex-col  max-h-fit  bg-cyan-300 basis-2/7 rounded   shadow-lg text-truncate flex-wrap"
+                  className="flex flex-col  max-h-fit  bg-blue-700 text-white basis-2/7 rounded   shadow-lg text-truncate flex-wrap"
                 >
                   <div className="flex items-center justify-between my-2 px-5 py-2">
                     <Link to={`/users/${user._id}`} className="font-bold ">
@@ -156,7 +155,7 @@ export const Trending = () => {
                       user.tags.length &&
                       user.tags.slice(0, 3).map((tag, idx) => (
                         <button
-                          className="p-2 m-3 bg-gray-200 rounded-full px-3 py-1"
+                          className="p-2 m-3 bg-gray-200 text-black rounded-full px-3 py-1"
                           key={idx}
                         >
                           {`#${tag}`}
@@ -165,6 +164,11 @@ export const Trending = () => {
                   </div>
                 </div>
               ))}
+            {users?.length === 0 && (
+              <div className="bg-blue-700 h-12 items-center p-3  text-white basis-2/7 rounded   shadow-lg text-truncate col-span-3 justify-self-center text-black font-bold capitalize">
+                <p>error whileloading users ...!!!</p>
+              </div>
+            )}
           </div>
         </div>
       </div>

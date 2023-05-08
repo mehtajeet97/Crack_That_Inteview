@@ -14,7 +14,6 @@ router.route("/").get(async (req, res) => {
 
     if (article.error) error.push(data);
     if (error.length > 0) throw topUsers.data;
-    console.log("in route end");
     res.status(200).json(
       helpers.sendResponse({
         article: article.data,

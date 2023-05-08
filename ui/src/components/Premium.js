@@ -1,8 +1,8 @@
 /**user premium  */
 
 import { useEffect, useState, useContext } from "react";
-import { PremiumPage1 } from "./PremiumPage1.js";
-import { Navigate } from "react-router-dom";
+// import { PremiumPage1 } from "./PremiumPage1.js";
+import { Navigate, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext.js";
 import axios from "axios";
 import img from "../virtualInterview.jpg";
@@ -12,9 +12,11 @@ import test from "../test.jpg";
 import blog from "../blog.png";
 
 export const Premium = () => {
+  const navigate = useNavigate();
   const { state, updateState } = useContext(AuthContext);
   const userDetails = state.userDetails;
   console.log(userDetails);
+
   const userIsPremium = userDetails.isPremiumUser;
   const userId = userDetails._id;
   const userRequest = "";
@@ -30,22 +32,19 @@ export const Premium = () => {
     return <Navigate to="/feed" />;
   }
   const premiumPage1 = (
-    <div
-      className=" rounded-lg bg-cover h-full "
-      style={{ backgroundImage: `url(${img})` }}
-    >
-      <div className="flex flex-col backdrop-blur h-full bg-white/30 items-center">
+    <div className=" rounded-lg bg-cover h-full ">
+      <div className="flex flex-col m-16 h-full bg-white/30 items-center z-0">
         <div className="flex flex-col items-center">
-          <img src={logo} className="max-h-40 max-w-40" />
           <h1
             className="font-bold text-5xl text-slate-950
+            
 "
           >
             Join Our Premium
           </h1>
         </div>
         <div className="flex justify-evenly m-5">
-          <div className="flex flex-col items-start p-5 max-h-fit space-y bg-cyan-300 basis-2/7 rounded-lg   shadow-lg text-slate-950 text-truncate flex-wrap">
+          <div className="flex flex-col items-start p-5 max-h-fit space-y bg-blue-700 basis-2/7 rounded-lg   shadow-lg text-white text-truncate flex-wrap">
             <img
               src={support}
               className="max-h-20 max-w-20 m-10 rounded-lg self-center flex-wrap"
@@ -58,7 +57,7 @@ export const Premium = () => {
               </p>
             </span>
           </div>
-          <div className="flex flex-col items-start p-5  max-h-fit space-y bg-cyan-300 basis-2/7 rounded-lg   shadow-lg text-slate-950 text-truncate flex-wrap">
+          <div className="flex flex-col items-start p-5  max-h-fit space-y bg-blue-700 basis-2/7 rounded-lg   shadow-lg text-white text-truncate flex-wrap">
             <img
               src={test}
               className="bg-white max-h-20 max-w-20 m-5 rounded-lg self-center "
@@ -75,7 +74,7 @@ export const Premium = () => {
               </p>
             </span>
           </div>
-          <div className="flex flex-col items-start p-5 max-h-fit space-y bg-cyan-300 basis-2/7 rounded-lg   shadow-lg text-slate-950 text-truncate flex-wrap">
+          <div className="flex flex-col items-start p-5 max-h-fit space-y bg-blue-700 basis-2/7 rounded-lg   shadow-lg text-white text-truncate flex-wrap">
             <img
               src={blog}
               className="bg-white max-h-20 max-w-20 m-5 rounded-lg self-center "
@@ -93,11 +92,10 @@ export const Premium = () => {
             </span>
           </div>
         </div>
-        <div className="capitalize flex flex-col max-h-min w-2/3 items-center m-10 bg-cyan-300 rounded-lg text-slate-950 font-bold">
-          {userDetails.request ? (
+        <div className="capitalize flex flex-col max-h-min w-1/5 py-2 items-center m-10 bg-blue-700 rounded-lg text-white font-bold">
+          {userDetails.requestPremium ? (
             <>
-              <p>Message : "{state.userDetails.request.data}"</p>
-              <p>Status : "{state.userDetails.request.status}"</p>
+              <p>Status : "{state.userDetails.requestPremium.status}"</p>
             </>
           ) : (
             <button
@@ -117,33 +115,43 @@ export const Premium = () => {
   );
   const handleSubmit = async (event) => {
     event.preventDefault();
-    let payload = JSON.parse(event.target[0].value);
+    let payload = event.target[0].value;
     if (payload.length) {
-      setFlag(0);
-      const res = await axios.patch(
-        `http://localhost:4000/users/${userId}`,
-        { data: payload, status: "pending" },
-        {
-          headers: {
-            reqType: "premium-request",
-            Authorization: localStorage.getItem("accessToken"),
-          },
-        }
-      );
-      localStorage.setItem(
-        "userDetails",
-        JSON.stringify({
-          ...JSON.parse(localStorage.getItem("userDetails")),
-          request: res.data.data.data.request,
-        })
-      );
-      updateState({
-        ...state,
-        isLoggedIn: false,
-        userDetails: { ...userDetails, request: res.data.data.data.request },
-      });
-      toggleChange();
-      setFlag(1);
+      try {
+        setFlag(0);
+        const res = await axios.patch(
+          `http://localhost:4000/users/${userId}`,
+          { data: payload, status: "pending" },
+          {
+            headers: {
+              reqType: "premium-request",
+              Authorization: localStorage.getItem("accessToken"),
+            },
+          }
+        );
+        localStorage.setItem(
+          "userDetails",
+          JSON.stringify({
+            ...JSON.parse(localStorage.getItem("userDetails")),
+            requestPremium: res.data.data.data.requestPremium,
+          })
+        );
+        updateState({
+          ...state,
+          isLoggedIn: false,
+          userDetails: { ...userDetails, request: res.data.data.data.request },
+        });
+        state.triggerToast("Your Request Has Been Submitted", "success");
+        toggleChange();
+        setFlag(1);
+      } catch (e) {
+        state.triggerToast(
+          "Your session has been expired. Please log in.",
+          "error"
+        );
+        localStorage.clear();
+        navigate("/login");
+      }
     } else {
       setFlag(1);
     }

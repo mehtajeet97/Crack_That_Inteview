@@ -38,6 +38,7 @@ const resp = (app) => {
             userScore,
             _id,
             requestPremium,
+            skills,
           } = user;
           await sendEmail(user, "login");
 
@@ -55,6 +56,7 @@ const resp = (app) => {
               userScore,
               _id,
               requestPremium,
+              skills,
             },
           });
         } catch (e) {
