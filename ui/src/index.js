@@ -78,7 +78,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "interviewremarks",
+        path: "interviewremarks/:id",
         element: (
           <ProtectedRoutes>
             <PostInterviewRemarks />

@@ -25,8 +25,8 @@ router
       const addInterview = await interview.createInterview(
         data.interviewer,
         data.interviewee,
-        [{ "skill knowledgs": "good", rating: 0 }],
-        [{ "level of difficuly": "good" }],
+        [{ "skill knowledge": "good", rating: 0 }],
+        [{ "level of difficulty": "good" }],
         "04/11/2022"
       );
       res.status(200).json(addInterview);
@@ -60,5 +60,15 @@ router
     } catch (e) {
       res.status(400).json(e);
     }
-  });
+  })
+  .patch(async (req, res) => {
+    try{
+    let remarks = req.body;
+    const updatedRemarks = await interview.addInterviewRemarks(req.params.id, remarks);
+    res.status(200).json(updatedRemarks);
+    } catch(e){
+    res.status(400).json(e);
+    }
+  })
+
 export default router;

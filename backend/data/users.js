@@ -34,7 +34,6 @@ const createUser = async (userDetails) => {
   passwordCheck(password);
   password = password.trim();
   password = await bcrypt.hash(password, saltRounds);
-
   let user = {
     firstName,
     lastName,
@@ -109,47 +108,12 @@ const getAllUsers = async () => {
   return listOfUsers;
 };
 
-const updateUser = async (id, key, value) => {
+const updateUser = async (id, user) => {
   idCheck(id);
   id = id.trim();
-  const updatedUser = await getUserById(id);
+  const userOrig = await getUserById(id)
+  let updatedUser = ({...userOrig, ...user})
   delete updatedUser._id;
-  stringCheck(key);
-  key = key.trim();
-  if (key === "firstName") {
-    stringCheck(value);
-    value = value.trim();
-    if (updatedUser.firstName === value) throw "First Name is the same";
-    updatedUser.firstName = value;
-  }
-  if (key === "lastName") {
-    stringCheck(value);
-    value = value.trim();
-    if (updatedUser.lastName === value) throw "Last Name is the same";
-    updatedUser.lastName = value;
-  }
-  if (key === "email") {
-    stringCheck(value);
-    value = value.trim();
-    if (updatedUser.email === value) throw "Email is the same";
-    updatedUser.email = value;
-  }
-  if (key === "phoneNumber") {
-    phoneNumberCheck(value);
-    value = value.trim();
-    if (updatedUser.phoneNumber === value) throw "Phone Number is the same";
-    updatedUser.phoneNumber = value;
-  }
-  if (key === "password") {
-    passwordCheck(value);
-    value = value.trim();
-    if (updatedUser.password === value) throw "Password is the same";
-    updatedUser.password = value;
-  }
-  let day = date.getDate();
-  let month = date.getMonth() + 1;
-  let year = date.getFullYear();
-  updatedUser.updatedAt = `${month}/${day}/${year}`;
   const userCollection = await users();
   const updatedUserInfo = await userCollection.findOneAndUpdate(
     { _id: new ObjectId(id) },
@@ -160,7 +124,7 @@ const updateUser = async (id, key, value) => {
     throw "The value could not be updated successfully";
   }
   updatedUserInfo.value._id = updatedUserInfo.value._id.toString();
-  return updatedUserInfo.value;
+  return updatedUserInfo;
 };
 
 const removeUser = async (id) => {

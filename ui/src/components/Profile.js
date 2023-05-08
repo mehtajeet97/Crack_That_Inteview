@@ -5,7 +5,6 @@ import axios from 'axios';
 import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../context/AuthContext.js";
 
-//To do: Reset Password Link 
 export const Profile = () => {
   const navigate = useNavigate();
   const [currentProfileState, setProfileState] = useState({});
@@ -27,7 +26,6 @@ export const Profile = () => {
 
   const getUserCall = async(id) => {
     const { data } = await axios.get(`http://localhost:4000/users/${id}`,{headers:{Authorization: `${localStorage.getItem("accessToken")}`}})
-    console.log(data);
     return data;
   }
 
@@ -47,45 +45,38 @@ export const Profile = () => {
     document.getElementById('profile').click();
     if(e.target.files && e.target.files[0]){
       setProfilePhoto(URL.createObjectURL(e.target.files[0]));
-      console.log(profilePhoto);
     }
   }
 
-  const userProfile = async (payload, id) => {
+  const userProfile = async () => {
     try {
-      const userProfileURL = `http://localhost:4000/users/${id}`;
-      let { data, status } = await axios.put(userProfileURL, payload);
+      let payload = currentProfileState;
+      const userProfileURL = `http://localhost:4000/users/${state.userDetails._id}`;
+      let { data, status } = await axios.patch(userProfileURL, payload, {headers:{ update: "user-profile", Authorization: `${localStorage.getItem("accessToken")}`}});
       if (status === 200) {
         navigate("/feed");
+        setProfileState(data);
       } else {
-        console.log(data.errors);
+        console.log(data);
       }
     } catch (e) {
-      console.log(e.response.data);
       return false;
     }
   };
 
 
   const handleSubmit = (event) => {
-    //Convert form to form json
-    //Validate inputs
-    //Compare which values are different
-    //Toggle the edit button
-    //If validation result is true submit the form else throw error on UI
     event.preventDefault();
-    const form = event.target;
-    const formData = new FormData(form);
-    formData.append('profilePhoto', profilePhoto)
-    const formJson = Object.fromEntries (formData.entries())
+    const form = document.getElementById("form")  
+    const formData = new FormData(form); 
+    formData.append('profilePhoto',profilePhoto)
+    const formJson = Object.fromEntries(formData.entries())
     let validationResult = validation.userProfile(formJson);
-    console.log(validationResult);
-    if (!validationResult.validationPassed) {
+    if (!validationResult) {
       setErrors(validationResult.errors);
     }
     else{
-      let payload = validationResult.data;
-      userProfile(payload);
+      userProfile(formData, userDetails._id);
     }
   }
   
@@ -95,11 +86,11 @@ return(
   <div className="btn-group">
   <button className="btn mb-2" onClick={handleCancel}>{isEdit ? "Cancel" : "Edit"}</button>
   </div>
-  <form className="w-full max-w-lg user-profile-form mb-2">
+  <form className="w-full max-w-lg user-profile-form mb-2" id="form" onSubmit={handleSubmit}>
   <div className="w-full space-y-4 rounded-lg sm:max-w-md xl:p-0">
   {isEdit &&  <div className="w-full rounded-lg sm:max-w-md xl:p-0">
   <label for="avatar">Select a Profile Picture</label>
-  <img src={profilePhoto} className="w-3/5 lg:block hidden mt-2" alt="Profile" onClick={handleProfileChange}></img>
+  {<img src={currentProfileState?.profilePhoto || profilePhoto} className="w-3/5 lg:block hidden mt-2" alt="Profile" onClick={handleProfileChange}></img>}
   <input type="file" onChange={handleProfileChange} id="profile" className="hidden" accept="image/*"/>
   </div>}
   {!isEdit && <img src={picture} className="w-3/5 lg:block hidden" alt="Profile"></img>}
@@ -176,29 +167,33 @@ return(
         currentProfileState.skills ? <div className="mb-5 flex list-none flex-col flex-wrap pl-0 md:flex-row">{currentProfileState.skills.map((skill) => <div className="my-2 block rounded bg-neutral-100 px-7 pb-3.5 pt-4 text-xs font-medium uppercase leading-tight text-black-500 data-[te-nav-active]:!bg-primary-100 data-[te-nav-active]:text-primary-700 dark:bg-neutral-100 dark:text-white dark:data-[te-nav-active]:text-primary-700 md:mr-4">{skill}</div>)}</div> : <div/>
       }
     </div>
-    <div className="w-full rounded-lg sm:max-w-md xl:p-0">
-      <label className="text-white font-semibold mb-2" for="organization">Organization</label>
-        <input className="appearance-none block w-half bg-gray-200 text-black-700 border border-black-500 rounded py-3 px-10 mb-5 focus:outline-none focus:bg-gray opacity-300 cursor-not-allowed" id="organization" type="text" value={currentProfileState?.organization || ''} placeholder="Organization" disabled></input>
+    <div>
+    {currentProfileState.role === "student" &&  <div className="w-full rounded-lg sm:max-w-md xl:p-0">
+      <label className="text-white font-semibold mb-2" for="organization">School</label>
+        <input className="appearance-none block w-half bg-gray-200 text-black-700 border border-black-500 rounded py-3 px-10 mb-5 focus:outline-none focus:bg-gray opacity-300 cursor-not-allowed" id="organization" type="text" value={currentProfileState?.school || ''} placeholder="School" disabled></input></div>}
+    {currentProfileState.role !== "student" && <div className="w-full rounded-lg sm:max-w-md xl:p-0"> 
+    <label className="text-white font-semibold mb-2" for="organization">Organization</label>
+        <input className="appearance-none block w-half bg-gray-200 text-black-700 border border-black-500 rounded py-3 px-10 mb-5 focus:outline-none focus:bg-gray opacity-300 cursor-not-allowed" id="organization" type="text" value={currentProfileState?.organization || ''} placeholder="Organization" disabled></input></div>}
     </div>
     <div className="w-full rounded-lg sm:max-w-md xl:p-0">
       <label className="text-white font-semibold mb-2" for="upcoming-interviews">Upcoming Interviews</label>
       {
-        currentProfileState.upcomingInterviews ? <div className="mb-5 flex list-none flex-col flex-wrap pl-0 md:flex-row">{currentProfileState.upcomingInterviews.map((interview) => <div className="my-2 block rounded bg-neutral-100 px-7 pb-3.5 pt-4 text-xs font-medium uppercase leading-tight text-black-500 data-[te-nav-active]:!bg-primary-100 data-[te-nav-active]:text-primary-700 dark:bg-neutral-700 dark:text-white dark:data-[te-nav-active]:text-primary-700 md:mr-4">{interview}</div>)}</div> : <div>No Upcoming Interviews</div>
+        currentProfileState.upcomingInterviews.length > 0 ? <div className="mb-5 flex list-none flex-col flex-wrap pl-0 md:flex-row">{currentProfileState.upcomingInterviews.map((interview) => <div className="my-2 block rounded bg-neutral-100 px-7 pb-3.5 pt-4 text-xs font-medium uppercase leading-tight text-black-500 data-[te-nav-active]:!bg-primary-100 data-[te-nav-active]:text-primary-700 dark:bg-neutral-700 dark:text-white dark:data-[te-nav-active]:text-primary-700 md:mr-4">{interview}</div>)}</div> : <div>No Upcoming Interviews</div>
       }
     </div>
     <div className="w-full rounded-lg sm:max-w-md xl:p-0">
       <label className="text-white font-semibold mb-2" for="recent-interviews">Recent Interviews</label>
       {
-        currentProfileState.recentInterviews ? <div className="mb-5 flex list-none flex-col flex-wrap pl-0 md:flex-row">{currentProfileState.recentInterviews.map((interview) => <div className="my-2 block rounded bg-neutral-100 px-7 pb-3.5 pt-4 text-xs font-medium uppercase leading-tight text-black-500 data-[te-nav-active]:!bg-primary-100 data-[te-nav-active]:text-primary-700 dark:bg-neutral-700 dark:text-white dark:data-[te-nav-active]:text-primary-700 md:mr-4">{interview}</div>)}</div> : <div>No Recent Interviews</div>
+        currentProfileState.recentInterviews.length > 0 ? <div className="mb-5 flex list-none flex-col flex-wrap pl-0 md:flex-row">{currentProfileState.recentInterviews.map((interview) => <div className="my-2 block rounded bg-neutral-100 px-7 pb-3.5 pt-4 text-xs font-medium uppercase leading-tight text-black-500 data-[te-nav-active]:!bg-primary-100 data-[te-nav-active]:text-primary-700 dark:bg-neutral-700 dark:text-white dark:data-[te-nav-active]:text-primary-700 md:mr-4">{interview}</div>)}</div> : <div>No Recent Interviews</div>
       }
     </div>
     <div className="w-full rounded-lg sm:max-w-md xl:p-0">
       <label className="text-white font-semibold mb-2" for="blogs">Blogs</label>
       {
-        currentProfileState.blogs ? <div className="mb-5 flex list-none flex-col flex-wrap pl-0 md:flex-row">{currentProfileState.blogs.map((blog) => <div className="my-2 block rounded bg-neutral-100 px-7 pb-3.5 pt-4 text-xs font-medium uppercase leading-tight text-black-500 data-[te-nav-active]:!bg-primary-100 data-[te-nav-active]:text-primary-700 dark:bg-neutral-700 dark:text-white dark:data-[te-nav-active]:text-primary-700 md:mr-4">{blog}</div>)}</div> : <div> No Blogs </div>
+        currentProfileState.blogs.length > 0 ? <div className="mb-5 flex list-none flex-col flex-wrap pl-0 md:flex-row">{currentProfileState.blogs.map((blog) => <div className="my-2 block rounded bg-neutral-100 px-7 pb-3.5 pt-4 text-xs font-medium uppercase leading-tight text-black-500 data-[te-nav-active]:!bg-primary-100 data-[te-nav-active]:text-primary-700 dark:bg-neutral-700 dark:text-white dark:data-[te-nav-active]:text-primary-700 md:mr-4">{blog}</div>)}</div> : <div>No Blogs</div>
       }
     </div>
-    <button type="submit" className="btn" onClick={handleSubmit}>Save</button>
+    <button type="submit" className="btn">Save</button>
   </div>
   </form>
   </div>

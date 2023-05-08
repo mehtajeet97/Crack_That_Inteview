@@ -242,15 +242,14 @@ export const validation = {
     payload;
     let result = { validationPassed: true, errors: {}, data: {}};
 
-    if (!firstName || !isValidString(firstName) || firstName.length < 3) {
+    if (!isValidName(firstName)) {
       result.errors.firstName = "Invalid first name provided!";
     }
-    
     else{
       result.data.firstName = firstName.trim();
     }
 
-    if (!lastName || !isValidString(lastName)) {
+    if (!isValidName(lastName)) {
       result.errors.lastName = "Invalid last name provided!";
     }
     else{
@@ -264,21 +263,21 @@ export const validation = {
       result.data.phoneNumber = phoneNumber;
     }
 
-    if(!linkedin || !(/(https?)?:?(\/\/)?(([w]{3}||\w\w)\.)?linkedin.com(\w+:{0,1}\w*@)?(\S+)(:([0-9])+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/.test(linkedin))){
+    if(!(/(https?)?:?(\/\/)?(([w]{3}||\w\w)\.)?linkedin.com(\w+:{0,1}\w*@)?(\S+)(:([0-9])+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/.test(linkedin))){
       result.errors.linkedin = "Invalid LinkedIn URL!";
     }
     else{
       result.data.linkedin = linkedin.trim();
     }
 
-    if(!github || !(/^(http(s?):\/\/)?(www\.)?github\.([a-z])+\/([A-Za-z0-9]{1,})+\/?$/i.test(github))){
+    if(!(/^(http(s?):\/\/)?(www\.)?github\.([a-z])+\/([A-Za-z0-9]{1,})+\/?$/i.test(github))){
       result.errors.github = "Invalid GitHub URL!";
     }
     else{
       result.data.github = github.trim();
     }
 
-    if(!twitter || !(/(?:https?:)?\/\/(?:www\.|m\.)?twitter\.com\/(\w{2,15})\/?(?:\?\S+)?(?:\#\S+)?$/igm.test(twitter))){
+    if(!(/(?:https?:)?\/\/(?:www\.|m\.)?twitter\.com\/(\w{2,15})\/?(?:\?\S+)?(?:\#\S+)?$/igm.test(twitter))){
       result.errors.twitter = "Invalid Twitter URL!";
     }
     else{

@@ -110,10 +110,18 @@ router
       res.status(400).json(e);
     }
   })
-  .put(async (req, res) => {
-    //todo
-    //only an user and an admin can change the user details
-    req.params.id = helpers.idCheck(req.params.id);
+  .patch(async (req, res) => {
+    let userInfo = req.body;
+    console.log(userInfo);
+    if (!userInfo || Object.keys(userInfo).length === 0) {
+      return res.status(400).json({ error: "There are no updates" });
+    }
+    try {
+      let updatedUser = await users.updateUser(req.params.id, userInfo);
+      return res.status(200).json(updatedUser);
+    } catch (e) {
+      return res.status(400).json(e);
+    }
   });
 
 export default router;
