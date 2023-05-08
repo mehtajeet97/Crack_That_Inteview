@@ -3,15 +3,17 @@
 2) Data structure change from array of objects to array of arrays on multiple selection
 */
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { AuthContext } from "../../context/AuthContext.js";
-import Calendar from "react-calendar";
 import moment from "moment";
 import axios from "axios";
-import "./Calendar.css";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
+import { useNavigate } from "react-router-dom";
 
 export const InterviewerSlots = () => {
   const { state, updateState } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const [currentDate, setCurrentDate] = useState(
     moment().add(1, "day").toDate()
@@ -118,6 +120,7 @@ export const InterviewerSlots = () => {
       let { data, status } = await axios.post(url, payload, headers);
       if (status === 200) {
         state.triggerToast("Interview slots added successfully", "success");
+        navigate("/feed");
       } else {
         state.triggerToast("Interview slots could not be added", "error");
       }
@@ -128,6 +131,9 @@ export const InterviewerSlots = () => {
         state.triggerToast("Session expired. Please log in again.", "success");
       } else {
         state.triggerToast(e.response.data.error, "error");
+        setSelectedSlots([]);
+        setDisabledDates([]);
+        setPageStep(0);
       }
     }
   };
@@ -137,7 +143,6 @@ export const InterviewerSlots = () => {
       _id: state.userDetails._id,
       availableSlots: selectedSlots,
     };
-    console.log(payload);
     addInterviewerAvailableSlots(payload);
   };
 

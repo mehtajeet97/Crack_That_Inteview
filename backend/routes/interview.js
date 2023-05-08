@@ -33,10 +33,10 @@ router
       if (addInterview.success) {
         res.status(200).json("Created Interview");
       } else {
-        throw `Interview already Created`;
+        res.status(400).json(helpers.sendError("Interview already created!!!"));
       }
     } catch (e) {
-      res.status(400).json(sendError(e)); //SendError necessary for toast
+      res.status(500).json(helpers.sendError(e)); //SendError necessary for toast
     }
   });
 

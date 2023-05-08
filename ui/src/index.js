@@ -9,9 +9,6 @@ import { Feed } from "./components/Feed.js";
 import { Interview } from "./components/Interview/Interview.js";
 import { TestYourself } from "./components/Exam/TestYourself.js";
 
-import { ScheduleForInterviewer } from "./components/ScheduleForInterviewer.js";
-import { ScheduleForStudent } from "./components/ScheduleForStudent.js";
-import { SchedulingScreen2 } from "./components/SchedulingScreen2.js";
 import { Blogs } from "./components/Blogs.js";
 import { Trending } from "./components/Trending.js";
 import { Profile } from "./components/Profile.js";
@@ -56,14 +53,6 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "scheduleforinterviewer",
-        element: (
-          <ProtectedRoutes>
-            <ScheduleForInterviewer />
-          </ProtectedRoutes>
-        ),
-      },
-      {
         path: "interviewerslots",
         element: (
           <ProtectedRoutes>
@@ -84,22 +73,6 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoutes>
             <OnGoingInterview />
-          </ProtectedRoutes>
-        ),
-      },
-      {
-        path: "scheduleforstudent",
-        element: (
-          <ProtectedRoutes>
-            <ScheduleForStudent />
-          </ProtectedRoutes>
-        ),
-      },
-      {
-        path: "scheduleforstudent/:interviewerId",
-        element: (
-          <ProtectedRoutes>
-            <SchedulingScreen2 />
           </ProtectedRoutes>
         ),
       },

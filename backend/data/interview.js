@@ -11,9 +11,9 @@ const createInterview = async (
   // intervieweeRemarks,
   // interviewerRemarks
 ) => {
-  if (!interviewee) throw "First Name must be provided";
-  if (!interviewer) throw "Last Name must be provided";
-  if (!interviewDate) throw "Email must be provided";
+  if (!interviewee) throw "Student Name must be provided";
+  if (!interviewer) throw "Interviewer Name must be provided";
+  if (!interviewDate) throw "Interview Date must be provided";
   // if (!intervieweeRemarks) throw "Remarks must be provided";
   // if (!interviewerRemarks) throw "Remarks Number must be provided";
   stringCheck(interviewee);
@@ -41,12 +41,21 @@ const createInterview = async (
     interviewStatus: ["Completed", "Scheduled", "Pending"],
   };
   const interviewCollection = await interviews();
-  const insertInterview = await interviewCollection.insertOne(interview);
-  if (!insertInterview.acknowledged || !insertInterview.insertedId)
-    throw "Cannot add interview";
-  const newId = insertInterview.insertedId.toString();
-  interview._id = newId;
-  return { success: true };
+  const findInterview = await interviewCollection.findOne({
+    interviewee,
+    interviewer,
+    interviewDate,
+  });
+  if (findInterview) {
+    return { success: false };
+  } else {
+    const insertInterview = await interviewCollection.insertOne(interview);
+    if (!insertInterview.acknowledged || !insertInterview.insertedId)
+      throw "Cannot add interview";
+    const newId = insertInterview.insertedId.toString();
+    interview._id = newId;
+    return { success: true };
+  }
 };
 
 const getInterviewById = async (id) => {

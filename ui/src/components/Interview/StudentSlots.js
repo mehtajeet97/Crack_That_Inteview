@@ -1,35 +1,6 @@
 /*
-This file is a copy of InterviewerSlots.js, which is the screen for interviewers to provide their avaialble slots
-This file is the screen viewed by the student when trying to schedule an interview and 
-is supposed to replicate features of 2 other files : 
-ScheduleForStudent.js [First Page viewed by student for selection of Interviewer]
-SchedullingScreen2.js [Second Page which allows selection of timeslot ]
-
-Flow for StudentSlots.js in UI --> 
-1) There is a Click Here button
-2) Onclick button has a call to route "http://localhost:4000/schedule" with Get verb
-3) Route triggers the data function getAllInterviewers in users.js that returns an array of objects 
-( all users whose role is interviewer and have provided their availableSlots)
-4) These objects / interviewers are rendered as cards with clickable names, 
-clicking on which takes you to the SchedullinScreen2.js
-
-Flow for SchedullingScreen2.js in UI -->
-1) Click here button 
-2) Renders a Calender but only displays the dates provided by Interviewer as available, rest of the dates are disabled
-3) For this, onclick of the button makes a route call "http://localhost:4000/schedule" with POST verb
-4) Route triggers a data function getAvailableSlots in users.js that returns an array of objects
-(availableSlots[] of the interviewer whose Id is provided)
-5) Once a date is selected the options are rendered in a select (dropdown) 
-to provide only the time slots provided by interviewer for the corresponding date
-6) Finally there is a Submit button that triggers 2 calls to the same route with different Ids : one for the interviewer
-as scheduleinterviewer() and one for user(student) as scheduleuser()
-7) This is a call to "http://localhost:4000/schedule/" + "id" which further triggers data function updateUpcomingInterview()
-which updates the upcomingInterviews[] of the user
-
 Issues :
-
-1) Dropdown does not render on the first click of selectedDate, it requires 2 clicks
-2) Updation in the Interviews Collection in DB on clicking submit by the student
+2) Duplication in Create Interview
 3) Duplication is prevented by checking if the date is same, however there could be a scenario 
 where even if the date is same, the time slot could be different -- This needs to be included as a functionality
 4) Code cleanup -- Instead of console.log, display the error message to the user
@@ -37,13 +8,17 @@ where even if the date is same, the time slot could be different -- This needs t
 
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../context/AuthContext.js";
-import Calendar from "react-calendar";
+import { useNavigate } from "react-router-dom";
+
 import moment from "moment";
 import axios from "axios";
 import "./Calendar.css";
 
 export const StudentSlots = () => {
   const { state, updateState } = useContext(AuthContext);
+  const userDetails = state.userDetails;
+
+  const navigate = useNavigate();
 
   const [currentDate, setCurrentDate] = useState(
     moment().add(1, "day").toDate()
@@ -53,6 +28,142 @@ export const StudentSlots = () => {
   const [selectedSlots, setSelectedSlots] = useState([]);
   const [pageStep, setPageStep] = useState(0);
 
+  // For rendering the interviewers through cards
+  const [interviewerCards, setInterviewerCards] = useState([]); //Array variable that will hold the list of interviewers
+
+  const [availableSlots, setAvailableSlots] = useState([]);
+  const [interviewerId, setInterviewId] = useState("");
+  const [interviewParams, setInterviewParams] = useState({});
+
+  // Handle First Button click to render interviewers
+  const populateInterviewers = async (event) => {
+    //Button click will populate the array
+    event.preventDefault();
+
+    const scheduleURL = "http://localhost:4000/schedule";
+    let { data, status } = await axios.get(scheduleURL, {
+      headers: { Authorization: localStorage.getItem("accessToken") },
+    });
+    /*
+  Values returned:
+  _id: 1
+  firstName: 1,
+  lastName: 1,
+  skills: 1,
+  organization: 1,
+  yoe: 1,
+  availableSlots : 1
+   */
+    if (status === 200) {
+      setInterviewerCards(data);
+    } else {
+      state.triggerToast(data.errors, "error");
+    }
+  };
+
+  const handleSelectInterviewer = (interviewer) => {
+    setInterviewId(interviewer._id);
+    renderOptions(interviewer.availableSlots);
+    next();
+  };
+  //
+  const renderOptions = (slots) => {
+    setAvailableSlots(slots);
+  };
+
+  //Buttons
+  const handleSubmitButton = async (date, time) => {
+    //Submits the data to backend for updation
+    let payload = {
+      date: date,
+      timings: time,
+    }; //Passes object as { date : toDateString() format, timings : value}
+    let userId = userDetails._id;
+
+    setInterviewParams({ userId, interviewerId, payload });
+
+    next();
+  };
+
+  const onHandleSubmit = async () => {
+    createInterview(interviewParams);
+    scheduleUser(interviewParams.payload);
+    scheduleInterviewer(interviewParams.payload);
+  };
+
+  const scheduleUser = async (payload) => {
+    try {
+      const studentURL = "http://localhost:4000/schedule/" + userDetails._id;
+      let { data, status } = await axios.post(studentURL, payload, {
+        headers: { Authorization: localStorage.getItem("accessToken") },
+      });
+      if (status === 200) {
+        //Display the selected date to the user for edit / Inform the user of success through alert/ toast
+        state.triggerToast("Interview Scheduled Successfully!", "success");
+        // navigate("/feed");
+      } else {
+        //Inform the user of errors through alert/ toast
+        state.triggerToast(data.errors, "error");
+      }
+    } catch (e) {
+      if (e.response.data.error === "Access Token expired") {
+        localStorage.clear();
+        updateState({ ...state, isLoggedIn: false, userDetails: {} });
+        state.triggerToast("Session expired. Please log in again.", "success");
+      } else {
+        state.triggerToast(e.response.data.error, "error");
+      }
+    }
+  };
+  const scheduleInterviewer = async (payload) => {
+    try {
+      const interviewerURL = "http://localhost:4000/schedule/" + interviewerId;
+      let { data, status } = await axios.post(interviewerURL, payload, {
+        headers: { Authorization: localStorage.getItem("accessToken") },
+      });
+
+      if (status === 200) {
+        //Display the selected date to the user for edit / Inform the user of success through alert/ toast
+        state.triggerToast("Interview Scheduled Successfully!", "success");
+      } else {
+        //Inform the user of errors through alert/ toast
+        state.triggerToast(data.errors, "error");
+      }
+    } catch (e) {
+      if (e.response.data.error === "Access Token expired") {
+        localStorage.clear();
+        updateState({ ...state, isLoggedIn: false, userDetails: {} });
+        state.triggerToast("Session expired. Please log in again.", "success");
+      } else {
+        state.triggerToast(e.response.data.error, "error");
+      }
+    }
+  };
+  const createInterview = async (payload) => {
+    try {
+      const url = "http://localhost:4000/interview/";
+      let { data, status } = await axios.post(url, payload, {
+        headers: { Authorization: localStorage.getItem("accessToken") },
+      });
+      if (status === 200) {
+        //Display the selected date to the user for edit / Inform the user of success through alert/ toast
+        state.triggerToast("Interview Scheduled Successfully!", "success");
+      } else {
+        //Inform the user of errors through alert/ toast
+        state.triggerToast(data.errors, "error");
+      }
+    } catch (e) {
+      if (e.response.data.error === "Access Token expired") {
+        localStorage.clear();
+        updateState({ ...state, isLoggedIn: false, userDetails: {} });
+        state.triggerToast("Session expired. Please log in again.", "success");
+        navigate("/login");
+      } else {
+        state.triggerToast(e.response.data.error, "error");
+      }
+    }
+  };
+  //////
   const timeSlots = [
     "9:00am to 9:45am",
     "10:00am to 10:45am",
@@ -139,220 +250,131 @@ export const StudentSlots = () => {
     setCheckedState(new Array(timeSlots.length).fill(false));
   };
 
-  const addInterviewerAvailableSlots = async (payload) => {
-    try {
-      let url = `http://localhost:4000/slots/`;
-      let headers = {
-        headers: {
-          Authorization: localStorage.getItem("accessToken"),
-        },
-      };
-      let { data, status } = await axios.post(url, payload, headers);
-      if (status === 200) {
-        state.triggerToast("Interview slots added successfully", "success");
-      } else {
-        state.triggerToast("Interview slots could not be added", "error");
-      }
-    } catch (e) {
-      if (e.response.data.error === "Access Token expired") {
-        localStorage.clear();
-        updateState({ ...state, isLoggedIn: false, userDetails: {} });
-        state.triggerToast("Session expired. Please log in again.", "success");
-      } else {
-        state.triggerToast(e.response.data.error, "error");
-      }
-    }
-  };
-
-  const onHandleSubmit = async () => {
-    let payload = {
-      _id: state.userDetails._id,
-      availableSlots: selectedSlots,
-    };
-    console.log(payload);
-    addInterviewerAvailableSlots(payload);
-  };
-
   const handleOnChange = (position) => {
     const updatedCheckedState = checkedState.map((item, index) =>
       index === position ? !item : item
     );
     setCheckedState(updatedCheckedState);
   };
+
   const selectInterviewerPage = (
     <>
-      <div className="flex w-full justify-around items-center md:flex-row flex-col">
-        <h1 className="text-center text-2xl mb-2 text-white">
+      <div>
+        <h1 className="text-center text-2xl text-white">
           Available Interviewers :{" "}
         </h1>
-        <div className="flex flex-row gap-4 mt-4">
-          {/* <button className="btn" onClick={() => setRange(!range)}>
-            Select as {range ? "single date" : "range"}
-          </button> */}
-          {selectedSlots.length > 0 && (
-            <button className="btn" onClick={() => setPageStep(2)}>
-              Review
-            </button>
-          )}
-          <button className="btn" onClick={next}>
-            Choose Timings
+        <div className="flex flex-col items-center justify-center mt-3">
+          <button className="btn" onClick={populateInterviewers}>
+            Choose Interviewers
           </button>
         </div>
-      </div>
-    </>
-  );
-  const selectDatePage = (
-    <>
-      {currentDate.length > 0 ? (
-        <p className="text-center text-2xl mb-2 text-black">
-          <span className="bold">Start:</span> {currentDate[0].toDateString()}
-          &nbsp;|&nbsp;
-          <span className="bold">End:</span> {currentDate[1].toDateString()}
-        </p>
-      ) : (
-        <p className="text-center text-2xl mb-2 text-white">
-          <span className="bold mr-2">
-            {" "}
-            {selectedSlots.length ? "Next Available Date" : "Today"}:{" "}
-          </span>
-          {currentDate.toDateString()}
-        </p>
-      )}
-      <div className="flex w-full justify-around items-center md:flex-row flex-col">
-        <Calendar
-          onChange={setCurrentDate}
-          selectRange={range}
-          value={currentDate}
-          minDate={moment().add(1, "day").toDate()}
-          tileDisabled={handleDisabledDates}
-        />
-        <div className="flex flex-row gap-4 mt-4">
-          {/* <button className="btn" onClick={() => setRange(!range)}>
-            Select as {range ? "single date" : "range"}
-          </button> */}
-          {selectedSlots.length > 0 && (
-            <button className="btn" onClick={() => setPageStep(2)}>
-              Review
-            </button>
-          )}
-          <button className="btn" onClick={next}>
-            Choose Timings
-          </button>
-        </div>
-      </div>
-    </>
-  );
-  const selectSlotsPage = (
-    <div>
-      <div className="flex justify-around items-center p-4">
-        <span className="lg:text-2xl text-lg font-medium text-white text-center">
-          Choose time slot: {currentDate.toDateString()}
-        </span>
-        <button
-          className="btn btn-sm bg-white text-blue-700 hover:bg-blue-700 hover:text-white hover:border-2 hover:border-white"
-          onClick={() =>
-            isAllSelected
-              ? setCheckedState(new Array(timeSlots.length).fill(false))
-              : setCheckedState(new Array(timeSlots.length).fill(true))
-          }
-        >
-          {isAllSelected ? "Unselect All" : "Select All"}
-        </button>
-      </div>
-      <div className="flex flex-col justify-center items-center">
-        <ul className="grid w-[80%] gap-6 md:grid-cols-3">
-          {timeSlots.map((slot, idx) => (
-            <li key={idx}>
-              <input
-                type="checkbox"
-                id={`checkbox${idx}`}
-                value={slot}
-                className="hidden peer"
-                checked={checkedState[idx]}
-                name={inputName}
-                onChange={() => handleOnChange(idx)}
-              />
-              <label
-                htmlFor={inputName}
-                onClick={() => handleOnChange(idx)}
-                className="inline-flex items-center justify-between w-full p-4 text-gray-500 bg-white border-2 border-gray-200 rounded-lg cursor-pointer   peer-checked:border-yellow-100 peer-checked:bg-blue-600 hover:text-gray-600 peer-checked:text-white hover:bg-gray-50 "
-              >
-                <div className="block">
-                  <div className="w-full text-lg font-semibold">{slot}</div>
+
+        {interviewerCards.length > 0 && (
+          <div className="flex w-full justify-around items-center md:flex-row flex-col mt-3">
+            <div className="grid lg:grid-cols-4 sm:grid-cols-2 gap-4 grid-cols-1">
+              {interviewerCards.map((card, idx) => (
+                <div
+                  key={idx}
+                  className="bg-cyan-300 basis-2/7 rounded overflow-hidden shadow-lg"
+                >
+                  <div
+                    onClick={() => handleSelectInterviewer(card)}
+                    className="px-6 py-4 cursor-pointer"
+                  >
+                    <div className="font-bold text-xl mb-2">
+                      {card.firstName} {card.lastName}
+                    </div>
+
+                    <p className="text-gray-700 text-base">
+                      Skills : {card.skills && card.skills}
+                    </p>
+
+                    <p className="text-gray-700 text-base">
+                      {!card.skills && `Not Disclosed.`}
+                    </p>
+
+                    <p className="text-gray-700 text-base">
+                      Company : {card.organization && card.organization}
+                    </p>
+                    <p className="text-gray-700 text-base">
+                      {!card.organization && `Not Disclosed.`}
+                    </p>
+
+                    <p className="text-gray-700 text-base">
+                      Years of Experience: {card.yoe && card.yoe}
+                    </p>
+                    <p className="text-gray-700 text-base">
+                      {!card.yoe && `Not Disclosed.`}
+                    </p>
+                  </div>
                 </div>
-              </label>
-            </li>
-          ))}
-        </ul>
-        <div className="w-[80%] flex justify-around">
-          <button
-            disabled={!isOneSelected}
-            className="btn min-w-[25%] mt-4 bg-white text-blue-700 hover:bg-blue-700 hover:text-white hover:border-2 hover:border-white"
-            onClick={handleAddNewSlot}
-          >
-            Save & Add New Slot
-          </button>
-          <button
-            disabled={!isOneSelected}
-            className="btn min-w-[25%] mt-4 bg-white text-blue-700 hover:bg-blue-700 hover:text-white hover:border-2 hover:border-white"
-            onClick={handlePage2Review}
-          >
-            Review
-          </button>
-        </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
-    </div>
+    </>
   );
-  const reviewSlotsPage = (
-    <div className="flex flex-col text-center text-white justify-between">
-      <span className="text-3xl w-full text-center mb-4">
-        Review: {selectedSlots.length} Days Selected
-      </span>
-      <div className="grid grid-cols-1 md:grid-cols-2 grid-flow-row p-3 gap-3">
-        {selectedSlots.length > 0 &&
-          selectedSlots.map((slot, idx) => {
+  const selectSlotPage = (
+    <>
+      <div>
+        <h1 className="text-center text-2xl text-white">Select Timeslot : </h1>
+      </div>
+      {availableSlots.length > 0 && (
+        <div>
+          {" "}
+          {availableSlots.map((item, index) => {
             return (
               <div
-                key={idx}
-                class="p-2 rounded-lg shadow bg-blue-700 flex flex-col justify-between items-center border-white border-2"
+                key={index}
+                className="flex w-full justify-around items-center md:flex-row flex-col mt-3"
               >
-                <h1 className="mb-4 text-white text-2xl">{slot.date}</h1>
-                <div class="mt-3 flex gap-2 flex-wrap font-normal">
-                  {slot.timings.map((timeSlot, idx) => {
-                    return (
-                      <button
-                        key={idx}
-                        className="btn btn-xs bg-blue-600 hover:border-white hover:bg-blue-600 hover:text-white border-none text-white mx-2"
+                <div tabIndex={index} className="collapse group">
+                  <div className="collapse-title bg-primary text-primary-content group-focus:bg-secondary group-focus:text-secondary-content">
+                    {item.date}
+                  </div>
+                  <div className="collapse-content bg-primary text-primary-content group-focus:bg-secondary group-focus:text-secondary-content">
+                    {item.timings.map((timing, index) => (
+                      <p
+                        onClick={() => handleSubmitButton(item.date, timing)}
+                        key={index}
+                        cursor="pointer"
                       >
-                        {timeSlot}
-                      </button>
-                    );
-                  })}
+                        {timing}
+                      </p>
+                    ))}
+                  </div>
                 </div>
-                <button
-                  onClick={() => handleRemoveSlot(slot)}
-                  class="btn btn-xs mt-4 bg-white text-blue-700 hover:bg-blue-700 hover:text-white hover:border-2 hover:border-white"
-                >
-                  Remove
-                </button>
               </div>
             );
           })}
-      </div>
-      <button
-        onClick={onHandleSubmit}
-        className="btn btn-md mt-4 min-w-[50%] mx-auto bg-white text-blue-700 hover:bg-blue-700 hover:text-white hover:border-2 hover:border-white"
-      >
-        Submit
-      </button>
-    </div>
+        </div>
+      )}
+    </>
   );
-  const pages = [
-    selectInterviewerPage,
-    selectDatePage,
-    selectSlotsPage,
-    reviewSlotsPage,
-  ];
+
+  const reviewSlotsPage = (
+    <>
+      <div className="flex flex-col text-center text-white justify-between">
+        <span className="text-3xl w-full text-center mb-4">Review:</span>
+
+        {interviewParams.payload && (
+          <div className="grid grid-cols-1 md:grid-cols-2 grid-flow-row p-3 gap-3">
+            <p>Date : {interviewParams.payload.date}</p>
+            <p>Time Slot : {interviewParams.payload.timings}</p>
+          </div>
+        )}
+
+        <button
+          onClick={onHandleSubmit}
+          className="btn btn-md mt-4 min-w-[50%] mx-auto bg-white text-blue-700 hover:bg-blue-700 hover:text-white hover:border-2 hover:border-white"
+        >
+          Schedule this Interview!
+        </button>
+      </div>
+    </>
+  );
+  const pages = [selectInterviewerPage, selectSlotPage, reviewSlotsPage];
   return (
     <div className="max-w-screen-md mx-auto flex-col justify-center overflow-auto items-center bg-blue-700 relative rounded-lg p-4">
       {pages[pageStep]}
