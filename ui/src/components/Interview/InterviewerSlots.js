@@ -5,10 +5,10 @@
 
 import { useContext, useState } from "react";
 import { AuthContext } from "../../context/AuthContext.js";
-import Calendar from "react-calendar";
 import moment from "moment";
 import axios from "axios";
-import "./Calendar.css";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
 import { useNavigate } from "react-router-dom";
 
 export const InterviewerSlots = () => {
