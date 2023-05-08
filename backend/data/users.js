@@ -310,7 +310,8 @@ export const updateUserBanStatus = async (userDetails) => {
     const userCollection = await users();
     const { lastErrorObject, value } = await userCollection.findOneAndUpdate(
       { _id: new ObjectId(userId) },
-      { $set: { isBanned } }
+      { $set: { isBanned } },
+      { returnDocument: "after" }
     );
     let { password, ...rest } = value;
     return rest;
@@ -414,7 +415,8 @@ const updateUpcomingInterview = async (userId, newSlot) => {
     // Update the user in the database
     const result = await userCollection.updateOne(
       { _id: new ObjectId(userId) },
-      { $set: { upcomingInterviews: user.upcomingInterviews } }
+      { $set: { upcomingInterviews: user.upcomingInterviews } },
+      { returnDocument: "after" }
     );
     if (result.modifiedCount === 1) {
       return { success: true }; //Succesful updation
@@ -440,6 +442,30 @@ const getUpcomingInterviews = async (id) => {
   return upcomingInterviews; //returns array of objects
 };
 
+const updateUserPremiumStatus = async (userDetails) => {
+  // let { _id, isPremiumUser, requestPremium, role, userId } = userDetails;
+  try {
+    const userCollection = await users();
+    const { lastErrorObject, value } = await userCollection.findOneAndUpdate(
+      { _id: new ObjectId(userDetails.userId) },
+      {
+        $set: {
+          isPremiumUser: userDetails.isPremiumUser,
+          requestPremium: { ...userDetails.requestPremium },
+        },
+      },
+      { returnDocument: "after" }
+    );
+
+    let { password, ...rest } = value;
+
+    return rest;
+  } catch (e) {
+    console.log(e);
+    return false;
+  }
+};
+
 export default {
   createUser,
   getUserById,
@@ -454,4 +480,5 @@ export default {
   getAvailableSlots,
   updateUpcomingInterview,
   getUpcomingInterviews,
+  updateUserPremiumStatus,
 };

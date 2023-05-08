@@ -1,6 +1,10 @@
+/**we need to update cards for premium and user */
 import { Link } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthContext.js";
 
 export const Feed = () => {
+  const { state, updateState } = useContext(AuthContext);
   const cards = [
     {
       title: "Interviews",
