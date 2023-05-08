@@ -388,4 +388,5 @@ export {
   sendResponse,
   sendError,
   isRoleValid,
+  isValidPassword
 };

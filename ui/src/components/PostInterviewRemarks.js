@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useState, useEffect, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext.js";
 import { Rating } from "./Rating.js";
 import { useParams } from "react-router-dom";
@@ -21,9 +22,10 @@ criterias.map((criteria) => {
 });
 
 export const PostInterviewRemarks = () => {
+  const navigate = useNavigate();
   const [interviewInformation, setInterviewInformation] = useState([]);
   const { state, updateState } = useContext(AuthContext);
-  const userId = useParams().id;
+  const interviewId = useParams().id;
 
   const criterias = [
     "Role Related Knowledge",
@@ -35,38 +37,46 @@ export const PostInterviewRemarks = () => {
   ];
 
   const [formState, setFormState] = useState(initialState);
-
-  const interviewDetails = state.userDetails;
+  
+  const interviewDetails = state.interviewDetails;
 
   useEffect(() => {
     const getInterview = async () => {
-      let interviewInfo = await getInterviewInfo(interviewDetails._id);
-
+      let interviewInfo = await getInterviewInfo();
       setInterviewInformation(interviewInfo);
     };
     getInterview();
   }, []);
 
-  const getInterviewInfo = async (id) => {
-    const { data } = await axios.get(`http://localhost:4000/interviews/${id}`, {
+  const getInterviewInfo = async () => {
+    const { data } = await axios.get(`http://localhost:4000/interviews/${interviewId}`, {
       headers: { Authorization: `${localStorage.getItem("accessToken")}` },
     });
     console.log(data);
     return data;
   };
 
-  const displayRating = (e) => {
-    console.log(e.target.value);
-    // setRating(e.target.value);
-  };
-
-  const updateUserBanStatus = (payload) => {
-    // let url =
+  const updateRemarks = async () => {
+    try {
+      let payload = formState;
+      console.log(payload)
+      const interviewURL = `http://localhost:4000/interviews/${interviewId}`;
+      let { data, status } = await axios.patch(interviewURL, payload, {headers:{ update: "interviewremarks", Authorization: `${localStorage.getItem("accessToken")}`}});
+      if (status === 200) {
+        setInterviewInformation(data);
+        navigate("/feed");
+      } else {
+        console.log(data)
+      }
+    } catch (e) {
+      console.log(e.response);
+      return false;
+    }
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
+    updateRemarks();
     console.log({ formState });
   };
 
@@ -76,7 +86,7 @@ export const PostInterviewRemarks = () => {
         Interview Remarks
       </h1>
       <p className="align-center font-semibold text-center text-white mt-4">
-        You just interviewed
+        You just interviewed {interviewInformation.interviewee}
       </p>
       <p className="align-center font-semibold text-center text-white mt-4">
         Please provide your feedback below
@@ -92,7 +102,7 @@ export const PostInterviewRemarks = () => {
                 className="text-white font-semibold text-center mt-4 mb-2"
                 htmlFor="role-related-knowledge"
               >
-                Role Related Knowledge
+                {criteria}
               </label>
               {criteria !== "Additional Comments" ? (
                 <Rating
@@ -110,6 +120,7 @@ export const PostInterviewRemarks = () => {
                   name={criteria}
                   className="textarea textarea-bordered"
                   placeholder="Fantastic candidate!"
+                  onChange={(event) => {setFormState({ ...formState, [criteria]: event.target.value})}}
                 ></textarea>
               )}
             </div>

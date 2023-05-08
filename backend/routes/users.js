@@ -203,7 +203,21 @@ router
         } catch (e) {
           errors.push(e);
         }
-      }
+      }else if(req.headers["update"] === "user-profile") {
+        let userInfo = req.body;
+        console.log(userInfo);
+        if (!userInfo || Object.keys(userInfo).length === 0) {
+          return res.status(400).json({ error: "There are no updates" });
+        }
+        try {
+          let updatedUser = await users.updateUser(req.params.id, userInfo);
+          return res.status(200).json(updatedUser);
+        } 
+        catch (e) {
+          return res.status(400).json(e);
+        }
+      };
+
     } catch (e) {
       res.status(400).json(helpers.sendError(e));
     }

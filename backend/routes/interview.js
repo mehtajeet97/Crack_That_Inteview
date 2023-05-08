@@ -65,5 +65,15 @@ router
     } catch (e) {
       res.status(400).json(e);
     }
-  });
+  })
+  .patch(async (req, res) => {
+    try{
+    let remarks = req.body;
+    const updatedRemarks = await interview.addInterviewRemarks(req.params.id, remarks);
+    res.status(200).json(updatedRemarks);
+    } catch(e){
+    res.status(400).json(e);
+    }
+  })
+
 export default router;

@@ -63,6 +63,7 @@ const getInterviewById = async (id) => {
   idCheck(id);
   id = id.trim();
   const interviewCollection = await interviews();
+  
   let listOfInterviews = await interviewCollection.findOne({
     _id: new ObjectId(id),
   });
@@ -97,9 +98,29 @@ const removeInterview = async (id) => {
   return `Interview with ${id} has been successfully deleted!`;
 };
 
+const addInterviewRemarks = async (id, remarks) => {
+  if (!id) throw "You should enter an Id";
+  idCheck(id);
+  id = id.trim();
+  const interviewCollection = await interviews();
+  let interview = await interviewCollection.findOne({
+    _id: new ObjectId(id)
+  });
+  if(!interview) throw "Interview is not valid";
+  let updateRemarks = {...interview, interviewerRemarks: remarks}
+  const updatedInterview = await interviewCollection.findOneAndUpdate(
+    {_id: new ObjectId(id)},
+    { $set: updateRemarks },
+    { returnDocument: "after" 
+    }
+  );
+  return updatedInterview;
+}
+
 export default {
   createInterview,
   getInterviewById,
   getAllInterviews,
   removeInterview,
+  addInterviewRemarks
 };

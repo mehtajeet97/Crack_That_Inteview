@@ -16,23 +16,28 @@ export const Navbar2 = () => {
     {
       name: "Interviews",
       path: "/interview",
-      role: ["student", "interviewer", "admin"],
+      role: ["student", "interviewer"],
     },
     {
       name: "Blogs",
       path: "/blogs",
-      role: ["student", "interviewer", "admin"],
+      role: ["student", "interviewer"],
     },
     {
       name: "AI Exam",
       path: "/test-yourself",
-      role: ["student", "admin"],
+      role: ["student"],
     },
     {
       name: "Go Premium",
       path: "/join-premium",
-      role: ["student", "admin"],
+      role: ["student"],
     },
+    {
+      name: "Dashboard",
+      path: "/admin",
+      role: ["admin"],
+    }
   ];
 
   let activeNavTabs = navTabs.filter((tab) =>
