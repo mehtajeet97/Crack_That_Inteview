@@ -55,7 +55,7 @@ export const StudentSlots = () => {
     if (status === 200) {
       setInterviewerCards(data);
     } else {
-      console.log("Error!!!");
+      state.triggerToast(data.errors, "error");
     }
   };
 
@@ -101,7 +101,7 @@ export const StudentSlots = () => {
         // navigate("/feed");
       } else {
         //Inform the user of errors through alert/ toast
-        console.log(data.errors);
+        state.triggerToast(data.errors, "error");
       }
     } catch (e) {
       if (e.response.data.error === "Access Token expired") {
@@ -125,7 +125,7 @@ export const StudentSlots = () => {
         state.triggerToast("Interview Scheduled Successfully!", "success");
       } else {
         //Inform the user of errors through alert/ toast
-        console.log(data.errors);
+        state.triggerToast(data.errors, "error");
       }
     } catch (e) {
       if (e.response.data.error === "Access Token expired") {
@@ -148,7 +148,7 @@ export const StudentSlots = () => {
         state.triggerToast("Interview Scheduled Successfully!", "success");
       } else {
         //Inform the user of errors through alert/ toast
-        console.log(data.errors);
+        state.triggerToast(data.errors, "error");
       }
     } catch (e) {
       if (e.response.data.error === "Access Token expired") {
