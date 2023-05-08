@@ -189,7 +189,6 @@ const removeUser = async (id) => {
 
 // Functions for Interview Scheduling
 
-// Route : schedule.js | ("/").get |  returns array of objects (interviewers who have updated their available slots)
 const getAllInterviewers = async () => {
   const userCollection = await users();
   let listOfInterviewers = await userCollection
@@ -207,10 +206,9 @@ const getAllInterviewers = async () => {
       }
     )
     .toArray();
-  return listOfInterviewers; //returns array of objects
+  return listOfInterviewers; //returns array of objects (interviewers)
 };
 
-// Route : schedule.js | ("/").post |  returns availableSlots[] (For rendering the Calendar for user to select matching slot)
 const getAvailableSlots = async (id) => {
   //Validation
   id = idCheck(id);
@@ -225,44 +223,55 @@ const getAvailableSlots = async (id) => {
   return availableSlots; //returns array of objects
 };
 
-// Route : schedule.js | ("/:id").post |  returns {success: true} or error (For succesful updation of availableSlots[] of interviewers)
 const updateAvailableSlots = async (userId, newSlot) => {
-  try {
-    //Validation through prior function
-    const user = await getUserById(userId);
-    const userCollection = await users();
+  //Validation through prior function
+  const user = await getUserById(userId);
+  const userCollection = await users();
 
-    // If the user does not exist, throw an error
-    if (!user) {
-      throw `User with id ${userId} not found`;
-    }
+  // If the user does not exist, throw an error
+  if (!user) {
+    throw `User with id ${userId} not found`;
+  }
 
-    // Check if the object with the same date already exists
-    const existingObject = user.availableSlots.find(
-      (obj) => obj.date === newSlot[0].date
-    );
-    console.log(existingObject, "here");
-    // If the object already exists, do something
-    if (existingObject) {
-      // Do something
-      throw `User ${userId} has an entry for the same date`;
-    } else {
-      // The object does not exist, so push it to the available slots array
-      user.availableSlots.push(...newSlot);
+  /*
+    Logic : 
+    1) Find an object in the availableSlots[] in the database that has the same date as an object in the incoming newSlot array
+    2) Requires looping through the availableSlots[] and through the newSlots[]
+    3) If there is a common date, then check if the timeslot provided is also the same
+    4) Loop through the timings of that object in availableSlots[] and through the timings of the object in newSlot[]
+    5) If the timing is same as well, return obj meaning existingObject will be the object present in the availableSlots[] 
+    in database that fulfills above conditions
+  */
+  const existingObject = user.availableSlots.find((obj) => {
+    for (let i = 0; i < newSlot.length; i++) {
+      if (obj.date === newSlot[i].date) {
+        const hasCommon = obj.timings.some((element) =>
+          newSlot[i].timings.includes(element)
+        );
+        if (hasCommon) {
+          return obj;
+        }
+      }
     }
+  });
+  // existingObject will have the object that is already loaded in the availableSlots[] in database
+  if (existingObject) {
+    throw `You have an entry for the same date & timeslot. Kindly try again`;
+  } else {
+    // The object does not exist, so push it to the available slots array
+    user.availableSlots.push(...newSlot);
+  }
 
-    // Update the user in the database
-    const result = await userCollection.updateOne(
-      { _id: new ObjectId(userId) },
-      { $set: { availableSlots: user.availableSlots } }
-    );
-    if (result.modifiedCount === 1) {
-      return { success: true }; //Succesful updation
-    } else {
-      return { success: false }; // Unsucessful updation
-    }
-  } catch (e) {
-    return e; //Errors otherwise
+  // Update the user in the database
+  const result = await userCollection.updateOne(
+    { _id: new ObjectId(userId) },
+    { $set: { availableSlots: user.availableSlots } }
+  );
+
+  if (result.modifiedCount === 1) {
+    return { success: true }; //Succesful updation
+  } else {
+    return { success: false }; // Unsucessful updation
   }
 };
 

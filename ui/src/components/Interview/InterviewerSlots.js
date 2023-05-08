@@ -3,7 +3,7 @@
 2) Data structure change from array of objects to array of arrays on multiple selection
 */
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { AuthContext } from "../../context/AuthContext.js";
 import Calendar from "react-calendar";
 import moment from "moment";
@@ -131,6 +131,9 @@ export const InterviewerSlots = () => {
         state.triggerToast("Session expired. Please log in again.", "success");
       } else {
         state.triggerToast(e.response.data.error, "error");
+        setSelectedSlots([]);
+        setDisabledDates([]);
+        setPageStep(0);
       }
     }
   };
@@ -140,7 +143,6 @@ export const InterviewerSlots = () => {
       _id: state.userDetails._id,
       availableSlots: selectedSlots,
     };
-    console.log(payload);
     addInterviewerAvailableSlots(payload);
   };
 
