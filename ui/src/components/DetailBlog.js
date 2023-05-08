@@ -15,16 +15,15 @@ import axios from "axios";
 
 export const DetailBlog = () => {
   const { state, updateState } = useContext(AuthContext);
-  console.log(state.userDetails);
+
   const userId = state.userDetails._id;
   const userPremium = state.userDetails.isPremiumUser;
-  console.log(userId, userPremium);
 
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [blog, editBlog] = useState();
-  const [origBlog, setOrigBlog] = useState();
+  const [blog, editBlog] = useState([]);
+  const [origBlog, setOrigBlog] = useState([]);
   const [back, setBack] = useState(false);
 
   const { blogId } = useParams();
@@ -89,12 +88,22 @@ export const DetailBlog = () => {
           `http://localhost:4000/articles/${blogId}`,
           headers
         );
-        console.log(data);
+
         if (data.message === "error") throw "error";
         editBlog(data.data);
         setOrigBlog(data.data);
       } catch (e) {
-        editBlog("error");
+        if (e.response.status === 401) {
+          state.triggerToast(
+            "Your session has been expired. Please log in.",
+            "error"
+          );
+          localStorage.clear();
+          navigate("/login");
+        } else {
+          editBlog([]);
+          setOrigBlog([]);
+        }
       }
     }
 
@@ -137,78 +146,81 @@ export const DetailBlog = () => {
     }
   }, [back]);
 
-  if (!blog) {
-    return <p>Loading........</p>;
-  }
-  if (blog === "error") {
-    return <p>Error fetching the blogs</p>;
-  }
   if (blog.isPremium) {
     if (!userPremium) {
       navigate("/join-premium");
     }
   }
   return (
-    <div key={blog.blogId} className="shadow-xl m-8">
-      <div className="flex flex-col space-x-4 p-3 ">
-        <button
-          onClick={() => {
-            setBack(true);
-            navigate(-1);
-          }}
-          className="font-semibold self-start space-y-2"
-        >
-          {" "}
-          {"<   "}Go Back
-        </button>
+    <div>
+      {blog && blog.length !== 0 && (
+        <div key={blog.blogId} className="shadow-xl m-8 text-black">
+          <div className="flex flex-col space-x-4 p-3 ">
+            <button
+              onClick={() => {
+                setBack(true);
+                navigate(-1);
+              }}
+              className="font-semibold self-start space-y-2"
+            >
+              {" "}
+              {"<   "}Go Back
+            </button>
 
-        <div className="flex justify-between  mx-10 mt-5 items-center">
-          <div className="">
-            <p className="mr-10 font-semibold capitalize">{blog.title}</p>
-            <button
-              id="upVote"
-              onClick={voteController}
-              className={
-                blog.upVotes.includes(userId)
-                  ? "font-bold "
-                  : "font-light opacity:70 self-start"
-              }
-            >
-              👍{blog.upVotesCount}
-            </button>
-            <button
-              id="downVote"
-              onClick={voteController}
-              className={
-                blog.downVotes.includes(userId)
-                  ? "font-bold self-start"
-                  : "font-light opacity:70 self-start"
-              }
-            >
-              👎{blog.downVotesCount}
-            </button>
+            <div className="flex justify-between  mx-10 mt-5 items-center">
+              <div className="">
+                <p className="mr-10 font-semibold capitalize">{blog.title}</p>
+                <button
+                  id="upVote"
+                  onClick={voteController}
+                  className={
+                    blog.upVotes.includes(userId)
+                      ? "font-bold "
+                      : "font-light opacity:70 self-start"
+                  }
+                >
+                  👍{blog.upVotesCount}
+                </button>
+                <button
+                  id="downVote"
+                  onClick={voteController}
+                  className={
+                    blog.downVotes.includes(userId)
+                      ? "font-bold self-start"
+                      : "font-light opacity:70 self-start"
+                  }
+                >
+                  👎{blog.downVotesCount}
+                </button>
+              </div>
+
+              <span className="flex  flex-col  font-light">{updateDate()}</span>
+            </div>
+
+            <div className="flex space-x-3 my-5 items-center flex-wrap">
+              {blog?.tags &&
+                Boolean(blog.tags.length) &&
+                blog.tags.slice(0, 3).map((x, y) => (
+                  <span key={y} className="font-light capitalize">
+                    | {x} |
+                  </span>
+                ))}
+            </div>
+            <div>
+              {blog.content.split("\n\n").map((x, y) => (
+                <p className="my-4" key={y}>
+                  {x}
+                </p>
+              ))}
+            </div>
           </div>
-
-          <span className="flex  flex-col  font-light">{updateDate()}</span>
         </div>
-
-        <div className="flex space-x-3 my-5 items-center flex-wrap">
-          {blog?.tags &&
-            Boolean(blog.tags.length) &&
-            blog.tags.slice(0, 3).map((x, y) => (
-              <span key={y} className="font-light capitalize">
-                | {x} |
-              </span>
-            ))}
+      )}
+      {blog.length === 0 && (
+        <div className="bg-blue-700 h-12 items-center p-3  text-white basis-2/7 rounded   shadow-lg text-truncate col-span-3 justify-self-center text-black font-bold capitalize">
+          <p>error whileloading Blog ...!!!</p>
         </div>
-        <div>
-          {blog.content.split("\n\n").map((x, y) => (
-            <p className="my-4" key={y}>
-              {x}
-            </p>
-          ))}
-        </div>
-      </div>
+      )}
     </div>
   );
 };

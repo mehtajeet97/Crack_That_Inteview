@@ -1,16 +1,3 @@
-//not working when tampering the access token in blogs.js
-// working when the backend is not working
-
-/*this component renderes the blogs from a list of blogs and connected to Blog.js and BlogFilter Button.js*/
-
-/*
-todo : userskills, userroles, user name, user premium
-pending added a plain loading text with css 
-
-*/
-
-/*appearance of the card
- */
 import { Link, useNavigate, redirect } from "react-router-dom";
 import { useEffect, useState, useContext } from "react";
 
@@ -23,30 +10,21 @@ export const Blogs = () => {
   const { state, updateState } = useContext(AuthContext);
 
   // Change the array value to proper values such 'all' to 'All'
-  const skills = ["java", "AWS", "SQL", "python", "javascript"];
-  const roles = ["java", "AWS", "SQL", "python", "javascript"];
+  const skills = state.userDetails.skills;
+
   const user = state.userDetails.firstName;
   const userPremium = state.userDetails.isPremiumUser;
 
   const [filteredBlogs, setfilteredBlogs] = useState([]); //used to render the current content
   const [allBlogs, setAllBlogs] = useState([]); //used to get the original content
-  let [skillState, skillStateSet] = useState(skills.map((x) => 0)); //both of these to toggle css
-
-  const logoutUser = () => {
-    try {
-      localStorage.clear();
-      navigate("/login");
-    } catch (e) {
-      console.log(e);
-    }
-  };
+  let [skillState, skillStateSet] = useState(0); //both of these to toggle css
 
   const filterSelected = (selectedSkill = "all") => {
     const filterBlogs =
       selectedSkill === "all"
         ? allBlogs
         : allBlogs.filter((x) => {
-            return x.tags.includes(selectedSkill);
+            return x.tags.includes(selectedSkill.toLowerCase());
           });
 
     setfilteredBlogs(filterBlogs);
@@ -63,14 +41,16 @@ export const Blogs = () => {
         setfilteredBlogs(data.data);
         setAllBlogs(data.data);
       } catch (e) {
-        // console.log(e);
-        if (e.response.data.error === "Access Token expired") {
+        if (e.response.status === 401) {
           state.triggerToast(
             "Your session has been expired. Please log in.",
             "error"
           );
           localStorage.clear();
           navigate("/login");
+        } else {
+          setfilteredBlogs([]);
+          setAllBlogs([]);
         }
       }
     }
@@ -79,13 +59,13 @@ export const Blogs = () => {
 
   return (
     <div>
-      <div className="px-6 py-4  mx-auto rounded-lg bg-lime-200">
+      <div className="px-6 py-4  mx-auto rounded-lg bg-lime-200 text-black">
         <span className="block font-bold text-xl mb-2 capitalize">
           Hello {user}! Welcome to our blogs
         </span>
       </div>
-      <div className=" my-2 px-6 py-4  mx-auto rounded-lg bg-lime-200">
-        <h3 className="block font-bold text-xl mb-2 ">
+      <div className=" my-6 px-6 py-4  mx-auto rounded-lg bg-lime-200 text-black">
+        <h3 className="block font-bold text-xl mb-2 mb-6 ">
           Get Blogs By Your Skills
         </h3>
         <button
@@ -93,18 +73,11 @@ export const Blogs = () => {
           key={" all"}
           source={"skills"}
           onClick={() => {
+            skillStateSet("all");
             filterSelected();
           }}
         >
           All
-        </button>
-        <button
-          className="bg-yellow-300 px-3 py-2 text-red-400 m-3 rounded-lg"
-          key={" logout"}
-          source={"skills"}
-          onClick={logoutUser}
-        >
-          logout
         </button>
 
         {skills.map((skill, idx) => (
@@ -130,14 +103,14 @@ export const Blogs = () => {
 
       <div className="capitalize grid grid-cols-3 gap-5">
         {filteredBlogs &&
-          Boolean(filteredBlogs.length) &&
+          filteredBlogs.length !== 0 &&
           Array.isArray(filteredBlogs) &&
           filteredBlogs.slice(0, 9).map((blog, idx) => (
             <div
               key={idx}
-              className="flex flex-col justify-between  p-3  max-h-fit min-h-1/2 bg-cyan-300 basis-2/7 rounded-2xl   shadow-lg text-truncate flex-wrap"
+              className="flex flex-col justify-between  p-3   font-bold max-h-fit min-h-1/2 bg-blue-700 basis-2/7 rounded-2xl   shadow-lg text-truncate flex-wrap"
             >
-              <div className="flex flex-row justify-between">
+              <div className="flex flex-row justify-between text-white">
                 <div className="flex ">
                   <div className="max-w-sm">
                     <Link
@@ -162,9 +135,9 @@ export const Blogs = () => {
                 </div>
                 {blog.isPremium ? <span>👑</span> : null}
               </div>
-              <div className="flex flex-row">
+              <div className="flex flex-row text-black">
                 {blog?.tags &&
-                  blog.tags.length &&
+                  blog.tags.length !== 0 &&
                   blog.tags.slice(0, 3).map((tag, idx) => (
                     <button
                       className=" capitalize p-2 m-3 bg-gray-200 rounded-full px-3 py-1"
@@ -177,7 +150,9 @@ export const Blogs = () => {
             </div>
           ))}
         {filteredBlogs.length === 0 && (
-          <p className="self-center">no blogs with this tags</p>
+          <div className="bg-blue-700 h-12 items-center p-3  text-white basis-2/7 rounded   shadow-lg text-truncate col-span-3 justify-self-center text-black font-bold capitalize">
+            <p>error whileloading Blogs ...!!!</p>
+          </div>
         )}
       </div>
     </div>

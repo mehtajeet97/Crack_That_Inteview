@@ -221,7 +221,7 @@ const patchUser = async (id, data) => {
     if (!user) throw "user not found";
     if (data.method == "premium-request") {
       delete data.method;
-      user.request = data;
+      user.requestPremium = data;
       user = { ...user };
     } else {
       if (!user.blogs.includes(data.blogId)) user.blogs.push(data.blogId);
