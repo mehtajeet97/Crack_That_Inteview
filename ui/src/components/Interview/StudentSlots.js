@@ -41,7 +41,9 @@ export const StudentSlots = () => {
     event.preventDefault();
 
     const scheduleURL = "http://localhost:4000/schedule";
-    let { data, status } = await axios.get(scheduleURL);
+    let { data, status } = await axios.get(scheduleURL, {
+      headers: { Authorization: localStorage.getItem("accessToken") },
+    });
     /*
   Values returned:
   _id: 1
