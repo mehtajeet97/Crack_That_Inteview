@@ -123,7 +123,7 @@ export const Register = () => {
   const onFormBack = (event) => setFormStep((prev) => prev - 1);
 
   const firstForm = (
-    <div className="p-4 space-y-4 md:space-y-4 sm:p-6">
+    <div className="p-4 space-y-4 md:space-y-4 sm:p-6 bg-blue-700">
       <h1 className="text-2xl font-bold text-center leading-tight tracking-tight text-white">
         Register with us as
       </h1>
@@ -290,7 +290,7 @@ export const Register = () => {
   );
 
   const secondForm = (
-    <div className="p-6 space-y-4 md:space-y-4 sm:p-8">
+    <div className="p-6 space-y-4 md:space-y-4 sm:p-8 bg-blue-700">
       <button
         className="bg-yellow-100 rounded-md py-1 px-2"
         onClick={onFormBack}

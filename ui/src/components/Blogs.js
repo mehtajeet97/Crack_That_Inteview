@@ -80,7 +80,8 @@ export const Blogs = () => {
           All
         </button>
 
-        {skills.map((skill, idx) => (
+        {skills?.length > 0 && 
+        skills.map((skill, idx) => (
           <button
             className={`capitalize px-3 py-2 rounded-lg text-red-400 m-3 ${
               skillState == skill

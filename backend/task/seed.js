@@ -7,21 +7,24 @@ const db = await dbConnection();
 await db.dropDatabase();
 
 async function main() {
+
   try {
+    let user = {firstName: "Siddharth", lastName: "Prabhakaran", age: 24, email: "sidduprabhak@gmail.com", password: "Test@1234$", phoneNumber: 9083319047, }
     let userDetails1 = await users.createUser(
       "Siddharth",
       "Prabhakaran",
       24,
       "sidduprabhak@gmail.com",
-      "Test@123$",
+      "Test@1234$",
       9083319047,
-      `C:\Users\siddu\OneDrive\Desktop\New Resume\Siddharth Prabhakaran - Resume.pdf`,
-      ["Java", "AWS", "SQL"],
-      "https://www.linkedin.com/in/sidprabhak/",
       "",
-      "https://github.com/sidprabhak",
-      "Google",
-      "Admin"
+      2,
+      "Data Engineer",
+      "",
+      ["JavaScript","AWS","SQL","Python"],
+      "Crack That Interview",
+      "Admin",
+      ""
     );
     console.log(userDetails1);
   } catch (e) {
@@ -41,48 +44,6 @@ async function main() {
     console.log(e);
   }
 
-  try {
-    let userDetails = await users.createUser(
-      "han",
-      "solo",
-      54,
-      "han1soloon@gmail.com",
-      "Han@solo",
-      5599887755,
-      `C:\Users\siddu\OneDrive\Desktop\New Resume\Siddharth Prabhakaran - Resume.pdf`,
-      ["Java", "AWS", "SQL"],
-      ["AI", "Machine Learning", "Big Data"],
-      `C:\Users\siddu\OneDrive\Pictures\Siddharth.jpg`,
-      ["space ship maintanance", "mechanics"],
-      ["Article1", "Article2"],
-      ["Interview1", "Interview2"],
-      ["Interview3", "Interview4"]
-    );
-  } catch (e) {
-    console.log(e);
-  }
-  try {
-    let userDetails = await users.createUser(
-      "luke",
-      "skywalker",
-      18,
-      "theforceiswithin@gmail.com",
-      "EndVader@today",
-      2232536255,
-      `C:\Users\siddu\OneDrive\Desktop\New Resume\Siddharth Prabhakaran - Resume.pdf`,
-      ["Java", "AWS", "SQL"],
-      ["AI", "Machine Learning", "Big Data"],
-      `C:\Users\siddu\OneDrive\Pictures\Siddharth.jpg`,
-      ["space ship maintanance", "mechanics"],
-      ["Article1", "Article2"],
-      ["Interview1", "Interview2"],
-      ["Interview3", "Interview4"]
-    );
-  } catch (e) {
-    console.log(e);
-  }
-
-  console.log("Done seeding database");
 }
 
 await main();

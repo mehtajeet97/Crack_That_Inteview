@@ -1,5 +1,4 @@
-//error with projecttion in get top for trending
-
+//error with projection in get top for trending
 import { users } from "../config/mongoCollections.js";
 import { ObjectId } from "mongodb";
 import {
@@ -11,6 +10,7 @@ import {
   stringCheck,
   isRoleValid,
   isValidEmail,
+  isValidPassword,
 } from "../helpers.js";
 import bcrypt from "bcryptjs";
 
@@ -33,7 +33,7 @@ const createUser = async (userDetails) => {
     role,
     school,
   } = userDetails;
-  passwordCheck(password);
+  isValidPassword(password);
   password = password.trim();
   password = await bcrypt.hash(password, saltRounds);
   let user = {
@@ -69,10 +69,8 @@ const createUser = async (userDetails) => {
   };
   const userCollection = await users();
   const insertedUserInfo = await userCollection.insertOne(user);
-
   if (!insertedUserInfo.acknowledged || !insertedUserInfo.insertedId)
     throw "Cannot add user";
-
   // const newId = insertedUserInfo.insertedId.toString();
   user._id = insertedUserInfo.insertedId.toString();
   return user;
