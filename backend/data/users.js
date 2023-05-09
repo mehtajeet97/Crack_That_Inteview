@@ -361,7 +361,6 @@ const updateUpcomingInterview = async (userId, newSlot) => {
   //Validation through prior function
   const user = await getUserById(userId);
   const userCollection = await users();
-
   // If the user does not exist, throw an error
   if (!user) {
     throw `User with id ${userId} not found`;
@@ -439,6 +438,59 @@ const getUpcomingInterviews = async (id) => {
   return upcomingInterviews; //returns array of objects
 };
 
+const getPastInterviews = async (id) => {
+  //Validation
+  id = idCheck(id);
+
+  const userCollection = await users();
+  // Find the user with the specified ID
+  const user = await userCollection.findOne({ _id: new ObjectId(id) });
+
+  // Extract the upcomingInterviews array from the user document
+  const pastInterviews = user.pastInterviews;
+
+  return pastInterviews; //returns array of objects
+};
+
+const moveToPast = async (userid, interviewId) => {
+  //Validation through prior function
+  const user = await getUserById(userid);
+  const userCollection = await users();
+  // If the user does not exist, throw an error
+  if (!user) {
+    throw `User with id ${userid} not found`;
+  }
+  const foundInterview = user.upcomingInterviews.find(
+    (interview) =>
+      JSON.stringify(interview.interviewid) === JSON.stringify(interviewId)
+  );
+  if (foundInterview) {
+    user.upcomingInterviews.splice(
+      user.upcomingInterviews.indexOf(foundInterview),
+      1
+    );
+    user.pastInterviews.push(foundInterview);
+  } else {
+    throw `No interview with that Id present`;
+  }
+  // Update the user in the database
+  const result = await userCollection.updateOne(
+    { _id: new ObjectId(userid) },
+    {
+      $set: {
+        upcomingInterviews: user.upcomingInterviews,
+        pastInterviews: user.pastInterviews,
+      },
+    },
+    { returnDocument: "after" }
+  );
+  if (result.modifiedCount === 1) {
+    return { success: true }; //Succesful updation
+  } else {
+    return { success: false }; // Unsucessful updation
+  }
+};
+
 const updateUserPremiumStatus = async (userDetails) => {
   // let { _id, isPremiumUser, requestPremium, role, userId } = userDetails;
   try {
@@ -480,6 +532,8 @@ export default {
   getAvailableSlots,
   updateUpcomingInterview,
   getUpcomingInterviews,
+  getPastInterviews,
   removeAvailableSlots,
+  moveToPast,
   updateUserPremiumStatus,
 };
