@@ -69,12 +69,25 @@ export const Admin = () => {
     getBlog();
   }, []);
   const getBlogs = async () => {
-    let { data } = await axios.get("http://localhost:4000/articles", {
-      headers: {
-        Authorization: localStorage.getItem("accessToken"),
-      },
-    });
-    return data.data;
+    try {
+      let { data } = await axios.get("http://localhost:4000/articles", {
+        headers: {
+          Authorization: localStorage.getItem("accessToken"),
+        },
+      });
+      return data.data;
+    } catch (e) {
+      let status = e.response.status;
+      if (status === 401) {
+        localStorage.clear();
+        state.triggerToast("invalid user credentials login again", "error");
+        navigate("/login");
+      } else if (status === 500) {
+        state.triggerToast("Internal Server Error", "error");
+      } else {
+        state.triggerToast("Error Fetching Blogs", "error");
+      }
+    }
   };
   const getUserCall = async () => {
     try {
@@ -91,7 +104,7 @@ export const Admin = () => {
       } else if (status === 500) {
         state.triggerToast("Internal server error", "error");
       } else {
-        state.triggerToast("error Updating user", "error");
+        state.triggerToast("error getting users", "error");
       }
     }
   };
@@ -136,8 +149,6 @@ export const Admin = () => {
             }
           })
         );
-      } else {
-        console.log(data.errors);
       }
     } catch (e) {
       let status = e.response.status;
@@ -148,14 +159,12 @@ export const Admin = () => {
       } else if (status === 500) {
         state.triggerToast("Internal server error", "error");
       } else {
-        console.log(e);
         state.triggerToast("Error Updating User", "error");
       }
     }
   };
   const updatePremium = async (payload) => {
     try {
-      console.log(payload);
       const userURL = `http://localhost:4000/users/${payload.userId}`;
       let { data, status } = await axios.patch(userURL, payload, {
         headers: {
@@ -174,8 +183,6 @@ export const Admin = () => {
             }
           })
         );
-      } else {
-        console.log(data.errors);
       }
     } catch (e) {
       let status = e.response.status;
@@ -185,19 +192,198 @@ export const Admin = () => {
         navigate("/login");
       } else if (status === 500) {
         state.triggerToast("Internal server error", "error");
+      } else if (status === 404) {
+        state.triggerToast("user not found", "error");
       } else {
         state.triggerToast("Error Fetching Data", "error");
       }
     }
   };
 
+  //To do: Write Functionality for Ban User
+  const handleBanUser = async (user) => {
+    let userDetails = JSON.parse(localStorage.getItem("userDetails"));
+    let payload = {
+      _id: userDetails._id,
+      role: userDetails.role,
+      isBanned: !user.isBanned,
+      userId: user._id,
+    };
+
+    await banUser(payload);
+  };
+
+  const handleUserRequest = async (user, event) => {
+    let userDetails = JSON.parse(localStorage.getItem("userDetails"));
+    let payload = {
+      _id: userDetails._id,
+      role: userDetails.role,
+      userId: user._id,
+      requestPremium:
+        event.target.textContent.toLowerCase() === "approve"
+          ? { ...user.requestPremium, status: "Approved" }
+          : { ...user.requestPremium, status: "Rejected" },
+      isPremiumUser:
+        event.target.textContent.toLowerCase() === "approve" ? true : false,
+    };
+
+    await updatePremium(payload);
+  };
+  const searchUser = () => {
+    let filter = document.getElementsByName("filter")[0].value;
+    let input = document.getElementById("search").value;
+
+    if (input.length > 0) {
+      const users = filteredUserData.filter((x) => {
+        return x[filter].toLowerCase().includes(input.toLowerCase());
+      });
+      setUsersData(users);
+    } else {
+      setUsersData(filteredUserData);
+    }
+  };
+  const searchblog = () => {
+    let input = document.getElementById("searchBlog").value;
+
+    if (input.length > 0) {
+      const blogs = filteredBlog.filter((x) =>
+        x["title"].toLowerCase().includes(input.toLowerCase())
+      );
+      setBlogs(blogs);
+    } else {
+      setBlogs(filteredBlog);
+    }
+  };
+  const updateBlog = (event, blog) => {
+    event.preventDefault();
+
+    if (event.target[0].value === blog.content) {
+      state.triggerToast("no changes are made to the blog", "warning");
+    } else {
+      blog = { ...blog, content: event.target[0].value };
+      patchBlog(blog);
+    }
+  };
+  const postBlogs = async (blog) => {
+    try {
+      blog.role = JSON.parse(localStorage.getItem("userDetails")).role;
+
+      const userURL = `http://localhost:4000/articles/`;
+      let { data, status } = await axios.post(userURL, blog, {
+        headers: {
+          Authorization: localStorage.getItem("accessToken"),
+        },
+      });
+      blogs.push(data.data);
+      setBlogs(blogs);
+      setFilteredBlogs(blogs);
+
+      setTags([]);
+      state.triggerToast("blog added successfully", "success");
+    } catch (e) {
+      if (e.response.status == 401) {
+        state.triggerToast(
+          "You are not allowed to create blogs Please log in.",
+          "error"
+        );
+        localStorage.clear();
+        navigate("/login");
+      } else if (e.response.status == 500) {
+        state.triggerToast("internal server error", "error");
+      } else {
+        state.triggerToast("couldnt add blog", "error");
+      }
+    }
+  };
+  const createBlog = async (event) => {
+    try {
+      let errors = [];
+      event.preventDefault();
+
+      let title = document.getElementById("blogTitle").value;
+      let content = document.getElementById("blogcontent").value;
+      let isPremium = document.getElementById("isPremium").checked;
+
+      if (!(title.length >= 0)) {
+        errors.push("blog title cannot be empty");
+      }
+      if (!(content.length >= 0)) {
+        errors.push("blog content cannot be empty");
+      }
+
+      let tagsSelected = tags.map((x) => {
+        return x.value;
+      });
+      if (!(tagsSelected.length >= 0)) {
+        errors.push("blog tags cannot be empty");
+      }
+      if (errors.length > 0) {
+        throw errors;
+      }
+      let newBlog = {
+        title,
+        content,
+        tags: tagsSelected,
+        isPremium,
+      };
+
+      postBlogs(newBlog);
+      document.getElementById("blogTitle").value = "";
+      document.getElementById("blogcontent").value = "";
+      document.getElementById("isPremium").checked = false;
+      setTags([]);
+      document.getElementById("createBlog").checked = false;
+    } catch (e) {
+      e.map((x) => {
+        state.triggerToast(x, "error");
+      });
+    }
+  };
+  const selectedTags = (data) => {
+    setTags(data);
+  };
+  const deleteBlog = async (blog) => {
+    try {
+      const userURL = `http://localhost:4000/articles/${blog._id}`;
+      let data = await axios.delete(userURL, {
+        headers: { Authorization: localStorage.getItem("accessToken") },
+      });
+
+      setBlogs(
+        blogs.filter((x) => {
+          if (x._id !== data.data.data.id) {
+            return x;
+          }
+        })
+      );
+    } catch (e) {
+      if (e.response.status == 401) {
+        state.triggerToast(
+          "You are not allowed to delete blogs Please log in.",
+          "error"
+        );
+        localStorage.clear();
+        navigate("/login");
+      } else if (e.response.status == 500) {
+        state.triggerToast("internal server error", "error");
+      } else {
+        state.triggerToast("couldnt delete the blogs", "error");
+      }
+    }
+  };
   const patchBlog = async (blog) => {
+    //done
     try {
       const userURL = `http://localhost:4000/articles/${blog._id}`;
 
-      let { data, status } = await axios.patch(userURL, blog, {
-        headers: { update: "blog" },
+      let data = await axios.patch(userURL, blog, {
+        headers: {
+          update: "blog",
+          Authorization: localStorage.getItem("accessToken"),
+          role: state.userDetails.role,
+        },
       });
+      data = data.data;
       setBlogs(
         blogs.map((x) => {
           if (x._id === data.data._id) {
@@ -218,135 +404,21 @@ export const Admin = () => {
           }
         })
       );
+
+      state.triggerToast(`blog edited successfully`, "success");
     } catch (e) {
-      console.log(e);
-    }
-  };
-  //To do: Write Functionality for Ban User
-  const handleBanUser = async (user) => {
-    let userDetails = JSON.parse(localStorage.getItem("userDetails"));
-    let payload = {
-      _id: userDetails._id,
-      role: userDetails.role,
-      isBanned: !user.isBanned,
-      userId: user._id,
-    };
-
-    await banUser(payload);
-  };
-
-  const handleUserRequest = async (user, event) => {
-    console.log(event);
-    let userDetails = JSON.parse(localStorage.getItem("userDetails"));
-    let payload = {
-      _id: userDetails._id,
-      role: userDetails.role,
-      userId: user._id,
-      requestPremium:
-        event.target.textContent.toLowerCase() === "approve"
-          ? { ...user.requestPremium, status: "Approved" }
-          : { ...user.requestPremium, status: "Rejected" },
-      isPremiumUser:
-        event.target.textContent.toLowerCase() === "approve" ? true : false,
-    };
-
-    await updatePremium(payload);
-  };
-  const searchUser = () => {
-    let filter = document.getElementsByName("filter")[0].value;
-    let input = document.getElementById("search").value;
-    console.log(input);
-    if (input.length > 0) {
-      console.log("here");
-      const users = filteredUserData.filter((x) => {
-        return x[filter].toLowerCase().includes(input.toLowerCase());
-      });
-      setUsersData(users);
-    } else {
-      setUsersData(filteredUserData);
-    }
-  };
-  const searchblog = () => {
-    let input = document.getElementById("searchBlog").value;
-    console.log(input);
-    if (input.length > 0) {
-      console.log("here");
-      const blogs = filteredBlog.filter((x) =>
-        x["title"].toLowerCase().includes(input.toLowerCase())
-      );
-      setBlogs(blogs);
-    } else {
-      setBlogs(filteredBlog);
-    }
-  };
-  const updateBlog = (event, blog) => {
-    event.preventDefault();
-
-    if (event.target[0].value === blog.content) {
-      state.triggerToast("no changes are made to the blog", "warning");
-    } else {
-      blog = { ...blog, content: event.target[0].value };
-      console.log(blog);
-      patchBlog(blog);
-    }
-  };
-  const postBlogs = async (blog) => {
-    try {
-      console.log(blog);
-      const userURL = `http://localhost:4000/articles/`;
-      let { data, status } = await axios.post(userURL, blog);
-      blogs.push(data.data);
-      setBlogs(blogs);
-      setFilteredBlogs(blogs);
-      console.log("uiayfhbsj");
-      document.getElementById("blogTitle").value = "";
-      document.getElementById("blogcontent").value = "";
-      document.getElementById("isPremium").checked = false;
-      setTags([]);
-      console.log("yes");
-    } catch (e) {
-      console.log(e);
-    }
-  };
-  const createBlog = async (event) => {
-    try {
-      event.preventDefault();
-
-      let title = document.getElementById("blogTitle").value;
-      let content = document.getElementById("blogcontent").value;
-      let isPremium = document.getElementById("isPremium").checked;
-
-      let tagsSelected = tags.map((x) => {
-        return x.value;
-      });
-      let newBlog = {
-        title,
-        content,
-        tags: tagsSelected,
-        isPremium,
-      };
-      postBlogs(newBlog);
-    } catch (e) {
-      console.log(e);
-    }
-  };
-  const selectedTags = (data) => {
-    setTags(data);
-  };
-  const deleteBlog = async (blog) => {
-    try {
-      const userURL = `http://localhost:4000/articles/${blog._id}`;
-      let data = await axios.delete(userURL);
-
-      setBlogs(
-        blogs.filter((x) => {
-          if (x._id !== data.data.data.id) {
-            return x;
-          }
-        })
-      );
-    } catch (e) {
-      console.log(e);
+      if (e.response.status == 401) {
+        state.triggerToast(
+          "You are not allowed to edit blogs Please log in.",
+          "error"
+        );
+        localStorage.clear();
+        navigate("/login");
+      } else if (e.response.status == 500) {
+        state.triggerToast("internal server error", "error");
+      } else {
+        state.triggerToast("couldnt edit the blogs", "error");
+      }
     }
   };
   const userPage = (
@@ -464,6 +536,9 @@ export const Admin = () => {
                               >
                                 Reject
                               </label>
+                              <label htmlFor="my-modal-6" className="btn">
+                                Cancel
+                              </label>
                             </div>
                           </div>
                         </div>
@@ -550,7 +625,7 @@ export const Admin = () => {
             >
               <div className=" bg-slate-800 w-full h-full flex flex-col gap-5 p-5 justify-between">
                 <div className="w-full h-1/2 self-stretch ">
-                  <label for="title" className="text-xl capitalize">
+                  <label htmlFor="title" className="text-xl capitalize">
                     enter title
                     <input
                       name="title"
@@ -561,7 +636,7 @@ export const Admin = () => {
                   </label>
 
                   <label
-                    for="blogcontent "
+                    htmlFor="blogcontent "
                     className="capitalize text-xl scrollbar-hide"
                   >
                     Content
@@ -572,6 +647,7 @@ export const Admin = () => {
                   </label>
                   <div className=" flex flex-row justify-between h-fit items-center  overflow-visible">
                     <Select
+                      id="skillOptions"
                       options={skills}
                       placeholder="select 3 tags for blog"
                       value={tags}
@@ -588,16 +664,16 @@ export const Admin = () => {
                         value="true"
                         className="ml-5 m-1"
                       />
-                      <label for="isPremium" className="text-lg m-5">
+                      <label htmlFor="isPremium" className="text-lg m-5">
                         {" "}
                         Premium Blog
                       </label>
                     </span>
-                    <div className="modal-action self-center m-3">
+                    <div className=" modal-action self-center m-3">
                       <button className="btn mt-0" type="submit">
-                        <label htmlFor="createBlog">Submit</label>
+                        Submit
                       </button>
-                      <label htmlFor="createBlog" className="btn">
+                      <label htmlFor="createBlog" className="btn modal-action">
                         close
                       </label>
                     </div>
@@ -640,13 +716,13 @@ export const Admin = () => {
                           onSubmit={(event) => {
                             document.getElementById(
                               `${blog._id}+form`
-                            ).disabled = true;
+                            ).disabled = "true";
                             document.getElementById(
                               `${blog._id}+edit`
                             ).className = " btn visible";
                             document.getElementById(
                               `${blog._id}+submit`
-                            ).className = " btn invisible absolute";
+                            ).className = " btn invisible";
                             updateBlog(event, blog);
                           }}
                           className="h-5/6 bg-slate-800 w-9/12 p-5"
@@ -659,6 +735,21 @@ export const Admin = () => {
                               <label
                                 htmlFor={blog._id}
                                 className="btn modal-action"
+                                onClick={() => {
+                                  document.getElementById(
+                                    `${blog._id}+form`
+                                  ).disabled = document.getElementById(
+                                    `${blog._id}+form`
+                                  ).disabled
+                                    ? true
+                                    : true;
+                                  document.getElementById(
+                                    `${blog._id}+submit`
+                                  ).className = "invisible btn modal-action";
+                                  document.getElementById(
+                                    `${blog._id}+edit`
+                                  ).className = "visible btn modal-action";
+                                }}
                               >
                                 ❌
                               </label>
@@ -666,11 +757,10 @@ export const Admin = () => {
                             <div className="w-full h-full text-center ">
                               <textarea
                                 className="w-full h-full rounded-xl px-3 py-2  "
-                                disabled="true"
+                                disabled={true}
                                 id={`${blog._id}+form`}
-                              >
-                                {blog.content}
-                              </textarea>
+                                value={blog.content}
+                              ></textarea>
                             </div>
 
                             <div className="modal-action">
@@ -678,12 +768,12 @@ export const Admin = () => {
                                 id={`${blog._id}+submit`}
                                 htmlFor={blog._id}
                                 type="submit"
-                                className="btn invisible "
+                                className="btn invisible  "
                               >
                                 Submit
                               </button>
                               <label
-                                className={`btn `}
+                                className={`btn visible modal-action`}
                                 type="button"
                                 id={`${blog._id}+edit`}
                                 onClick={() => {
@@ -699,15 +789,15 @@ export const Admin = () => {
                                   ).className = document.getElementById(
                                     `${blog._id}+form`
                                   ).disabled
-                                    ? "invisible modal-action"
+                                    ? "invisible btn modal-action"
                                     : "visible btn modal-action";
                                   document.getElementById(
                                     `${blog._id}+edit`
                                   ).className = document.getElementById(
                                     `${blog._id}+form`
                                   ).disabled
-                                    ? "visible"
-                                    : "invisible";
+                                    ? "visible btn modal-action"
+                                    : "invisible btn modal-action";
                                 }}
                               >
                                 Edit

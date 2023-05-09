@@ -65,7 +65,7 @@ const createUser = async (userDetails) => {
     userScore: 0,
     isBanned: false,
     organization,
-    requestPremium: { message: "", status: "initial", allow: true },
+    requestPremium: { message: "", status: "new", allow: true },
   };
   const userCollection = await users();
   const insertedUserInfo = await userCollection.insertOne(user);
@@ -115,8 +115,8 @@ const getAllUsers = async () => {
 const updateUser = async (id, user) => {
   idCheck(id);
   id = id.trim();
-  const userOrig = await getUserById(id)
-  let updatedUser = ({...userOrig, ...user})
+  const userOrig = await getUserById(id);
+  let updatedUser = { ...userOrig, ...user };
   delete updatedUser._id;
   const userCollection = await users();
   const updatedUserInfo = await userCollection.findOneAndUpdate(
@@ -157,7 +157,7 @@ const patchUser = async (id, data) => {
         error.push(e);
       }
       try {
-        data.data = stringCheck(data.data);
+        data.message = stringCheck(data.message);
       } catch (e) {
         error.push(e);
       }
@@ -421,12 +421,15 @@ const updateUserPremiumStatus = async (userDetails) => {
       { returnDocument: "after" }
     );
 
+    if (lastErrorObject.n === 0) {
+      throw "user not found";
+    }
     let { password, ...rest } = value;
 
     return rest;
   } catch (e) {
-    console.log(e);
-    return false;
+    return e;
+    // return false;
   }
 };
 

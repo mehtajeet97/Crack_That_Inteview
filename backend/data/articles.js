@@ -27,7 +27,7 @@ const createArticle = async (data) => {
     } catch (e) {
       error.push(e);
     }
-    console.log(error);
+
     let article = {
       title: data.title,
       content: data.content,
@@ -135,7 +135,7 @@ const removeArticle = async (id) => {
 const updateVote = async (id, data) => {
   try {
     const errors = [];
-    console.log("in update vote", { data });
+
     try {
       id = idCheck(id);
     } catch (e) {
@@ -155,7 +155,6 @@ const updateVote = async (id, data) => {
       { returnDocument: "after" }
     );
 
-    // console.log(updatedInfo)
     if (updatedInfo.lastErrorObject.n === 0) {
       throw "could not add the upvotes the band details";
     }
