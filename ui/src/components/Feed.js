@@ -8,13 +8,13 @@ export const Feed = () => {
   const cards = [
     {
       title: "Interviews",
-      path: "/studentslots",
+      path: "/interview",
       data: "Hey this is an interview card. you will get any upcoming interviews here",
     },
     { title: "Blogs", path: "/blogs" },
     { title: "Show me what's trending today", path: "/trending" },
     { title: "Test Yourself", path: "/test-yourself" },
-    { title: "Recent Interviews", path: "/interview" },
+    { title: "Recent Interviews", path: "/interviewrecords" },
     { title: "Learn More", path: "/interview" },
     { title: "Learn About Premium", path: "/join-premium" },
   ];
