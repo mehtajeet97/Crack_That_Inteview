@@ -226,7 +226,7 @@ router
           let lastName = xss(req.body.lastName);
           let age = xss(req.body.age);
           let email = xss(req.body.email);
-          let phone = xss(req.body.phone);
+          let phone = xss(req.body.phoneNumber);
           let resume = xss(req.body.resume);
           let skills = req.body.skills.map((skill)=>skill);
           let linkedin = xss(req.body.linkedin);

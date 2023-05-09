@@ -84,7 +84,6 @@ export const Profile = () => {
     formData.append("profilePhoto", profilePhoto);
     const formJson = Object.fromEntries(formData.entries());
     let validationResult = validation.userProfile(formJson);
-    console.log(validationResult);
     if (!validationResult.validationPassed) {
       setErrors(validationResult.errors);
     } else {
