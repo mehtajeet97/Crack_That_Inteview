@@ -40,6 +40,7 @@ export const Blogs = () => {
         });
         setfilteredBlogs(data.data);
         setAllBlogs(data.data);
+        skillState(0);
       } catch (e) {
         if (e.response.status === 401) {
           state.triggerToast(
@@ -65,7 +66,7 @@ export const Blogs = () => {
         </span>
       </div>
       <div className=" my-6 px-6 py-4  mx-auto rounded-lg bg-lime-200 text-black">
-        <h3 className="block font-bold text-xl mb-2 mb-6 ">
+        <h3 className="block font-bold text-xl mb-2  ">
           Get Blogs By Your Skills
         </h3>
         <button
@@ -80,31 +81,29 @@ export const Blogs = () => {
           All
         </button>
 
-        {skills?.length > 0 && 
-        skills.map((skill, idx) => (
-          <button
-            className={`capitalize px-3 py-2 rounded-lg text-red-400 m-3 ${
-              skillState == skill
-                ? " bg-yellow-30   ring opacity-70 ring-red-400"
-                : " bg-yellow-300 "
-            }`}
-            key={idx}
-            index={idx}
-            source={"skills"}
-            onClick={() => {
-              skillStateSet(skill);
-              filterSelected(skill);
-              // cssToggle(event);
-            }}
-          >
-            {skill}
-          </button>
-        ))}
+        {skills?.length > 0 &&
+          skills.map((skill, idx) => (
+            <button
+              className={`capitalize px-3 py-2 rounded-lg text-red-400 m-3 ${
+                skillState == skill
+                  ? " bg-yellow-30   ring opacity-70 ring-red-400"
+                  : " bg-yellow-300 "
+              }`}
+              key={idx}
+              index={idx}
+              source={"skills"}
+              onClick={() => {
+                skillStateSet(skill);
+                filterSelected(skill);
+              }}
+            >
+              {skill}
+            </button>
+          ))}
       </div>
 
       <div className="capitalize grid grid-cols-3 gap-5">
-        {filteredBlogs &&
-          filteredBlogs.length !== 0 &&
+        {filteredBlogs.length !== 0 &&
           Array.isArray(filteredBlogs) &&
           filteredBlogs.slice(0, 9).map((blog, idx) => (
             <div
@@ -150,8 +149,13 @@ export const Blogs = () => {
               </div>
             </div>
           ))}
-        {filteredBlogs.length === 0 && (
-          <div className="bg-blue-700 h-12 items-center p-3  text-white basis-2/7 rounded   shadow-lg text-truncate col-span-3 justify-self-center text-black font-bold capitalize">
+        {filteredBlogs.length === 0 && allBlogs.length !== 0 && (
+          <div className="bg-blue-700 h-12 items-center p-3  text-white basis-2/7 rounded   shadow-lg text-truncate col-span-3 justify-self-center  font-bold capitalize">
+            <p>no Blogs on this topic...!!!</p>
+          </div>
+        )}
+        {filteredBlogs.length === 0 && allBlogs.length == 0 && (
+          <div className="bg-blue-700 h-12 items-center p-3  text-white basis-2/7 rounded   shadow-lg text-truncate col-span-3 justify-self-center  font-bold capitalize">
             <p>error whileloading Blogs ...!!!</p>
           </div>
         )}

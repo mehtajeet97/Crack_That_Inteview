@@ -33,6 +33,7 @@ export const StudentSlots = () => {
 
   const [availableSlots, setAvailableSlots] = useState([]);
   const [interviewerId, setInterviewId] = useState("");
+  const [interviewerName, setInterviewerName] = useState("");
   const [interviewParams, setInterviewParams] = useState({});
 
   // Handle First Button click to render interviewers
@@ -63,6 +64,7 @@ export const StudentSlots = () => {
 
   const handleSelectInterviewer = (interviewer) => {
     setInterviewId(interviewer._id);
+    setInterviewerName(interviewer.firstName + " " + interviewer.lastName);
     renderOptions(interviewer.availableSlots);
     next();
   };
@@ -87,58 +89,8 @@ export const StudentSlots = () => {
 
   const onHandleSubmit = async () => {
     createInterview(interviewParams);
-    scheduleUser(interviewParams.payload);
-    scheduleInterviewer(interviewParams.payload);
   };
 
-  const scheduleUser = async (payload) => {
-    try {
-      const studentURL = "http://localhost:4000/schedule/" + userDetails._id;
-      let { data, status } = await axios.post(studentURL, payload, {
-        headers: { Authorization: localStorage.getItem("accessToken") },
-      });
-      if (status === 200) {
-        //Display the selected date to the user for edit / Inform the user of success through alert/ toast
-        state.triggerToast("Interview Scheduled Successfully!", "success");
-        // navigate("/feed");
-      } else {
-        //Inform the user of errors through alert/ toast
-        state.triggerToast(data.errors, "error");
-      }
-    } catch (e) {
-      if (e.response.data.error === "Access Token expired") {
-        localStorage.clear();
-        updateState({ ...state, isLoggedIn: false, userDetails: {} });
-        state.triggerToast("Session expired. Please log in again.", "success");
-      } else {
-        state.triggerToast(e.response.data.error, "error");
-      }
-    }
-  };
-  const scheduleInterviewer = async (payload) => {
-    try {
-      const interviewerURL = "http://localhost:4000/schedule/" + interviewerId;
-      let { data, status } = await axios.post(interviewerURL, payload, {
-        headers: { Authorization: localStorage.getItem("accessToken") },
-      });
-
-      if (status === 200) {
-        //Display the selected date to the user for edit / Inform the user of success through alert/ toast
-        state.triggerToast("Interview Scheduled Successfully!", "success");
-      } else {
-        //Inform the user of errors through alert/ toast
-        state.triggerToast(data.errors, "error");
-      }
-    } catch (e) {
-      if (e.response.data.error === "Access Token expired") {
-        localStorage.clear();
-        updateState({ ...state, isLoggedIn: false, userDetails: {} });
-        state.triggerToast("Session expired. Please log in again.", "success");
-      } else {
-        state.triggerToast(e.response.data.error, "error");
-      }
-    }
-  };
   const createInterview = async (payload) => {
     try {
       const url = "http://localhost:4000/interview/";
@@ -148,18 +100,21 @@ export const StudentSlots = () => {
       if (status === 200) {
         //Display the selected date to the user for edit / Inform the user of success through alert/ toast
         state.triggerToast("Interview Scheduled Successfully!", "success");
+        navigate("/feed");
       } else {
         //Inform the user of errors through alert/ toast
         state.triggerToast(data.errors, "error");
+        navigate("/feed");
       }
     } catch (e) {
-      if (e.response.data.error === "Access Token expired") {
+      if (e.response.data.message === "Access Token expired") {
         localStorage.clear();
         updateState({ ...state, isLoggedIn: false, userDetails: {} });
         state.triggerToast("Session expired. Please log in again.", "success");
         navigate("/login");
       } else {
-        state.triggerToast(e.response.data.error, "error");
+        state.triggerToast(e.response.data.message, "error");
+        navigate("/feed");
       }
     }
   };
@@ -359,7 +314,8 @@ export const StudentSlots = () => {
         <span className="text-3xl w-full text-center mb-4">Review:</span>
 
         {interviewParams.payload && (
-          <div className="grid grid-cols-1 md:grid-cols-2 grid-flow-row p-3 gap-3">
+          <div className="justify-center">
+            <p>Name : {interviewerName}</p>
             <p>Date : {interviewParams.payload.date}</p>
             <p>Time Slot : {interviewParams.payload.timings}</p>
           </div>

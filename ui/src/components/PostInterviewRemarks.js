@@ -37,7 +37,7 @@ export const PostInterviewRemarks = () => {
   ];
 
   const [formState, setFormState] = useState(initialState);
-  
+
   const interviewDetails = state.interviewDetails;
 
   useEffect(() => {
@@ -49,9 +49,12 @@ export const PostInterviewRemarks = () => {
   }, []);
 
   const getInterviewInfo = async () => {
-    const { data } = await axios.get(`http://localhost:4000/interviews/${interviewId}`, {
-      headers: { Authorization: `${localStorage.getItem("accessToken")}` },
-    });
+    const { data } = await axios.get(
+      `http://localhost:4000/interview/${interviewId}`,
+      {
+        headers: { Authorization: `${localStorage.getItem("accessToken")}` },
+      }
+    );
     console.log(data);
     return data;
   };
@@ -59,14 +62,19 @@ export const PostInterviewRemarks = () => {
   const updateRemarks = async () => {
     try {
       let payload = formState;
-      console.log(payload)
-      const interviewURL = `http://localhost:4000/interviews/${interviewId}`;
-      let { data, status } = await axios.patch(interviewURL, payload, {headers:{ update: "interviewremarks", Authorization: `${localStorage.getItem("accessToken")}`}});
+      console.log(payload);
+      const interviewURL = `http://localhost:4000/interview/${interviewId}`;
+      let { data, status } = await axios.patch(interviewURL, payload, {
+        headers: {
+          update: "interviewremarks",
+          Authorization: `${localStorage.getItem("accessToken")}`,
+        },
+      });
       if (status === 200) {
         setInterviewInformation(data);
         navigate("/feed");
       } else {
-        console.log(data)
+        console.log(data);
       }
     } catch (e) {
       console.log(e.response);
@@ -120,7 +128,12 @@ export const PostInterviewRemarks = () => {
                   name={criteria}
                   className="textarea textarea-bordered"
                   placeholder="Fantastic candidate!"
-                  onChange={(event) => {setFormState({ ...formState, [criteria]: event.target.value})}}
+                  onChange={(event) => {
+                    setFormState({
+                      ...formState,
+                      [criteria]: event.target.value,
+                    });
+                  }}
                 ></textarea>
               )}
             </div>

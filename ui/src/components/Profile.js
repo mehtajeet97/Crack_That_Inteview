@@ -1,10 +1,11 @@
 import { validation } from "../shared/helper.js";
 import picture from "../blank-profile-picture.jpg";
 import { useNavigate } from "react-router-dom";
-import axios from 'axios';
+import axios from "axios";
 import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../context/AuthContext.js";
 
+//To do: Reset Password Link
 export const Profile = () => {
   const navigate = useNavigate();
   const [currentProfileState, setProfileState] = useState({});
@@ -15,14 +16,14 @@ export const Profile = () => {
   const { state, updateState } = useContext(AuthContext);
   const userDetails = state.userDetails;
 
- useEffect(()=>{
-    const getUser = async ()=>{
+  useEffect(() => {
+    const getUser = async () => {
       let user = await getUserCall(userDetails._id);
       setProfileState(user);
       setOriginalProfileState(user);
     };
     getUser();
-	}, [])
+  }, []);
 
   const getUserCall = async(id) => {
     const { data } = await axios.get(`http://localhost:4000/users/${id}`,{headers:{Authorization: `${localStorage.getItem("accessToken")}`}})
@@ -41,22 +42,27 @@ export const Profile = () => {
 
   const handleCancel = () => {
     setProfileState(originalProfileState);
-    setEdit((prev) => !prev)
+    setEdit((prev) => !prev);
     setProfilePhoto(picture);
-  }
+  };
 
   const handleProfileChange = (e) => {
-    document.getElementById('profile').click();
-    if(e.target.files && e.target.files[0]){
+    document.getElementById("profile").click();
+    if (e.target.files && e.target.files[0]) {
       setProfilePhoto(URL.createObjectURL(e.target.files[0]));
     }
-  }
+  };
 
   const userProfile = async () => {
     try {
       let payload = currentProfileState;
       const userProfileURL = `http://localhost:4000/users/${state.userDetails._id}`;
-      let { data, status } = await axios.patch(userProfileURL, payload, {headers:{ update: "user-profile", Authorization: `${localStorage.getItem("accessToken")}`}});
+      let { data, status } = await axios.patch(userProfileURL, payload, {
+        headers: {
+          update: "user-profile",
+          Authorization: `${localStorage.getItem("accessToken")}`,
+        },
+      });
       if (status === 200) {
         navigate("/feed");
         setProfileState(data);
@@ -71,20 +77,19 @@ export const Profile = () => {
     }
   };
 
-
   const handleSubmit = (event) => {
     event.preventDefault();
-    const form = document.getElementById("form")  
-    const formData = new FormData(form); 
-    formData.append('profilePhoto',profilePhoto)
-    const formJson = Object.fromEntries(formData.entries())
+    const form = event.target;
+    const formData = new FormData(form);
+    formData.append("profilePhoto", profilePhoto);
+    const formJson = Object.fromEntries(formData.entries());
     let validationResult = validation.userProfile(formJson);
     console.log(validationResult);
     if (!validationResult.validationPassed) {
       setErrors(validationResult.errors);
-    }
-    else{
-      userProfile(formData, userDetails._id);
+    } else {
+      let payload = validationResult.data;
+      userProfile(payload);
     }
     if (Object.keys(errors).includes(event.target.name)) {
       let { [event.target.name]: errorLabel, ...rest } = errors;

@@ -39,9 +39,8 @@ router
   .post(upload.single("resume"), async (req, res) => {
     let payload = req.body;
 
-    if (payload.role !== "interviewer") {
+    if (payload.role === "student") {
       let file = req.file;
-      let fileLocationDisk = `./uploads/${req.body.tempFilePath}`;
       let fileLocationDB = `static/${req.body.tempFilePath}/${file.originalname}`;
       payload.resume = fileLocationDB;
     }
@@ -63,7 +62,9 @@ router
             .status(200)
             .json({ message: "User registered successfully", data: rest });
         } else {
-          fs.rmSync(fileLocationDisk, { recursive: true, force: true });
+          if (payload.role === "student") {
+            fs.rmSync(fileLocationDisk, { recursive: true, force: true });
+          }
           if (user.error === "Invalid email provided") {
             res.status(400).json({ data: [], errors: user.error });
           } else {
@@ -143,23 +144,23 @@ router
           }
         } catch (e) {
           console.log(e);
-          res.status(400).send(helpers.sendError(JSON.stringify(e)));
+          res.status(500).send(helpers.sendError(JSON.stringify(e)));
         }
       } else if (req.headers["reqtype"] == "premium-request") {
         try {
           data.method = "premium-request";
           try {
-            req.params.id = helpers.idCheck(req.params.id);
+            req.params.id = xss(helpers.idCheck(req.params.id));
           } catch (e) {
             errors.push(e);
           }
           try {
-            data.data = xss(helpers.stringCheck(data.data));
+            data.message = xss(helpers.stringCheck(data.message));
           } catch (e) {
             errors.push(e);
           }
           try {
-            data.status = helpers.stringCheck(data.status);
+            data.status = xss(helpers.stringCheck(data.status));
           } catch (e) {
             errors.push(e);
           }
@@ -169,17 +170,26 @@ router
           if (updatedUser.error) {
             throw updatedUser.data;
           }
+          if (updatedUser == "user not found") {
+            res.status(404).json(helpers.sendError("user not found"));
+          }
           res.status(200).json(helpers.sendResponse(updatedUser));
         } catch (e) {
-          res.status(500).json(helpers.sendError("internal server error"));
+          if (e.length) {
+            res.status(400).json(helpers.sendError("bad request"));
+          } else {
+            res.status(500).json(helpers.sendError("internal server error"));
+          }
         }
       } else if (req.headers["update"] == "premium") {
         // console.log("in user route updating premium", data);
         try {
           // if (validationResult.validationPassed) {
+          if (data.role !== "admin") throw "not admin";
           if (helpers.idCheck(data.userId)) {
             let updateResult = await users.updateUserPremiumStatus(data);
             if (!updateResult) throw `Internal Server Error`;
+            if (updateResult === "user not found") throw "user not found";
             res.status(200).json(helpers.sendResponse(updateResult));
           } else {
             res
@@ -187,14 +197,20 @@ router
               .send(helpers.sendError(JSON.stringify(validationResult.errors)));
           }
         } catch (e) {
-          res.status(400).send(helpers.sendError(JSON.stringify(e)));
+          if (e === "user not found") {
+            res.status(404).json(helpers.sendError(e));
+          } else if (e == "not admin") {
+            res.status(401).json(helpers.sendError(e));
+          } else {
+            res.status(400).send(helpers.sendError(JSON.stringify(e)));
+          }
         }
       } else if (req.headers["update"] === "readBlogs") {
         if (!data || Object.keys(data).length === 0) {
           return "error while liking the blog";
         }
         try {
-          req.params.id = helpers.idCheck(req.params.id);
+          req.params.id = xss(helpers.idCheck(req.params.id));
         } catch (e) {
           errors.push(e);
         }
