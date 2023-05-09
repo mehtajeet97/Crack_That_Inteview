@@ -135,6 +135,7 @@ export const DetailBlog = () => {
               `http://localhost:4000/users/${userId}`,
               {
                 blogId: id,
+                blogTitle: blog.title,
               },
               headers
             )

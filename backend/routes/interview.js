@@ -16,6 +16,9 @@ router
   })
   .post(async (req, res) => {
     let data = req.body;
+    let payloadDate = data.payload.date;
+    let payloadtimings = data.payload.timings;
+
     try {
       data.userId = helpers.idCheck(data.userId);
       data.interviewerId = helpers.idCheck(data.interviewerId);
@@ -28,13 +31,30 @@ router
         userName,
         interviewerName,
         data.payload,
-        "Scheduled"
+        "scheduled"
       );
-      await users.updateUpcomingInterview(data.userId, data.payload);
-      await users.updateUpcomingInterview(data.interviewerId, data.payload); //returns {success:true} or error
+
+      const interviewId = addInterview.insertedId;
+      let interviewerpayload = {
+        interviewid: interviewId,
+        studentName: userName,
+        date: payloadDate,
+        timings: payloadtimings,
+      };
+      let studentpayload = {
+        interviewid: interviewId,
+        interviewerName: interviewerName,
+        date: payloadDate,
+        timings: payloadtimings,
+      };
+      await users.updateUpcomingInterview(data.userId, studentpayload);
+      await users.updateUpcomingInterview(
+        data.interviewerId,
+        interviewerpayload
+      ); //returns {success:true} or error
       await users.removeAvailableSlots(data.interviewerId, data.payload);
 
-      if (addInterview.success) {
+      if (addInterview.acknowledged === true) {
         res.status(200).json("Created Interview");
       } else {
         res
@@ -51,10 +71,9 @@ router
 router
   .route("/:id")
   .get(async (req, res) => {
-    req.params.id = helpers.idCheck(req.params.id);
     try {
+      req.params.id = helpers.idCheck(req.params.id);
       const interviews = await interview.getInterviewById(req.params.id);
-
       res.status(200).send(interviews);
     } catch (e) {
       res.status(400).send(e);

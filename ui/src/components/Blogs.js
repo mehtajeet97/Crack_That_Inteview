@@ -66,9 +66,9 @@ export const Blogs = () => {
         </span>
       </div>
       <div className=" my-6 px-6 py-4  mx-auto rounded-lg bg-lime-200 text-black">
-        <h3 className="block font-bold text-xl mb-2  ">
+        <h1 className="block font-bold text-xl mb-2  ">
           Get Blogs By Your Skills
-        </h3>
+        </h1>
         <button
           className="bg-yellow-300 px-3 py-2 text-red-400 m-3 rounded-lg"
           key={" all"}
@@ -125,9 +125,9 @@ export const Blogs = () => {
                       }
                       state={{ data: blog }}
                     >
-                      <h3 className="capitalize px-5 py-2 max-w-sm overflow-hidden">
+                      <h1 className="capitalize px-5 py-2 max-w-sm overflow-hidden">
                         {blog.title}
-                      </h3>
+                      </h1>
                     </Link>
                   </div>
                   <span className="self-center">👍{blog.upVotesCount}</span>

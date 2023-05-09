@@ -236,30 +236,30 @@ export const StudentSlots = () => {
                     onClick={() => handleSelectInterviewer(card)}
                     className="px-6 py-4 cursor-pointer"
                   >
-                    <div className="font-bold text-xl mb-2">
+                    <div className="font-bold text-xl mb-2 text-black">
                       {card.firstName} {card.lastName}
                     </div>
 
-                    <p className="text-gray-700 text-base">
-                      Skills : {card.skills && card.skills}
+                    <p className="text-gray-700 text-base mb-1">
+                      Skills : {card.skills && card.skills.join(",")},
                     </p>
 
-                    <p className="text-gray-700 text-base">
-                      {!card.skills && `Not Disclosed.`}
+                    <p className="text-gray-700 text-base mb-1">
+                      {!card.skills && `(Not Disclosed)`}
                     </p>
 
-                    <p className="text-gray-700 text-base">
+                    <p className="text-gray-700 text-base mb-1">
                       Company : {card.organization && card.organization}
                     </p>
-                    <p className="text-gray-700 text-base">
-                      {!card.organization && `Not Disclosed.`}
+                    <p className="text-gray-700 text-base mb-1">
+                      {!card.organization && `(Not Disclosed)`}
                     </p>
 
                     <p className="text-gray-700 text-base">
-                      Years of Experience: {card.yoe && card.yoe}
+                      Experience: {card.yoe && card.yoe}
                     </p>
                     <p className="text-gray-700 text-base">
-                      {!card.yoe && `Not Disclosed.`}
+                      {!card.yoe && `(Not Disclosed)`}
                     </p>
                   </div>
                 </div>

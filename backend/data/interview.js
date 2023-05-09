@@ -48,14 +48,14 @@ const createInterview = async (
     interviewDate,
   });
   if (findInterview) {
-    return { success: false };
+    throw "Cannot add interview";
   } else {
     const insertInterview = await interviewCollection.insertOne(interview);
     if (!insertInterview.acknowledged || !insertInterview.insertedId)
       throw "Cannot add interview";
     const newId = insertInterview.insertedId.toString();
     interview._id = newId;
-    return { success: true };
+    return insertInterview;
   }
 };
 
