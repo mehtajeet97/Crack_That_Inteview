@@ -90,9 +90,9 @@ export const Trending = () => {
                         }
                         state={{ data: blog }}
                       >
-                        <h3 className="capitalize w-8/9 h-1/3 px-5 py-2 font-bold overflow-scrollable">
+                        <h1 className="capitalize w-8/9 h-1/3 px-5 py-2 font-bold overflow-scrollable">
                           {blog.title}
-                        </h3>
+                        </h1>
                       </Link>
                       <span className="self-center">👍{blog.upVotesCount}</span>
                       <span className="self-center">
@@ -141,6 +141,7 @@ export const Trending = () => {
                       <img
                         src={picture}
                         className="max-h-8 max-w-8  m-2 rounded-full inline"
+                        alt="profile picture"
                       />
 
                       <span>{user.firstName + user.lastName}</span>

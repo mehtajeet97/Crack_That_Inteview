@@ -51,6 +51,7 @@ export const Premium = () => {
             <img
               src={support}
               className="max-h-20 max-w-20 m-10 rounded-lg self-center flex-wrap"
+              alt="top interviewers"
             />
             <span>
               <h1 className="font-bold"> Interviews With Top Interviewers</h1>
@@ -60,10 +61,11 @@ export const Premium = () => {
               </p>
             </span>
           </div>
-          <div className="flex flex-col items-start p-5  max-h-fit space-y bg-blue-700 basis-2/7 rounded-lg   shadow-lg text-white text-truncate flex-wrap">
+          <div className="flex flex-col items-start p-5  max-h-fit space-y bg-blue-700 basis-2/7 rounded-lg justify-around  shadow-lg text-white text-truncate flex-wrap">
             <img
               src={test}
               className="bg-white max-h-20 max-w-20 m-5 rounded-lg self-center "
+              alt="top questions"
             />
             <h1 className="font-bold">
               {" "}
@@ -81,6 +83,7 @@ export const Premium = () => {
             <img
               src={blog}
               className="bg-white max-h-20 max-w-20 m-5 rounded-lg self-center "
+              alt="premium blogs and news letters"
             />
             <h1 className="font-bold">
               {" "}
