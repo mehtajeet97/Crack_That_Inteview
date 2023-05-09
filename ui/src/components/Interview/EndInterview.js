@@ -43,7 +43,7 @@ export const EndInterview = () => {
           );
           navigate("/login");
         } else {
-          state.triggerToast(e.response.data.message, "error");
+          state.triggerToast(e.response.data, "error");
           navigate("/feed");
         }
       }

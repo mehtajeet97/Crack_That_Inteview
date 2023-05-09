@@ -116,7 +116,7 @@ export const InterviewRecords = () => {
               <tbody>
                 {upcoming.map((interview) => {
                   return (
-                    <tr key={"num"}>
+                    <tr>
                       {userDetails.role === "interviewer" ? (
                         <td>{interview.studentName}</td>
                       ) : (
@@ -166,14 +166,14 @@ export const InterviewRecords = () => {
               <tbody>
                 {past.map((interview) => {
                   return (
-                    <tr key={"num"}>
+                    <tr>
                       {userDetails.role === "interviewer" ? (
                         <td>{interview.studentName}</td>
                       ) : (
                         <td>{interview.interviewerName}</td>
                       )}
                       <td>{interview.date}</td>
-                      <td>{interview.duration}</td>
+                      <td>{interview.timings}</td>
                     </tr>
                   );
                 })}

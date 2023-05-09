@@ -464,6 +464,7 @@ const moveToPast = async (userid, interviewId) => {
     (interview) =>
       JSON.stringify(interview.interviewid) === JSON.stringify(interviewId)
   );
+  console.log(foundInterview);
   if (foundInterview) {
     user.upcomingInterviews.splice(
       user.upcomingInterviews.indexOf(foundInterview),

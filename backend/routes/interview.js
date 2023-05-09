@@ -71,10 +71,9 @@ router
 router
   .route("/:id")
   .get(async (req, res) => {
-    req.params.id = helpers.idCheck(req.params.id);
     try {
+      req.params.id = helpers.idCheck(req.params.id);
       const interviews = await interview.getInterviewById(req.params.id);
-
       res.status(200).send(interviews);
     } catch (e) {
       res.status(400).send(e);
