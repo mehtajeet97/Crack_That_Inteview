@@ -20,6 +20,9 @@ import { Register } from "./components/Register.js";
 import { ProtectedRoutes } from "./components/ProtectedRoutes.js";
 import { Premium } from "./components/Premium.js";
 import { DetailBlog } from "./components/DetailBlog.js";
+
+import { StartInterview } from "./components/Interview/StartInterview.js";
+import { EndInterview } from "./components/Interview/EndInterview.js";
 import { OnGoingInterview } from "./components/Interview/OnGoingInterview.js";
 import { InterviewerSlots } from "./components/Interview/InterviewerSlots.js";
 import { StudentSlots } from "./components/Interview/StudentSlots.js";
@@ -76,7 +79,22 @@ const router = createBrowserRouter([
           </ProtectedRoutes>
         ),
       },
-
+      {
+        path: "startinterview",
+        element: (
+          <ProtectedRoutes>
+            <StartInterview />
+          </ProtectedRoutes>
+        ),
+      },
+      {
+        path: "interview/:interviewId",
+        element: (
+          <ProtectedRoutes>
+            <EndInterview />
+          </ProtectedRoutes>
+        ),
+      },
       {
         path: "test-yourself",
         element: (
