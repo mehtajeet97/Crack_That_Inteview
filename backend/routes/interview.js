@@ -27,13 +27,21 @@ router
       const addInterview = await interview.createInterview(
         userName,
         interviewerName,
-        data.payload
+        data.payload,
+        "Scheduled"
       );
+      await users.updateUpcomingInterview(data.userId, data.payload);
+      await users.updateUpcomingInterview(data.interviewerId, data.payload); //returns {success:true} or error
+      await users.removeAvailableSlots(data.interviewerId, data.payload);
 
       if (addInterview.success) {
         res.status(200).json("Created Interview");
       } else {
-        res.status(400).json(helpers.sendError("Interview already created!!!"));
+        res
+          .status(400)
+          .json(
+            helpers.sendError("Interview already created! Please try again")
+          );
       }
     } catch (e) {
       res.status(500).json(helpers.sendError(e)); //SendError necessary for toast
@@ -46,7 +54,8 @@ router
     req.params.id = helpers.idCheck(req.params.id);
     try {
       const interviews = await interview.getInterviewById(req.params.id);
-      res.send(interviews);
+
+      res.status(200).send(interviews);
     } catch (e) {
       res.status(400).send(e);
     }
@@ -67,13 +76,16 @@ router
     }
   })
   .patch(async (req, res) => {
-    try{
-    let remarks = req.body;
-    const updatedRemarks = await interview.addInterviewRemarks(req.params.id, remarks);
-    res.status(200).json(updatedRemarks);
-    } catch(e){
-    res.status(400).json(e);
+    try {
+      let remarks = req.body;
+      const updatedRemarks = await interview.addInterviewRemarks(
+        req.params.id,
+        remarks
+      );
+      res.status(200).json(updatedRemarks);
+    } catch (e) {
+      res.status(400).json(e);
     }
-  })
+  });
 
 export default router;

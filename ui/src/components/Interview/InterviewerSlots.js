@@ -125,12 +125,12 @@ export const InterviewerSlots = () => {
         state.triggerToast("Interview slots could not be added", "error");
       }
     } catch (e) {
-      if (e.response.data.error === "Access Token expired") {
+      if (e.response.data.message === "Access Token expired") {
         localStorage.clear();
         updateState({ ...state, isLoggedIn: false, userDetails: {} });
         state.triggerToast("Session expired. Please log in again.", "success");
       } else {
-        state.triggerToast(e.response.data.error, "error");
+        state.triggerToast(e.response.data.message, "error");
         setSelectedSlots([]);
         setDisabledDates([]);
         setPageStep(0);
