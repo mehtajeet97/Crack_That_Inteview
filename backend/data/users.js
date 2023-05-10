@@ -175,6 +175,11 @@ const patchUser = async (id, data) => {
       } catch (e) {
         error.push(e);
       }
+      try {
+        data.blogId = stringCheck(data.blogTitle);
+      } catch (e) {
+        error.push(e);
+      }
     }
 
     const userCollection = await users();
@@ -186,7 +191,7 @@ const patchUser = async (id, data) => {
       user.requestPremium = data;
       user = { ...user };
     } else {
-      if (!user.blogs.includes(data.blogId)) user.blogs.push(data.blogId);
+      if (!user.blogs.includes(data.blogId)) user.blogs.push(data.blogTitle);
     }
 
     const updatedInfo = await userCollection.findOneAndUpdate(
@@ -208,6 +213,7 @@ const patchUser = async (id, data) => {
       throw "could not update the user details";
     }
     updatedInfo.value._id = updatedInfo.value._id.toString();
+    // console.log(updatedInfo);
     return { data: updatedInfo.value, error: false };
   } catch (e) {
     return { data: e, error: true };
@@ -278,7 +284,7 @@ export const updateUserBanStatus = async (userDetails) => {
     let { password, ...rest } = value;
     return rest;
   } catch (e) {
-    console.log(e);
+    // console.log(e);
     return false;
   }
 };
@@ -464,7 +470,8 @@ const moveToPast = async (userid, interviewId) => {
     (interview) =>
       JSON.stringify(interview.interviewid) === JSON.stringify(interviewId)
   );
-  console.log(foundInterview);
+  // console.log(foundInterview);
+
   if (foundInterview) {
     user.upcomingInterviews.splice(
       user.upcomingInterviews.indexOf(foundInterview),

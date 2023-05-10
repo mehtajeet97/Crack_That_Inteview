@@ -16,6 +16,10 @@ import Select from "react-select";
 export const Admin = () => {
   const navigate = useNavigate();
   const { state, updateState } = useContext(AuthContext);
+  if (state?.userDetails?.role.toLowerCase() !== "admin") {
+    navigate(`/feed`);
+  }
+
   const [usersData, setUsersData] = useState([]);
   const [interviewsData, setInterviewsData] = useState([]);
   const [filteredUserData, setFilteredUserData] = useState([]);
@@ -44,6 +48,10 @@ export const Admin = () => {
     { value: "docker", label: "Docker", type: "skills" },
   ];
   useEffect(() => {
+    if (JSON.parse(localStorage.getItem("userDetails"))?.role !== "admin") {
+      localStorage.clear();
+      navigate("/login");
+    }
     const getUser = async () => {
       let userData = await getUserCall();
       if (userData?.length) {
@@ -165,6 +173,7 @@ export const Admin = () => {
   };
   const updatePremium = async (payload) => {
     try {
+      // console.log(payload);
       const userURL = `http://localhost:4000/users/${payload.userId}`;
       let { data, status } = await axios.patch(userURL, payload, {
         headers: {
@@ -226,7 +235,7 @@ export const Admin = () => {
       isPremiumUser:
         event.target.textContent.toLowerCase() === "approve" ? true : false,
     };
-
+    // console.log(payload);
     await updatePremium(payload);
   };
   const searchUser = () => {
@@ -498,18 +507,21 @@ export const Admin = () => {
                               "rejected" ||
                             user.role === "admin"
                           }
-                          htmlFor="my-modal-6"
+                          htmlFor={user._id}
                           className="btn btn-ghost btn-xs col-span-2"
+                          // onClick={(event, user) => {
+                          //   console.log(event.target);
+                          // }}
                         >
                           View Request
                         </label>
 
                         <input
                           type="checkbox"
-                          id="my-modal-6"
+                          id={user._id}
                           className="modal-toggle"
                         />
-                        <div className="modal modal-bottom sm:modal-middle">
+                        <div className="modal modal-middle sm:modal-middle">
                           <div className="modal-box">
                             <h3 className="font-bold text-lg">
                               {` Application ${user.firstName} for Premium Status`}
@@ -519,7 +531,7 @@ export const Admin = () => {
                             </p>
                             <div className="modal-action">
                               <label
-                                htmlFor="my-modal-6"
+                                htmlFor={user._id}
                                 className="btn"
                                 onClick={(event) =>
                                   handleUserRequest(user, event)
@@ -528,7 +540,7 @@ export const Admin = () => {
                                 Approve
                               </label>
                               <label
-                                htmlFor="my-modal-6"
+                                htmlFor={user._id}
                                 className="btn"
                                 onClick={(event) =>
                                   handleUserRequest(user, event)
@@ -536,7 +548,7 @@ export const Admin = () => {
                               >
                                 Reject
                               </label>
-                              <label htmlFor="my-modal-6" className="btn">
+                              <label htmlFor={user._id} className="btn">
                                 Cancel
                               </label>
                             </div>
@@ -759,8 +771,9 @@ export const Admin = () => {
                                 className="w-full h-full rounded-xl px-3 py-2  "
                                 disabled={true}
                                 id={`${blog._id}+form`}
-                                value={blog.content}
-                              ></textarea>
+                              >
+                                {blog.content}
+                              </textarea>
                             </div>
 
                             <div className="modal-action">

@@ -8,6 +8,7 @@ const emailTemplate = {
 
 const getHTMLEmail = (user, mailType) => {
   let templates = {
+    scheduled: `Congrats, ${user.firstName}! Your Interview has been scheduled`,
     register: `Welcome, ${user.firstName}!`,
     login: `Welcome back, ${user.firstName}!`,
   };

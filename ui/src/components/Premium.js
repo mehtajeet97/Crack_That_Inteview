@@ -18,7 +18,6 @@ export const Premium = () => {
   const navigate = useNavigate();
   const { state, updateState } = useContext(AuthContext);
   const userDetails = state.userDetails;
-  console.log(userDetails);
 
   const userIsPremium = userDetails.isPremiumUser;
   const userId = userDetails._id;
@@ -33,6 +32,10 @@ export const Premium = () => {
 
   if (userIsPremium) {
     return <Navigate to="/feed" />;
+  }
+  if (userDetails.role !== "student") {
+    state.triggerToast("only students can access premium request", "warning");
+    return <Navigate to="/login" />;
   }
   const premiumPage1 = (
     <div className=" rounded-lg bg-cover h-full ">

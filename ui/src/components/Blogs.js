@@ -40,9 +40,9 @@ export const Blogs = () => {
         });
         setfilteredBlogs(data.data);
         setAllBlogs(data.data);
-        skillState(0);
+        skillStateSet(0);
       } catch (e) {
-        if (e.response.status === 401) {
+        if (e.response?.status === 401) {
           state.triggerToast(
             "Your session has been expired. Please log in.",
             "error"
@@ -56,6 +56,11 @@ export const Blogs = () => {
       }
     }
     fetchData();
+    if (JSON.parse(localStorage.getItem("userDetails"))?.role !== "student") {
+      state.triggerToast("only students can access premium request", "warning");
+      localStorage.clear();
+      navigate("/login");
+    }
   }, []);
 
   return (

@@ -44,8 +44,8 @@ export const InterviewRecords = () => {
         const interview = data[i];
 
         const dateString = interview.timings;
-        const parts = dateString.split(" to ");
-        const hours = parseInt(parts[0].split(":")[0], 10);
+        const parts = dateString?.split(" to ");
+        const hours = parseInt(parts[0]?.split(":")[0], 10);
         // const minutes = parseInt(parts[0].split(":")[1], 10);
         const amPm = parts[1];
 

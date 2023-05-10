@@ -65,7 +65,7 @@ export const StudentSlots = () => {
   const handleSelectInterviewer = (interviewer) => {
     setInterviewId(interviewer._id);
     setInterviewerName(interviewer.firstName + " " + interviewer.lastName);
-    renderOptions(interviewer.availableSlots);
+    renderOptions(interviewer?.availableSlots);
     next();
   };
   //
@@ -224,7 +224,7 @@ export const StudentSlots = () => {
           </button>
         </div>
 
-        {interviewerCards.length > 0 && (
+        {interviewerCards?.length > 0 && (
           <div className="flex w-full justify-around items-center md:flex-row flex-col mt-3">
             <div className="grid lg:grid-cols-4 sm:grid-cols-2 gap-4 grid-cols-1">
               {interviewerCards.map((card, idx) => (
