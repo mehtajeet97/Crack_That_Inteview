@@ -56,6 +56,11 @@ export const Blogs = () => {
       }
     }
     fetchData();
+    if (JSON.parse(localStorage.getItem("userDetails"))?.role !== "student") {
+      state.triggerToast("only students can access premium request", "warning");
+      localStorage.clear();
+      navigate("/login");
+    }
   }, []);
 
   return (
