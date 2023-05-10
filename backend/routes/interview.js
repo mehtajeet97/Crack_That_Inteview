@@ -3,6 +3,7 @@ import { interviewData as interview } from "../data/index.js";
 import users from "../data/users.js";
 import * as helpers from "../helpers.js";
 const router = Router();
+import { sendEmail } from "../config/mail.js";
 
 router
   .route("/")
@@ -33,17 +34,18 @@ router
         data.payload,
         "scheduled"
       );
+      await sendEmail(user, "scheduled");
 
       const interviewId = addInterview.insertedId;
       let interviewerpayload = {
         interviewid: interviewId,
-        studentName: userName,
+        name: userName,
         date: payloadDate,
         timings: payloadtimings,
       };
       let studentpayload = {
         interviewid: interviewId,
-        interviewerName: interviewerName,
+        name: interviewerName,
         date: payloadDate,
         timings: payloadtimings,
       };

@@ -16,6 +16,10 @@ import Select from "react-select";
 export const Admin = () => {
   const navigate = useNavigate();
   const { state, updateState } = useContext(AuthContext);
+  if (state?.userDetails?.role.toLowerCase() !== "admin") {
+    navigate(`/feed`);
+  }
+
   const [usersData, setUsersData] = useState([]);
   const [interviewsData, setInterviewsData] = useState([]);
   const [filteredUserData, setFilteredUserData] = useState([]);
