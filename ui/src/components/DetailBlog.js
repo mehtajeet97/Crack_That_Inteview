@@ -64,6 +64,7 @@ export const DetailBlog = () => {
   const headers = {
     headers: {
       Authorization: localStorage.getItem("accessToken"),
+      update: "readBlogs",
     },
   };
 
@@ -116,7 +117,6 @@ export const DetailBlog = () => {
         origBlog.downVotes.length !== blog.downVotes.length)
     ) {
       return () => {
-        console.log("i shouldnt run");
         try {
           const errors = [];
           const id = location.pathname.split("/")[2];
@@ -141,7 +141,7 @@ export const DetailBlog = () => {
             )
             .catch((e) => errors.push(e));
         } catch (e) {
-          console.log(e);
+          navigate("/blogs");
         }
       };
     }
