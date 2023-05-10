@@ -260,7 +260,7 @@ export const validation = {
       result.errors.phoneNumber = "Invalid Phone Number provided!"
     }
     else{
-      result.data.phoneNumber = phoneNumber?.trim().toTitleCase();
+      result.data.phoneNumber = phoneNumber;
     }
 
     if(linkedin && !(/(https?)?:?(\/\/)?(([w]{3}||\w\w)\.)?linkedin.com(\w+:{0,1}\w*@)?(\S+)(:([0-9])+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/.test(linkedin))){
