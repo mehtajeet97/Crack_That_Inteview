@@ -7,8 +7,6 @@ export const ProtectedRoutes = ({ children }) => {
   const isLoggedIn =
     localStorage.getItem("accessToken") && localStorage.getItem("userDetails");
   const navigate = useNavigate();
-  console.log("From protected routes");
-  console.log({ isLoggedIn });
 
   // const checkUserToken = () => {
   //   const accessToken = localStorage.getItem("accessToken");

@@ -27,6 +27,7 @@ import { InterviewRecords } from "./components/Interview/InterviewRecords.js";
 import { OnGoingInterview } from "./components/Interview/OnGoingInterview.js";
 import { EndInterview } from "./components/Interview/EndInterview.js";
 import { PostInterviewRemarks } from "./components/PostInterviewRemarks.js";
+import { Exam } from "./components/Exam/Exam.js";
 
 import { Admin } from "./components/Admin.js";
 
@@ -102,6 +103,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoutes>
             <TestYourself />
+          </ProtectedRoutes>
+        ),
+      },
+      {
+        path: "exams/:examId",
+        element: (
+          <ProtectedRoutes>
+            <Exam />
           </ProtectedRoutes>
         ),
       },

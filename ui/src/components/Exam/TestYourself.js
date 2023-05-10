@@ -3,7 +3,7 @@ import { QuestionCard } from "./QuestionCard.js";
 import { TestCard } from "./TestCard.js";
 import { TestResult } from "./TestResult.js";
 import { AuthContext } from "../../context/AuthContext.js";
-import { useBeforeUnload } from "react-router-dom";
+import { useBeforeUnload, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 export const TestYourself = () => {
@@ -12,27 +12,17 @@ export const TestYourself = () => {
   let userDetails = state.userDetails;
 
   const [formState, setFormState] = useState({
-    skill: "Pick one",
+    skill: "pick one",
     role: userDetails.role,
-    _id: userDetails._id,
+    userId: userDetails._id,
   });
+
+  let navigate = useNavigate();
 
   const [flag, setFlag] = useState(false);
   const greetMessage = "Congratulations! 🎉🥺";
   const [counter, setCount] = useState(10);
-  const testsOfInterest = [
-    "Python",
-    "Docker",
-    "SQL",
-    "Java",
-    "C++",
-    "C",
-    "Javascript",
-    "HTML",
-    "CSS",
-    "React",
-    "Angular",
-  ];
+  const testsOfInterest = ["Python"];
 
   const handleFieldChange = (event) => {
     const updatedState = {
@@ -86,21 +76,24 @@ export const TestYourself = () => {
   };
 
   const nextPage = () => setPageStep(pageStep + 1);
-  const beginTest = () => {
-    console.log("Test");
-  };
-  const onInitializeTest = async (e) => {
-    let payload = {
-      role: userDetails.role,
-      skill: formState.skill,
-      _id: userDetails._id,
+  const beginTest = async () => {
+    let payload = formState;
+    let initiateExamURL = "http://localhost:4000/exams";
+    let options = {
+      headers: {
+        Authorization: localStorage.getItem("accessToken"),
+      },
     };
-    console.log(payload);
-    setPageStep(pageStep + 1);
-    // let initialTestData = axios.post();
+    try {
+      let {
+        data: { data },
+      } = await axios.post(initiateExamURL, payload, options);
+      navigate(`/exams/${data._id}`);
+    } catch (e) {
+      console.log(e);
+      state.triggerToast(JSON.stringify(e), "error");
+    }
   };
-
-  const layout = <div className="hero min-h-[50%] text-blue-700"></div>;
 
   const pages = [
     <div className="flex flex-col justify-around h-[60%] max-w-lg text-center">
@@ -130,7 +123,6 @@ export const TestYourself = () => {
             Pick a technical skill you'd love to test yourself.
           </span>
         </label>
-
         <select
           name="skill"
           value={formState.skill}
@@ -138,7 +130,9 @@ export const TestYourself = () => {
           id="skill"
           className="select select-bordered bg-blue-700 text-white"
         >
-          <option disabled>Pick one</option>
+          <option disabled={formState.skill !== "pick one"} value={"pick one"}>
+            Pick one
+          </option>
           {testsOfInterest.map((test, idx) => (
             <option key={idx} value={test.toLowerCase()}>
               {test}
@@ -148,7 +142,8 @@ export const TestYourself = () => {
         <button
           type="submit"
           className="btn bg-white mt-4 text-blue-700 hover:bg-blue-700 hover:text-white hover:border-2 hover:border-white"
-          onClick={onInitializeTest}
+          onClick={() => setPageStep(pageStep + 1)}
+          disabled={formState.skill === "pick one"}
         >
           Let's go!
         </button>
