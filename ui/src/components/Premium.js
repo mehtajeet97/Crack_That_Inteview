@@ -160,7 +160,8 @@ export const Premium = () => {
         state.triggerToast("Your Request Has Been Submitted", "success");
         toggleChange();
         setFlag(1);
-        navigate("/feed");
+        // navigate("/feed");
+        setMark(0);
       } catch (e) {
         console.log(e);
         state.triggerToast(

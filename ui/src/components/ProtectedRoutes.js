@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Login } from "./Login.js";
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
+import { Admin } from "./Admin.js";
 
 export const ProtectedRoutes = ({ children }) => {
   const isLoggedIn =
@@ -23,5 +24,17 @@ export const ProtectedRoutes = ({ children }) => {
   //   checkUserToken();
   // }, [isLoggedIn]);
 
-  return <>{isLoggedIn ? children : <Login />}</>;
+  return (
+    <>
+      {isLoggedIn ? (
+        JSON.parse(localStorage.getItem("userDetails")).role === "admin" ? (
+          <Admin />
+        ) : (
+          children
+        )
+      ) : (
+        <Login />
+      )}
+    </>
+  );
 };
