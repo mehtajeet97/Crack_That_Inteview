@@ -1,4 +1,7 @@
-/**user premium  */
+/**user premium
+ * need help in update the status as soon as the user submits a request if cant resolve we can set the
+ * redirect to the premium page as soon as he hits
+ */
 
 import { useEffect, useState, useContext } from "react";
 // import { PremiumPage1 } from "./PremiumPage1.js";
@@ -15,7 +18,6 @@ export const Premium = () => {
   const navigate = useNavigate();
   const { state, updateState } = useContext(AuthContext);
   const userDetails = state.userDetails;
-  console.log(userDetails);
 
   const userIsPremium = userDetails.isPremiumUser;
   const userId = userDetails._id;
@@ -30,6 +32,10 @@ export const Premium = () => {
 
   if (userIsPremium) {
     return <Navigate to="/feed" />;
+  }
+  if (userDetails.role !== "student") {
+    state.triggerToast("only students can access premium request", "warning");
+    return <Navigate to="/login" />;
   }
   const premiumPage1 = (
     <div className=" rounded-lg bg-cover h-full ">
@@ -48,6 +54,7 @@ export const Premium = () => {
             <img
               src={support}
               className="max-h-20 max-w-20 m-10 rounded-lg self-center flex-wrap"
+              alt="top interviewers"
             />
             <span>
               <h1 className="font-bold"> Interviews With Top Interviewers</h1>
@@ -57,10 +64,11 @@ export const Premium = () => {
               </p>
             </span>
           </div>
-          <div className="flex flex-col items-start p-5  max-h-fit space-y bg-blue-700 basis-2/7 rounded-lg   shadow-lg text-white text-truncate flex-wrap">
+          <div className="flex flex-col items-start p-5  max-h-fit space-y bg-blue-700 basis-2/7 rounded-lg justify-around  shadow-lg text-white text-truncate flex-wrap">
             <img
               src={test}
               className="bg-white max-h-20 max-w-20 m-5 rounded-lg self-center "
+              alt="top questions"
             />
             <h1 className="font-bold">
               {" "}
@@ -78,6 +86,7 @@ export const Premium = () => {
             <img
               src={blog}
               className="bg-white max-h-20 max-w-20 m-5 rounded-lg self-center "
+              alt="premium blogs and news letters"
             />
             <h1 className="font-bold">
               {" "}
@@ -93,9 +102,9 @@ export const Premium = () => {
           </div>
         </div>
         <div className="capitalize flex flex-col max-h-min w-1/5 py-2 items-center m-10 bg-blue-700 rounded-lg text-white font-bold">
-          {userDetails.requestPremium ? (
+          {userDetails.requestPremium.status !== "new" ? (
             <>
-              <p>Status : "{state.userDetails.requestPremium.status}"</p>
+              <p>Status : "{userDetails.requestPremium.status}"</p>
             </>
           ) : (
             <button
@@ -113,6 +122,24 @@ export const Premium = () => {
       </div>
     </div>
   );
+  const update = (res) => {
+    localStorage.setItem(
+      "userDetails",
+      JSON.stringify({
+        ...JSON.parse(localStorage.getItem("userDetails")),
+        requestPremium: res.data.data.data.requestPremium,
+      })
+    );
+    updateState({
+      ...state,
+      isLoggedIn: false,
+      userDetails: {
+        ...userDetails,
+        request: res.data.data.data.requestPremium,
+      },
+    });
+    return null;
+  };
   const handleSubmit = async (event) => {
     event.preventDefault();
     let payload = event.target[0].value;
@@ -121,7 +148,7 @@ export const Premium = () => {
         setFlag(0);
         const res = await axios.patch(
           `http://localhost:4000/users/${userId}`,
-          { data: payload, status: "pending" },
+          { message: payload, status: "pending" },
           {
             headers: {
               reqType: "premium-request",
@@ -129,22 +156,13 @@ export const Premium = () => {
             },
           }
         );
-        localStorage.setItem(
-          "userDetails",
-          JSON.stringify({
-            ...JSON.parse(localStorage.getItem("userDetails")),
-            requestPremium: res.data.data.data.requestPremium,
-          })
-        );
-        updateState({
-          ...state,
-          isLoggedIn: false,
-          userDetails: { ...userDetails, request: res.data.data.data.request },
-        });
+        update(res);
         state.triggerToast("Your Request Has Been Submitted", "success");
         toggleChange();
         setFlag(1);
+        navigate("/feed");
       } catch (e) {
+        console.log(e);
         state.triggerToast(
           "Your session has been expired. Please log in.",
           "error"

@@ -6,6 +6,7 @@
 import Router from "express";
 import { articleData as articles } from "../data/index.js";
 import * as helpers from "../helpers.js";
+import xss from "xss";
 
 const router = Router();
 
@@ -27,9 +28,14 @@ router
     try {
       let data = req.body;
       const errors = [];
+      if (data.role !== "admin") {
+        throw "invalid role";
+      }
+
+      delete data.role;
 
       try {
-        data.content = helpers.stringCheck(data.content);
+        data.content = xss(helpers.stringCheck(data.content));
       } catch (e) {
         errors.push(e);
       }
@@ -40,7 +46,7 @@ router
         errors.push(e);
       }
       try {
-        data.title = helpers.stringCheck(data.title);
+        data.title = xss(helpers.stringCheck(data.title));
       } catch (e) {
         errors.push(e);
       }
@@ -49,16 +55,25 @@ router
       } catch (e) {
         errors.push(e);
       }
-      console.log(data);
+      // console.log(data);
       if (errors.length > 0) throw errors;
       const addArticle = await articles.createArticle(data);
-      if (addArticle.err) {
-        throw addArticle.data;
-      }
 
-      res.status(200).json(helpers.sendResponse(addArticle.data));
+      if (addArticle.err) {
+        res.status(500).json(helpers.sendError("internal server error"));
+      } else {
+        res.status(200).json(helpers.sendResponse(addArticle.data));
+      }
     } catch (e) {
-      res.status(400).json(helpers.sendError(e));
+      if (e === "invalid role") {
+        res
+          .status(401)
+          .json(helpers.sendResponse("you are not allowed to edit blogs"));
+      } else if (e === "missing credentials") {
+        res.status(401).json(helpers.sendResponse("missing login credentials"));
+      } else {
+        res.status(400).json(helpers.sendError(e));
+      }
     }
   });
 
@@ -88,33 +103,46 @@ router
   })
   .patch(async (req, res) => {
     //this put request is to only update the blog upvotes and downvotes
+
     try {
       const errors = [];
       if (req.headers["update"] === "blog") {
-        const data = req.body;
-        console.log(data);
-        if (!data || Object.keys(data).length === 0) {
-          return "error while liking the blog";
-        }
         try {
-          req.params.id = helpers.idCheck(req.params.id);
-        } catch (e) {
-          errors.push(e);
-        }
+          if (req.headers["role"] !== "admin") {
+            throw role;
+          }
+          const data = req.body;
+          if (!data || Object.keys(data).length === 0) {
+            return "error while liking the blog";
+          }
+          try {
+            req.params.id = helpers.idCheck(req.params.id);
+          } catch (e) {
+            errors.push(e);
+          }
 
-        if (errors.length > 0) {
-          throw errors;
-        }
-        console.log("in patch route of articles");
-        try {
-          const updatedPost = await articles.update(data);
-          res.status(200).json(helpers.sendResponse(updatedPost));
+          if (errors.length > 0) {
+            throw errors;
+          }
+
+          try {
+            const updatedPost = await articles.update(data);
+            res.status(200).json(helpers.sendResponse(updatedPost));
+          } catch (e) {
+            errors.push(e);
+          }
+          if (errors.length > 0) {
+            throw errors;
+          }
         } catch (e) {
-          throw e;
+          if (role !== "admin") {
+            res.status(401).json(helpers.sendError("invalid user"));
+          } else {
+            res.status(400).json(helpers.sendError("internal server error"));
+          }
         }
       } else {
         const data = req.body;
-        console.log({ data });
         if (!data || Object.keys(data).length === 0) {
           return "error while liking the blog";
         }
@@ -136,13 +164,11 @@ router
         res.status(200).json(helpers.sendResponse(updatedPost));
       }
     } catch (e) {
-      // console.log(e, "errors here");
       res.status(400).json(helpers.sendError(e));
     }
   })
   .delete(async (req, res) => {
     try {
-      console.log("in delete route");
       const errors = [];
       try {
         req.params.id = helpers.idCheck(req.params.id);
@@ -151,12 +177,12 @@ router
       }
 
       if (errors.length > 0) throw errors;
-      console.log("into deletion data");
+
       const { data } = await articles.removeArticle(req.params.id);
       let response = { id: data, deleted: true };
       res.status(200).json(helpers.sendResponse(response));
     } catch (e) {
-      res.status(404).send(e);
+      res.status(401).send(e);
     }
   });
 

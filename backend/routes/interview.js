@@ -3,6 +3,7 @@ import { interviewData as interview } from "../data/index.js";
 import users from "../data/users.js";
 import * as helpers from "../helpers.js";
 const router = Router();
+import { sendEmail } from "../config/mail.js";
 
 router
   .route("/")
@@ -16,6 +17,9 @@ router
   })
   .post(async (req, res) => {
     let data = req.body;
+    let payloadDate = data.payload.date;
+    let payloadtimings = data.payload.timings;
+
     try {
       data.userId = helpers.idCheck(data.userId);
       data.interviewerId = helpers.idCheck(data.interviewerId);
@@ -27,13 +31,39 @@ router
       const addInterview = await interview.createInterview(
         userName,
         interviewerName,
-        data.payload
+        data.payload,
+        "scheduled"
       );
+      await sendEmail(user, "scheduled");
 
-      if (addInterview.success) {
+      const interviewId = addInterview.insertedId;
+      let interviewerpayload = {
+        interviewid: interviewId,
+        name: userName,
+        date: payloadDate,
+        timings: payloadtimings,
+      };
+      let studentpayload = {
+        interviewid: interviewId,
+        name: interviewerName,
+        date: payloadDate,
+        timings: payloadtimings,
+      };
+      await users.updateUpcomingInterview(data.userId, studentpayload);
+      await users.updateUpcomingInterview(
+        data.interviewerId,
+        interviewerpayload
+      ); //returns {success:true} or error
+      await users.removeAvailableSlots(data.interviewerId, data.payload);
+
+      if (addInterview.acknowledged === true) {
         res.status(200).json("Created Interview");
       } else {
-        res.status(400).json(helpers.sendError("Interview already created!!!"));
+        res
+          .status(400)
+          .json(
+            helpers.sendError("Interview already created! Please try again")
+          );
       }
     } catch (e) {
       res.status(500).json(helpers.sendError(e)); //SendError necessary for toast
@@ -43,10 +73,10 @@ router
 router
   .route("/:id")
   .get(async (req, res) => {
-    req.params.id = helpers.idCheck(req.params.id);
     try {
+      req.params.id = helpers.idCheck(req.params.id);
       const interviews = await interview.getInterviewById(req.params.id);
-      res.send(interviews);
+      res.status(200).send(interviews);
     } catch (e) {
       res.status(400).send(e);
     }
@@ -67,13 +97,16 @@ router
     }
   })
   .patch(async (req, res) => {
-    try{
-    let remarks = req.body;
-    const updatedRemarks = await interview.addInterviewRemarks(req.params.id, remarks);
-    res.status(200).json(updatedRemarks);
-    } catch(e){
-    res.status(400).json(e);
+    try {
+      let remarks = req.body;
+      const updatedRemarks = await interview.addInterviewRemarks(
+        req.params.id,
+        remarks
+      );
+      res.status(200).json(updatedRemarks);
+    } catch (e) {
+      res.status(400).json(e);
     }
-  })
+  });
 
 export default router;

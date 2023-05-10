@@ -1,10 +1,11 @@
 import { validation } from "../shared/helper.js";
 import picture from "../blank-profile-picture.jpg";
 import { useNavigate } from "react-router-dom";
-import axios from 'axios';
+import axios from "axios";
 import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../context/AuthContext.js";
 
+//To do: Reset Password Link
 export const Profile = () => {
   const navigate = useNavigate();
   const [currentProfileState, setProfileState] = useState({});
@@ -15,44 +16,53 @@ export const Profile = () => {
   const { state, updateState } = useContext(AuthContext);
   const userDetails = state.userDetails;
 
- useEffect(()=>{
-    const getUser = async ()=>{
+  useEffect(() => {
+    const getUser = async () => {
       let user = await getUserCall(userDetails._id);
       setProfileState(user);
       setOriginalProfileState(user);
     };
     getUser();
-	}, [])
+  }, []);
 
   const getUserCall = async(id) => {
     const { data } = await axios.get(`http://localhost:4000/users/${id}`,{headers:{Authorization: `${localStorage.getItem("accessToken")}`}})
-    return data;
+    return data.data;
   }
 
   const handleFieldChange = (e) => {
     setProfileState(prev => {
       return {...prev, [e.target.name]:e.target.value}
     })
+    if (Object.keys(errors).includes(e.target.name)) {
+      let { [e.target.name]: errorLabel, ...rest } = errors;
+      setErrors(rest);
+    }
   }
 
   const handleCancel = () => {
     setProfileState(originalProfileState);
-    setEdit((prev) => !prev)
+    setEdit((prev) => !prev);
     setProfilePhoto(picture);
-  }
+  };
 
   const handleProfileChange = (e) => {
-    document.getElementById('profile').click();
-    if(e.target.files && e.target.files[0]){
+    document.getElementById("profile").click();
+    if (e.target.files && e.target.files[0]) {
       setProfilePhoto(URL.createObjectURL(e.target.files[0]));
     }
-  }
+  };
 
   const userProfile = async () => {
     try {
       let payload = currentProfileState;
       const userProfileURL = `http://localhost:4000/users/${state.userDetails._id}`;
-      let { data, status } = await axios.patch(userProfileURL, payload, {headers:{ update: "user-profile", Authorization: `${localStorage.getItem("accessToken")}`}});
+      let { data, status } = await axios.patch(userProfileURL, payload, {
+        headers: {
+          update: "user-profile",
+          Authorization: `${localStorage.getItem("accessToken")}`,
+        },
+      });
       if (status === 200) {
         navigate("/feed");
         setProfileState(data);
@@ -60,23 +70,29 @@ export const Profile = () => {
         console.log(data);
       }
     } catch (e) {
+      console.log(e);
+      let error = e?.response?.data;
+      state.triggerToast(error.errors, "error");
       return false;
     }
   };
 
-
   const handleSubmit = (event) => {
     event.preventDefault();
-    const form = document.getElementById("form")  
-    const formData = new FormData(form); 
-    formData.append('profilePhoto',profilePhoto)
-    const formJson = Object.fromEntries(formData.entries())
+    const form = event.target;
+    const formData = new FormData(form);
+    formData.append("profilePhoto", profilePhoto);
+    const formJson = Object.fromEntries(formData.entries());
     let validationResult = validation.userProfile(formJson);
-    if (!validationResult) {
+    if (!validationResult.validationPassed) {
       setErrors(validationResult.errors);
+    } else {
+      let payload = validationResult.data;
+      userProfile(payload);
     }
-    else{
-      userProfile(formData, userDetails._id);
+    if (Object.keys(errors).includes(event.target.name)) {
+      let { [event.target.name]: errorLabel, ...rest } = errors;
+      setErrors(rest);
     }
   }
   
@@ -96,25 +112,28 @@ return(
   {!isEdit && <img src={picture} className="w-3/5 lg:block hidden" alt="Profile"></img>}
   <div className="w-full rounded-lg sm:max-w-md xl:p-0">
       <label className="text-white font-semibold mb-2" for="first-name">First Name</label>
-        <input className="appearance-none block w-half bg-gray-200 text-black-700 border border-black-500 rounded py-3 px-5 mb-5 focus:outline-none focus:bg-white opacity-300" id="grid-first-name" type="text" name="firstName" value={currentProfileState?.firstName || ''} onChange={handleFieldChange} placeholder="Siddharth" disabled={!isEdit}></input>
+        <input className="appearance-none block w-full bg-gray-200 text-black-700 border border-black-500 rounded py-3 px-5 mb-5 focus:outline-none focus:bg-white opacity-300" id="firstName" type="text" name="firstName" value={currentProfileState?.firstName || ''} onChange={handleFieldChange} placeholder="Siddharth" disabled={!isEdit}></input>
+        {!!errors.firstName && (<p className="text-sm text-red-800">{errors.firstName}</p>)}
     </div>
     <div className="w-full rounded-lg sm:max-w-md xl:p-0">
-      <label className="text-white font-semibold mb-2" for="last-name">Last Name</label>
-        <input className="appearance-none block w-half bg-gray-200 text-black-700 border border-black-500 rounded py-3 px-5 mb-5 focus:outline-none focus:bg-white opacity-300" id="grid-first-name" type="text" name="lastName" value={currentProfileState?.lastName || ''} onChange={handleFieldChange} placeholder="Prabhakaran" disabled={!isEdit}></input>
+      <label className="text-white font-semibold mb-2" for="lastName">Last Name</label>
+        <input className="appearance-none block w-full bg-gray-200 text-black-700 border border-black-500 rounded py-3 px-5 mb-5 focus:outline-none focus:bg-white opacity-300" id="lastName" type="text" name="lastName" value={currentProfileState?.lastName || ''} onChange={handleFieldChange} placeholder="Prabhakaran" disabled={!isEdit}></input>
+        {!!errors.lastName && (<p className="text-sm text-red-800">{errors.lastName}</p>)}
     </div>
     <div className="w-full rounded-lg sm:max-w-md xl:p-0">
-      <label className="text-white font-semibold mb-2" for="phone-number">Phone Number</label>
-        <input className="appearance-none block w-half bg-gray-200 text-black-700 border border-black-500 rounded py-3 px-5 mb-5 focus:outline-none focus:bg-white opacity-300" id="phone" type="tel" name="phoneNumber"  value={currentProfileState?.phoneNumber || ''} onChange={handleFieldChange} placeholder="" disabled={!isEdit}></input>
+      <label className="text-white font-semibold mb-2" for="phoneNumber">Phone Number</label>
+        <input className="appearance-none block w-full bg-gray-200 text-black-700 border border-black-500 rounded py-3 px-5 mb-5 focus:outline-none focus:bg-white opacity-300" id="phoneNumber" type="tel" name="phoneNumber"  value={currentProfileState?.phoneNumber || ''} onChange={handleFieldChange} placeholder="" disabled={!isEdit}></input>
+        {!!errors.phoneNumber && (<p className="text-sm text-red-800">{errors.phoneNumber}</p>)}
     </div>
     <div className="w-full rounded-lg sm:max-w-md xl:p-0">
       <label className="text-white font-semibold mb-2" for="email-address">Email Address</label>
-        <input className="appearance-none block w-half bg-gray-200 text-black-700 border border-black-500 rounded py-3 px-5 mb-5 focus:outline-none focus:bg-gray opacity-300 cursor-not-allowed" id="email-address" type="email" name="email" value={currentProfileState?.email || ''} placeholder="example@gmail.com" disabled></input>
+        <input className="appearance-none block w-full bg-gray-200 text-black-700 border border-black-500 rounded py-3 px-5 mb-5 focus:outline-none focus:bg-gray opacity-300 cursor-not-allowed" id="email-address" type="email" name="email" value={currentProfileState?.email || ''} placeholder="example@gmail.com" disabled></input>
     </div>
-    {/* TO DO: Make changes to the social media icons and skills to make it editable */}
     <div>
     {isEdit && <div className="w-full rounded-lg sm:max-w-md xl:p-0">
       <label className="text-white font-semibold mb-2" for="linkedin">Linkedin</label>
-        <input className="appearance-none block w-half bg-gray-200 text-black-700 border border-black-500 rounded py-3 px-10 mb-5 focus:outline-none focus:bg-white opacity-300" id="linkedin" type="text" name="linkedin" value={currentProfileState?.linkedin || ''} onChange={handleFieldChange} placeholder="Linkedin"></input>
+        <input className="appearance-none block w-full bg-gray-200 text-black-700 border border-black-500 rounded py-3 px-5 mb-5 focus:outline-none focus:bg-white opacity-300" id="linkedin" type="text" name="linkedin" value={currentProfileState?.linkedin || ''} onChange={handleFieldChange} placeholder="Linkedin"></input>
+        {!!errors.linkedin && (<p className="text-sm text-red-800">{errors.linkedin}</p>)}
     </div>}
     {!isEdit &&
       <button type="button" className="bg-blue-600 p-2 font-semibold text-white inline-flex items-center space-x-2 rounded" onClick={() => {
@@ -132,7 +151,8 @@ return(
     <div>
     {isEdit &&  <div className="w-full rounded-lg sm:max-w-md xl:p-0">
     <label className="text-white font-semibold mb-2" for="github">GitHub</label>
-        <input className="appearance-none block w-half bg-gray-200 text-black-700 border border-black-500 rounded py-3 px-10 mb-5 focus:outline-none focus:bg-white opacity-300" id="github" type="text" name="github" value={currentProfileState?.github || ''} onChange={handleFieldChange} placeholder="GitHub"></input>
+        <input className="appearance-none block w-full bg-gray-200 text-black-700 border border-black-500 rounded py-3 px-5 mb-5 focus:outline-none focus:bg-white opacity-300" id="github" type="text" name="github" value={currentProfileState?.github || ''} onChange={handleFieldChange} placeholder="GitHub"></input>
+        {!!errors.github && (<p className="text-sm text-red-800">{errors.github}</p>)}
     </div>}{!isEdit &&
       <button className="bg-gray-700 p-2 font-semibold text-white inline-flex items-center space-x-2 rounded"  onClick={() => {
         if(currentProfileState?.github)
@@ -149,7 +169,8 @@ return(
     <div>
     {isEdit &&  <div className="w-full rounded-lg sm:max-w-md xl:p-0">
       <label className="text-white font-semibold mb-2" for="twitter">Twitter</label>
-        <input className="appearance-none block w-half bg-gray-200 text-black-700 border border-black-500 rounded py-3 px-10 mb-5 focus:outline-none focus:bg-white opacity-300" id="twitter" type="text" name="twitter" value={currentProfileState?.twitter || ''} onChange={handleFieldChange} placeholder="Twitter"></input>
+        <input className="appearance-none block w-full bg-gray-200 text-black-700 border border-black-500 rounded py-3 px-5 mb-5 focus:outline-none focus:bg-white opacity-300" id="twitter" type="text" name="twitter" value={currentProfileState?.twitter || ''} onChange={handleFieldChange} placeholder="Twitter"></input>
+        {!!errors.twitter && (<p className="text-sm text-red-800">{errors.twitter}</p>)}
     </div>}{!isEdit &&
       <button className="bg-blue-400 p-2 font-semibold text-white inline-flex items-center space-x-2 rounded"  onClick={() => {
         if(currentProfileState?.twitter)
@@ -164,33 +185,27 @@ return(
     <div className="w-full rounded-lg sm:max-w-md xl:p-0">
       <label className="text-white font-semibold mb-2" for="skills">Skills</label>
       {
-        currentProfileState.skills ? <div className="mb-5 flex list-none flex-col flex-wrap pl-0 md:flex-row">{currentProfileState.skills.map((skill) => <div className="my-2 block rounded bg-neutral-100 px-7 pb-3.5 pt-4 text-xs font-medium uppercase leading-tight text-black-500 data-[te-nav-active]:!bg-primary-100 data-[te-nav-active]:text-primary-700 dark:bg-neutral-100 dark:text-white dark:data-[te-nav-active]:text-primary-700 md:mr-4">{skill}</div>)}</div> : <div/>
+        currentProfileState.skills ? <div className="mb-5 flex list-none flex-col flex-wrap pl-0 md:flex-row">{currentProfileState?.skills?.map((skill) => <div className="my-2 block rounded bg-neutral-100 px-7 pb-3.5 pt-4 text-xs font-medium uppercase leading-tight text-black-500 data-[te-nav-active]:!bg-primary-100 data-[te-nav-active]:text-primary-700 dark:bg-neutral-100 dark:text-white dark:data-[te-nav-active]:text-primary-700 md:mr-4">{skill}</div>)}</div> : <div/>
       }
     </div>
     <div>
     {currentProfileState.role === "student" &&  <div className="w-full rounded-lg sm:max-w-md xl:p-0">
       <label className="text-white font-semibold mb-2" for="organization">School</label>
-        <input className="appearance-none block w-half bg-gray-200 text-black-700 border border-black-500 rounded py-3 px-10 mb-5 focus:outline-none focus:bg-gray opacity-300 cursor-not-allowed" id="organization" type="text" value={currentProfileState?.school || ''} placeholder="School" disabled></input></div>}
+        <input className="appearance-none block w-full bg-gray-200 text-black-700 border border-black-500 rounded py-3 px-5 mb-5 focus:outline-none focus:bg-gray opacity-300 cursor-not-allowed" id="organization" type="text" value={currentProfileState?.school || ''} placeholder="School" disabled></input></div>}
     {currentProfileState.role !== "student" && <div className="w-full rounded-lg sm:max-w-md xl:p-0"> 
     <label className="text-white font-semibold mb-2" for="organization">Organization</label>
-        <input className="appearance-none block w-half bg-gray-200 text-black-700 border border-black-500 rounded py-3 px-10 mb-5 focus:outline-none focus:bg-gray opacity-300 cursor-not-allowed" id="organization" type="text" value={currentProfileState?.organization || ''} placeholder="Organization" disabled></input></div>}
+        <input className="appearance-none block w-full bg-gray-200 text-black-700 border border-black-500 rounded py-3 px-5 mb-5 focus:outline-none focus:bg-gray opacity-300 cursor-not-allowed" id="organization" type="text" value={currentProfileState?.organization || ''} placeholder="Organization" disabled></input></div>}
     </div>
     <div className="w-full rounded-lg sm:max-w-md xl:p-0">
-      <label className="text-white font-semibold mb-2" for="upcoming-interviews">Upcoming Interviews</label>
-      {
-        currentProfileState.upcomingInterviews.length > 0 ? <div className="mb-5 flex list-none flex-col flex-wrap pl-0 md:flex-row">{currentProfileState.upcomingInterviews.map((interview) => <div className="my-2 block rounded bg-neutral-100 px-7 pb-3.5 pt-4 text-xs font-medium uppercase leading-tight text-black-500 data-[te-nav-active]:!bg-primary-100 data-[te-nav-active]:text-primary-700 dark:bg-neutral-700 dark:text-white dark:data-[te-nav-active]:text-primary-700 md:mr-4">{interview}</div>)}</div> : <div>No Upcoming Interviews</div>
+      {currentProfileState?.upcomingInterviews?.length ? <><label className="text-white font-semibold mb-2" for="upcoming-interviews">Upcoming Interviews</label><div className="mb-5 flex list-none flex-col flex-wrap pl-0 md:flex-row">{currentProfileState?.upcomingInterviews?.map((interview, index) => <div key={index} className="my-2 block rounded bg-neutral-100 px-5 pb-3.5 pt-4 text-xs font-medium uppercase leading-tight text-black-500 data-[te-nav-active]:!bg-primary-100 data-[te-nav-active]:text-primary-700 dark:bg-neutral-700 dark:text-white dark:data-[te-nav-active]:text-primary-700 md:mr-4"><div>{interview.date}</div><div>{interview.timings}</div></div>)}</div></>: <div></div>
       }
     </div>
     <div className="w-full rounded-lg sm:max-w-md xl:p-0">
-      <label className="text-white font-semibold mb-2" for="recent-interviews">Recent Interviews</label>
-      {
-        currentProfileState.recentInterviews.length > 0 ? <div className="mb-5 flex list-none flex-col flex-wrap pl-0 md:flex-row">{currentProfileState.recentInterviews.map((interview) => <div className="my-2 block rounded bg-neutral-100 px-7 pb-3.5 pt-4 text-xs font-medium uppercase leading-tight text-black-500 data-[te-nav-active]:!bg-primary-100 data-[te-nav-active]:text-primary-700 dark:bg-neutral-700 dark:text-white dark:data-[te-nav-active]:text-primary-700 md:mr-4">{interview}</div>)}</div> : <div>No Recent Interviews</div>
+      {currentProfileState?.recentInterviews?.length ? <><label className="text-white font-semibold mb-2" for="recent-interviews">Recent Interviews</label><div className="mb-5 flex list-none flex-col flex-wrap pl-0 md:flex-row">{currentProfileState?.recentInterviews?.map((interview, index) => <div key={index} className="my-2 block rounded bg-neutral-100 px-5 pb-3.5 pt-4 text-xs font-medium uppercase leading-tight text-black-500 data-[te-nav-active]:!bg-primary-100 data-[te-nav-active]:text-primary-700 dark:bg-neutral-700 dark:text-white dark:data-[te-nav-active]:text-primary-700 md:mr-4"><div>{interview.date}</div><div>{interview.timings}</div></div>)}</div></>: <div></div>
       }
     </div>
     <div className="w-full rounded-lg sm:max-w-md xl:p-0">
-      <label className="text-white font-semibold mb-2" for="blogs">Blogs</label>
-      {
-        currentProfileState.blogs.length > 0 ? <div className="mb-5 flex list-none flex-col flex-wrap pl-0 md:flex-row">{currentProfileState.blogs.map((blog) => <div className="my-2 block rounded bg-neutral-100 px-7 pb-3.5 pt-4 text-xs font-medium uppercase leading-tight text-black-500 data-[te-nav-active]:!bg-primary-100 data-[te-nav-active]:text-primary-700 dark:bg-neutral-700 dark:text-white dark:data-[te-nav-active]:text-primary-700 md:mr-4">{blog}</div>)}</div> : <div>No Blogs</div>
+      {currentProfileState?.blogs?.length ? <><label className="text-white font-semibold mb-2" for="blogs">Blogs</label><div className="mb-5 flex list-none flex-col flex-wrap pl-0 md:flex-row">{currentProfileState?.blogs?.map((blog) => <div className="my-2 block rounded bg-neutral-100 px-5 pb-3.5 pt-4 text-xs font-medium uppercase leading-tight text-black-500 data-[te-nav-active]:!bg-primary-100 data-[te-nav-active]:text-primary-700 dark:bg-neutral-700 dark:text-white dark:data-[te-nav-active]:text-primary-700 md:mr-4">{blog}</div>)}</div></> : <div></div>
       }
     </div>
     <button type="submit" className="btn">Save</button>

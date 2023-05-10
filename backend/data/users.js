@@ -1,5 +1,4 @@
-//error with projecttion in get top for trending
-
+//error with projection in get top for trending
 import { users } from "../config/mongoCollections.js";
 import { ObjectId } from "mongodb";
 import {
@@ -11,6 +10,7 @@ import {
   stringCheck,
   isRoleValid,
   isValidEmail,
+  isValidPassword,
 } from "../helpers.js";
 import bcrypt from "bcryptjs";
 
@@ -33,7 +33,7 @@ const createUser = async (userDetails) => {
     role,
     school,
   } = userDetails;
-  passwordCheck(password);
+  isValidPassword(password);
   password = password.trim();
   password = await bcrypt.hash(password, saltRounds);
   let user = {
@@ -65,14 +65,12 @@ const createUser = async (userDetails) => {
     userScore: 0,
     isBanned: false,
     organization,
-    requestPremium: { message: "", status: "initial", allow: true },
+    requestPremium: { message: "", status: "new", allow: true },
   };
   const userCollection = await users();
   const insertedUserInfo = await userCollection.insertOne(user);
-
   if (!insertedUserInfo.acknowledged || !insertedUserInfo.insertedId)
     throw "Cannot add user";
-
   // const newId = insertedUserInfo.insertedId.toString();
   user._id = insertedUserInfo.insertedId.toString();
   return user;
@@ -115,8 +113,8 @@ const getAllUsers = async () => {
 const updateUser = async (id, user) => {
   idCheck(id);
   id = id.trim();
-  const userOrig = await getUserById(id)
-  let updatedUser = ({...userOrig, ...user})
+  const userOrig = await getUserById(id);
+  let updatedUser = { ...userOrig, ...user };
   delete updatedUser._id;
   const userCollection = await users();
   const updatedUserInfo = await userCollection.findOneAndUpdate(
@@ -157,7 +155,7 @@ const patchUser = async (id, data) => {
         error.push(e);
       }
       try {
-        data.data = stringCheck(data.data);
+        data.message = stringCheck(data.message);
       } catch (e) {
         error.push(e);
       }
@@ -177,6 +175,11 @@ const patchUser = async (id, data) => {
       } catch (e) {
         error.push(e);
       }
+      try {
+        data.blogId = stringCheck(data.blogTitle);
+      } catch (e) {
+        error.push(e);
+      }
     }
 
     const userCollection = await users();
@@ -188,7 +191,7 @@ const patchUser = async (id, data) => {
       user.requestPremium = data;
       user = { ...user };
     } else {
-      if (!user.blogs.includes(data.blogId)) user.blogs.push(data.blogId);
+      if (!user.blogs.includes(data.blogId)) user.blogs.push(data.blogTitle);
     }
 
     const updatedInfo = await userCollection.findOneAndUpdate(
@@ -210,6 +213,7 @@ const patchUser = async (id, data) => {
       throw "could not update the user details";
     }
     updatedInfo.value._id = updatedInfo.value._id.toString();
+    // console.log(updatedInfo);
     return { data: updatedInfo.value, error: false };
   } catch (e) {
     return { data: e, error: true };
@@ -280,7 +284,7 @@ export const updateUserBanStatus = async (userDetails) => {
     let { password, ...rest } = value;
     return rest;
   } catch (e) {
-    console.log(e);
+    // console.log(e);
     return false;
   }
 };
@@ -319,24 +323,31 @@ const updateAvailableSlots = async (userId, newSlot) => {
     5) If the timing is same as well, return obj meaning existingObject will be the object present in the availableSlots[] 
     in database that fulfills above conditions
   */
-  const existingObject = user.availableSlots.find((obj) => {
-    for (let i = 0; i < newSlot.length; i++) {
-      if (obj.date === newSlot[i].date) {
-        const hasCommon = obj.timings.some((element) =>
-          newSlot[i].timings.includes(element)
-        );
-        if (hasCommon) {
-          return obj;
-        }
+
+  // Check if the date of each obj in newSlots[] is the same as that of each in availableSlots[]
+  for (const incomingSlot of newSlot) {
+    const foundIndex = user.availableSlots.findIndex(
+      (slot) => slot.date === incomingSlot.date
+    );
+
+    if (foundIndex !== -1) {
+      // If the date is found, further check if all the timings is the same
+      const foundSlot = user.availableSlots[foundIndex];
+      if (
+        foundSlot.timings.every((timing) => timing === incomingSlot.timings)
+      ) {
+        throw `You have an entry for the same date & timeslot. Kindly try again`;
+      } else {
+        // If the date is the same, but the timings array has some values that are different
+        const uniqueTimings = [
+          ...new Set(foundSlot.timings.concat(incomingSlot.timings)),
+        ];
+        foundSlot.timings = uniqueTimings;
       }
+    } else {
+      // If the date is not the same, then insert the object into the availableSlots[]
+      user.availableSlots.push(incomingSlot);
     }
-  });
-  // existingObject will have the object that is already loaded in the availableSlots[] in database
-  if (existingObject) {
-    throw `You have an entry for the same date & timeslot. Kindly try again`;
-  } else {
-    // The object does not exist, so push it to the available slots array
-    user.availableSlots.push(...newSlot);
   }
 
   // Update the user in the database
@@ -353,42 +364,69 @@ const updateAvailableSlots = async (userId, newSlot) => {
 };
 
 const updateUpcomingInterview = async (userId, newSlot) => {
-  try {
-    //Validation through prior function
-    const user = await getUserById(userId);
-    const userCollection = await users();
+  //Validation through prior function
+  const user = await getUserById(userId);
+  const userCollection = await users();
+  // If the user does not exist, throw an error
+  if (!user) {
+    throw `User with id ${userId} not found`;
+  }
+  // Check if the object with the same date already exists
+  const existingObject = user.upcomingInterviews.find(
+    (obj) => obj.date === newSlot.date
+  );
 
-    // If the user does not exist, throw an error
-    if (!user) {
-      throw `User with id ${userId} not found`;
-    }
-    // Check if the object with the same date already exists
-    const existingObject = user.upcomingInterviews.find(
-      (obj) => obj.date === newSlot.date
-    );
+  // If the object already exists, throw an error
+  if (existingObject) {
+    throw `Interview already scheduled for this day. Please try again`;
+  } else {
+    // The object does not exist, so push it to the available slots array
+    user.upcomingInterviews.push(newSlot);
+  }
+  // Update the user in the database
+  const result = await userCollection.updateOne(
+    { _id: new ObjectId(userId) },
+    { $set: { upcomingInterviews: user.upcomingInterviews } },
+    { returnDocument: "after" }
+  );
+  if (result.modifiedCount === 1) {
+    return { success: true }; //Succesful updation
+  } else {
+    return { success: false }; // Unsucessful updation
+  }
+};
 
-    // If the object already exists, do something
-    if (existingObject) {
-      // Do something
+const removeAvailableSlots = async (userId, newSlot) => {
+  //Validation through prior function
+  const user = await getUserById(userId);
+  const userCollection = await users();
 
-      throw `User ${userId} has an entry for the same date`;
-    } else {
-      // The object does not exist, so push it to the available slots array
-      user.upcomingInterviews.push(newSlot);
-    }
-    // Update the user in the database
-    const result = await userCollection.updateOne(
-      { _id: new ObjectId(userId) },
-      { $set: { upcomingInterviews: user.upcomingInterviews } },
-      { returnDocument: "after" }
-    );
-    if (result.modifiedCount === 1) {
-      return { success: true }; //Succesful updation
-    } else {
-      return { success: false }; // Unsucessful updation
-    }
-  } catch (e) {
-    return e; //Errors otherwise
+  // If the user does not exist, throw an error
+  if (!user) {
+    throw `User with id ${userId} not found`;
+  }
+  // Check if the date of incoming data matches any date in my database
+  const foundIndex = user.availableSlots.findIndex(
+    (slot) => slot.date === newSlot.date
+  );
+
+  // If the date is found, delete the specific timings provided in incoming data from the database of that specific date
+  if (foundIndex !== -1) {
+    user.availableSlots[foundIndex].timings = user.availableSlots[
+      foundIndex
+    ].timings.filter((timing) => timing !== newSlot.timings);
+  }
+
+  // Update the user in the database
+  const result = await userCollection.updateOne(
+    { _id: new ObjectId(userId) },
+    { $set: { availableSlots: user.availableSlots } },
+    { returnDocument: "after" }
+  );
+  if (result.modifiedCount === 1) {
+    return { success: true }; //Succesful updation
+  } else {
+    return { success: false }; // Unsucessful updation
   }
 };
 
@@ -406,6 +444,61 @@ const getUpcomingInterviews = async (id) => {
   return upcomingInterviews; //returns array of objects
 };
 
+const getPastInterviews = async (id) => {
+  //Validation
+  id = idCheck(id);
+
+  const userCollection = await users();
+  // Find the user with the specified ID
+  const user = await userCollection.findOne({ _id: new ObjectId(id) });
+
+  // Extract the upcomingInterviews array from the user document
+  const pastInterviews = user.pastInterviews;
+
+  return pastInterviews; //returns array of objects
+};
+
+const moveToPast = async (userid, interviewId) => {
+  //Validation through prior function
+  const user = await getUserById(userid);
+  const userCollection = await users();
+  // If the user does not exist, throw an error
+  if (!user) {
+    throw `User with id ${userid} not found`;
+  }
+  const foundInterview = user.upcomingInterviews.find(
+    (interview) =>
+      JSON.stringify(interview.interviewid) === JSON.stringify(interviewId)
+  );
+  // console.log(foundInterview);
+
+  if (foundInterview) {
+    user.upcomingInterviews.splice(
+      user.upcomingInterviews.indexOf(foundInterview),
+      1
+    );
+    user.pastInterviews.push(foundInterview);
+  } else {
+    throw `No interview with that Id present`;
+  }
+  // Update the user in the database
+  const result = await userCollection.updateOne(
+    { _id: new ObjectId(userid) },
+    {
+      $set: {
+        upcomingInterviews: user.upcomingInterviews,
+        pastInterviews: user.pastInterviews,
+      },
+    },
+    { returnDocument: "after" }
+  );
+  if (result.modifiedCount === 1) {
+    return { success: true }; //Succesful updation
+  } else {
+    return { success: false }; // Unsucessful updation
+  }
+};
+
 const updateUserPremiumStatus = async (userDetails) => {
   // let { _id, isPremiumUser, requestPremium, role, userId } = userDetails;
   try {
@@ -421,12 +514,15 @@ const updateUserPremiumStatus = async (userDetails) => {
       { returnDocument: "after" }
     );
 
+    if (lastErrorObject.n === 0) {
+      throw "user not found";
+    }
     let { password, ...rest } = value;
 
     return rest;
   } catch (e) {
-    console.log(e);
-    return false;
+    return e;
+    // return false;
   }
 };
 
@@ -444,5 +540,8 @@ export default {
   getAvailableSlots,
   updateUpcomingInterview,
   getUpcomingInterviews,
+  getPastInterviews,
+  removeAvailableSlots,
+  moveToPast,
   updateUserPremiumStatus,
 };

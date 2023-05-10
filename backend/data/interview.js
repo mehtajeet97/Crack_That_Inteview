@@ -7,7 +7,8 @@ const date = new Date();
 const createInterview = async (
   interviewee,
   interviewer,
-  interviewDate
+  interviewDate,
+  interviewStatus
   // intervieweeRemarks,
   // interviewerRemarks
 ) => {
@@ -38,7 +39,7 @@ const createInterview = async (
     interviewerRemarks: [],
     createdAt: `${month}/${day}/${year}`,
     updatedAt: `${month}/${day}/${year}`,
-    interviewStatus: ["Completed", "Scheduled", "Pending"],
+    interviewStatus,
   };
   const interviewCollection = await interviews();
   const findInterview = await interviewCollection.findOne({
@@ -47,14 +48,14 @@ const createInterview = async (
     interviewDate,
   });
   if (findInterview) {
-    return { success: false };
+    throw "Cannot add interview";
   } else {
     const insertInterview = await interviewCollection.insertOne(interview);
     if (!insertInterview.acknowledged || !insertInterview.insertedId)
       throw "Cannot add interview";
     const newId = insertInterview.insertedId.toString();
     interview._id = newId;
-    return { success: true };
+    return insertInterview;
   }
 };
 
@@ -63,7 +64,7 @@ const getInterviewById = async (id) => {
   idCheck(id);
   id = id.trim();
   const interviewCollection = await interviews();
-  
+
   let listOfInterviews = await interviewCollection.findOne({
     _id: new ObjectId(id),
   });
@@ -104,23 +105,22 @@ const addInterviewRemarks = async (id, remarks) => {
   id = id.trim();
   const interviewCollection = await interviews();
   let interview = await interviewCollection.findOne({
-    _id: new ObjectId(id)
+    _id: new ObjectId(id),
   });
-  if(!interview) throw "Interview is not valid";
-  let updateRemarks = {...interview, interviewerRemarks: remarks}
+  if (!interview) throw "Interview is not valid";
+  let updateRemarks = { ...interview, interviewerRemarks: remarks };
   const updatedInterview = await interviewCollection.findOneAndUpdate(
-    {_id: new ObjectId(id)},
+    { _id: new ObjectId(id) },
     { $set: updateRemarks },
-    { returnDocument: "after" 
-    }
+    { returnDocument: "after" }
   );
   return updatedInterview;
-}
+};
 
 export default {
   createInterview,
   getInterviewById,
   getAllInterviews,
   removeInterview,
-  addInterviewRemarks
+  addInterviewRemarks,
 };

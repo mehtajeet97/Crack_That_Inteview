@@ -33,6 +33,7 @@ export const StudentSlots = () => {
 
   const [availableSlots, setAvailableSlots] = useState([]);
   const [interviewerId, setInterviewId] = useState("");
+  const [interviewerName, setInterviewerName] = useState("");
   const [interviewParams, setInterviewParams] = useState({});
 
   // Handle First Button click to render interviewers
@@ -63,7 +64,8 @@ export const StudentSlots = () => {
 
   const handleSelectInterviewer = (interviewer) => {
     setInterviewId(interviewer._id);
-    renderOptions(interviewer.availableSlots);
+    setInterviewerName(interviewer.firstName + " " + interviewer.lastName);
+    renderOptions(interviewer?.availableSlots);
     next();
   };
   //
@@ -87,58 +89,8 @@ export const StudentSlots = () => {
 
   const onHandleSubmit = async () => {
     createInterview(interviewParams);
-    scheduleUser(interviewParams.payload);
-    scheduleInterviewer(interviewParams.payload);
   };
 
-  const scheduleUser = async (payload) => {
-    try {
-      const studentURL = "http://localhost:4000/schedule/" + userDetails._id;
-      let { data, status } = await axios.post(studentURL, payload, {
-        headers: { Authorization: localStorage.getItem("accessToken") },
-      });
-      if (status === 200) {
-        //Display the selected date to the user for edit / Inform the user of success through alert/ toast
-        state.triggerToast("Interview Scheduled Successfully!", "success");
-        // navigate("/feed");
-      } else {
-        //Inform the user of errors through alert/ toast
-        state.triggerToast(data.errors, "error");
-      }
-    } catch (e) {
-      if (e.response.data.error === "Access Token expired") {
-        localStorage.clear();
-        updateState({ ...state, isLoggedIn: false, userDetails: {} });
-        state.triggerToast("Session expired. Please log in again.", "success");
-      } else {
-        state.triggerToast(e.response.data.error, "error");
-      }
-    }
-  };
-  const scheduleInterviewer = async (payload) => {
-    try {
-      const interviewerURL = "http://localhost:4000/schedule/" + interviewerId;
-      let { data, status } = await axios.post(interviewerURL, payload, {
-        headers: { Authorization: localStorage.getItem("accessToken") },
-      });
-
-      if (status === 200) {
-        //Display the selected date to the user for edit / Inform the user of success through alert/ toast
-        state.triggerToast("Interview Scheduled Successfully!", "success");
-      } else {
-        //Inform the user of errors through alert/ toast
-        state.triggerToast(data.errors, "error");
-      }
-    } catch (e) {
-      if (e.response.data.error === "Access Token expired") {
-        localStorage.clear();
-        updateState({ ...state, isLoggedIn: false, userDetails: {} });
-        state.triggerToast("Session expired. Please log in again.", "success");
-      } else {
-        state.triggerToast(e.response.data.error, "error");
-      }
-    }
-  };
   const createInterview = async (payload) => {
     try {
       const url = "http://localhost:4000/interview/";
@@ -148,18 +100,21 @@ export const StudentSlots = () => {
       if (status === 200) {
         //Display the selected date to the user for edit / Inform the user of success through alert/ toast
         state.triggerToast("Interview Scheduled Successfully!", "success");
+        navigate("/feed");
       } else {
         //Inform the user of errors through alert/ toast
         state.triggerToast(data.errors, "error");
+        navigate("/feed");
       }
     } catch (e) {
-      if (e.response.data.error === "Access Token expired") {
+      if (e.response.data.message === "Access Token expired") {
         localStorage.clear();
         updateState({ ...state, isLoggedIn: false, userDetails: {} });
         state.triggerToast("Session expired. Please log in again.", "success");
         navigate("/login");
       } else {
-        state.triggerToast(e.response.data.error, "error");
+        state.triggerToast(e.response.data.message, "error");
+        navigate("/feed");
       }
     }
   };
@@ -269,7 +224,7 @@ export const StudentSlots = () => {
           </button>
         </div>
 
-        {interviewerCards.length > 0 && (
+        {interviewerCards?.length > 0 && (
           <div className="flex w-full justify-around items-center md:flex-row flex-col mt-3">
             <div className="grid lg:grid-cols-4 sm:grid-cols-2 gap-4 grid-cols-1">
               {interviewerCards.map((card, idx) => (
@@ -281,30 +236,30 @@ export const StudentSlots = () => {
                     onClick={() => handleSelectInterviewer(card)}
                     className="px-6 py-4 cursor-pointer"
                   >
-                    <div className="font-bold text-xl mb-2">
+                    <div className="font-bold text-xl mb-2 text-black">
                       {card.firstName} {card.lastName}
                     </div>
 
-                    <p className="text-gray-700 text-base">
-                      Skills : {card.skills && card.skills}
+                    <p className="text-gray-700 text-base mb-1">
+                      Skills : {card.skills && card.skills.join(",")},
                     </p>
 
-                    <p className="text-gray-700 text-base">
-                      {!card.skills && `Not Disclosed.`}
+                    <p className="text-gray-700 text-base mb-1">
+                      {!card.skills && `(Not Disclosed)`}
                     </p>
 
-                    <p className="text-gray-700 text-base">
+                    <p className="text-gray-700 text-base mb-1">
                       Company : {card.organization && card.organization}
                     </p>
-                    <p className="text-gray-700 text-base">
-                      {!card.organization && `Not Disclosed.`}
+                    <p className="text-gray-700 text-base mb-1">
+                      {!card.organization && `(Not Disclosed)`}
                     </p>
 
                     <p className="text-gray-700 text-base">
-                      Years of Experience: {card.yoe && card.yoe}
+                      Experience: {card.yoe && card.yoe}
                     </p>
                     <p className="text-gray-700 text-base">
-                      {!card.yoe && `Not Disclosed.`}
+                      {!card.yoe && `(Not Disclosed)`}
                     </p>
                   </div>
                 </div>
@@ -359,7 +314,8 @@ export const StudentSlots = () => {
         <span className="text-3xl w-full text-center mb-4">Review:</span>
 
         {interviewParams.payload && (
-          <div className="grid grid-cols-1 md:grid-cols-2 grid-flow-row p-3 gap-3">
+          <div className="justify-center">
+            <p>Name : {interviewerName}</p>
             <p>Date : {interviewParams.payload.date}</p>
             <p>Time Slot : {interviewParams.payload.timings}</p>
           </div>

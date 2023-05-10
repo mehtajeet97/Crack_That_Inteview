@@ -20,12 +20,16 @@ import { Register } from "./components/Register.js";
 import { ProtectedRoutes } from "./components/ProtectedRoutes.js";
 import { Premium } from "./components/Premium.js";
 import { DetailBlog } from "./components/DetailBlog.js";
-import { OnGoingInterview } from "./components/Interview/OnGoingInterview.js";
+
 import { InterviewerSlots } from "./components/Interview/InterviewerSlots.js";
 import { StudentSlots } from "./components/Interview/StudentSlots.js";
-import { Admin } from "./components/Admin.js";
+import { InterviewRecords } from "./components/Interview/InterviewRecords.js";
+import { OnGoingInterview } from "./components/Interview/OnGoingInterview.js";
+import { EndInterview } from "./components/Interview/EndInterview.js";
 import { PostInterviewRemarks } from "./components/PostInterviewRemarks.js";
 import { Exam } from "./components/Exam/Exam.js";
+
+import { Admin } from "./components/Admin.js";
 
 const router = createBrowserRouter([
   {
@@ -70,6 +74,14 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: "interviewrecords",
+        element: (
+          <ProtectedRoutes>
+            <InterviewRecords />
+          </ProtectedRoutes>
+        ),
+      },
+      {
         path: "ongoing",
         element: (
           <ProtectedRoutes>
@@ -78,6 +90,14 @@ const router = createBrowserRouter([
         ),
       },
 
+      {
+        path: "interview/:interviewId",
+        element: (
+          <ProtectedRoutes>
+            <EndInterview />
+          </ProtectedRoutes>
+        ),
+      },
       {
         path: "test-yourself",
         element: (

@@ -40,8 +40,9 @@ export const Blogs = () => {
         });
         setfilteredBlogs(data.data);
         setAllBlogs(data.data);
+        skillStateSet(0);
       } catch (e) {
-        if (e.response.status === 401) {
+        if (e.response?.status === 401) {
           state.triggerToast(
             "Your session has been expired. Please log in.",
             "error"
@@ -55,6 +56,11 @@ export const Blogs = () => {
       }
     }
     fetchData();
+    if (JSON.parse(localStorage.getItem("userDetails"))?.role !== "student") {
+      state.triggerToast("only students can access premium request", "warning");
+      localStorage.clear();
+      navigate("/login");
+    }
   }, []);
 
   return (
@@ -65,9 +71,9 @@ export const Blogs = () => {
         </span>
       </div>
       <div className=" my-6 px-6 py-4  mx-auto rounded-lg bg-lime-200 text-black">
-        <h3 className="block font-bold text-xl mb-6 ">
+        <h1 className="block font-bold text-xl mb-2  ">
           Get Blogs By Your Skills
-        </h3>
+        </h1>
         <button
           className="bg-yellow-300 px-3 py-2 text-red-400 m-3 rounded-lg"
           key={" all"}
@@ -94,7 +100,6 @@ export const Blogs = () => {
               onClick={() => {
                 skillStateSet(skill);
                 filterSelected(skill);
-                // cssToggle(event);
               }}
             >
               {skill}
@@ -103,8 +108,7 @@ export const Blogs = () => {
       </div>
 
       <div className="capitalize grid grid-cols-3 gap-5">
-        {filteredBlogs &&
-          filteredBlogs.length !== 0 &&
+        {filteredBlogs.length !== 0 &&
           Array.isArray(filteredBlogs) &&
           filteredBlogs.slice(0, 9).map((blog, idx) => (
             <div
@@ -126,9 +130,9 @@ export const Blogs = () => {
                       }
                       state={{ data: blog }}
                     >
-                      <h3 className="capitalize px-5 py-2 max-w-sm overflow-hidden">
+                      <h1 className="capitalize px-5 py-2 max-w-sm overflow-hidden">
                         {blog.title}
-                      </h3>
+                      </h1>
                     </Link>
                   </div>
                   <span className="self-center">👍{blog.upVotesCount}</span>
@@ -150,8 +154,13 @@ export const Blogs = () => {
               </div>
             </div>
           ))}
-        {filteredBlogs.length === 0 && (
-          <div className="bg-blue-700 h-12 items-center p-3  text-white basis-2/7 rounded   shadow-lg text-truncate col-span-3 justify-self-center text-black font-bold capitalize">
+        {filteredBlogs.length === 0 && allBlogs.length !== 0 && (
+          <div className="bg-blue-700 h-12 items-center p-3  text-white basis-2/7 rounded   shadow-lg text-truncate col-span-3 justify-self-center  font-bold capitalize">
+            <p>no Blogs on this topic...!!!</p>
+          </div>
+        )}
+        {filteredBlogs.length === 0 && allBlogs.length == 0 && (
+          <div className="bg-blue-700 h-12 items-center p-3  text-white basis-2/7 rounded   shadow-lg text-truncate col-span-3 justify-self-center  font-bold capitalize">
             <p>error whileloading Blogs ...!!!</p>
           </div>
         )}
