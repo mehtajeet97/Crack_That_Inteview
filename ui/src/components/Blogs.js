@@ -65,7 +65,7 @@ export const Blogs = () => {
         </span>
       </div>
       <div className=" my-6 px-6 py-4  mx-auto rounded-lg bg-lime-200 text-black">
-        <h3 className="block font-bold text-xl mb-2 mb-6 ">
+        <h3 className="block font-bold text-xl mb-6 ">
           Get Blogs By Your Skills
         </h3>
         <button
@@ -80,25 +80,26 @@ export const Blogs = () => {
           All
         </button>
 
-        {skills.map((skill, idx) => (
-          <button
-            className={`capitalize px-3 py-2 rounded-lg text-red-400 m-3 ${
-              skillState == skill
-                ? " bg-yellow-30   ring opacity-70 ring-red-400"
-                : " bg-yellow-300 "
-            }`}
-            key={idx}
-            index={idx}
-            source={"skills"}
-            onClick={() => {
-              skillStateSet(skill);
-              filterSelected(skill);
-              // cssToggle(event);
-            }}
-          >
-            {skill}
-          </button>
-        ))}
+        {skills?.length > 0 &&
+          skills.map((skill, idx) => (
+            <button
+              className={`capitalize px-3 py-2 rounded-lg text-red-400 m-3 ${
+                skillState == skill
+                  ? " bg-yellow-30   ring opacity-70 ring-red-400"
+                  : " bg-yellow-300 "
+              }`}
+              key={idx}
+              index={idx}
+              source={"skills"}
+              onClick={() => {
+                skillStateSet(skill);
+                filterSelected(skill);
+                // cssToggle(event);
+              }}
+            >
+              {skill}
+            </button>
+          ))}
       </div>
 
       <div className="capitalize grid grid-cols-3 gap-5">

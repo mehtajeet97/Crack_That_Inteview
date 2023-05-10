@@ -262,6 +262,34 @@ export const validate = {
 
     // let
   },
+  initialExam: (payload) => {
+    let { userId, skill, role } = payload;
+
+    let result = { validationPassed: true, errors: {}, data: {} };
+
+    if (!isValidObjectId(userId)) {
+      result.errors.userId = "Invalid userId provided";
+    } else {
+      result.data.userId = userId;
+    }
+
+    if (!isValidString(skill)) {
+      result.errors.skill = "Invalid skill provided";
+    } else {
+      result.data.skill = skill;
+    }
+
+    if (role.toLowerCase().trim() !== "student") {
+      result.errors.role = "Only students are allowed to give an exam";
+    } else {
+      result.data.role = role.toLowerCase().trim();
+    }
+
+    if (Object.keys(result.errors).length) {
+      result.validationPassed = false;
+    }
+    return result;
+  },
   //use this for the error handling and get the data checked in admin premium request
 };
 
@@ -388,5 +416,5 @@ export {
   sendResponse,
   sendError,
   isRoleValid,
-  isValidPassword
+  isValidPassword,
 };

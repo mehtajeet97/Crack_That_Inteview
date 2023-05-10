@@ -1,8 +1,29 @@
-import { useEffect, useState } from "react";
+import axios from "axios";
+import { useEffect, useState, useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../../context/AuthContext.js";
 
-export const TestResult = ({ result }) => {
+export const TestResult = ({ examInfo }) => {
   const [score, setScore] = useState(0);
   const [showResult, setShowResult] = useState(false);
+  const [examState, setExamState] = useState({});
+  let navigate = useNavigate();
+  const { state, updateState } = useContext(AuthContext);
+  const getExamInfo = async (examId) => {
+    let examInfoURL = `http://localhost:4000/exams/${examId}?withAnswer=True`;
+
+    try {
+      let { data } = await axios.get(examInfoURL, {
+        headers: {
+          Authorization: localStorage.getItem("accessToken"),
+        },
+      });
+      setExamState(data.data);
+    } catch (e) {
+      state.triggerToast(e.response.data.message, "error");
+      navigate("/feed");
+    }
+  };
 
   const calculateScore = (questions) => {
     let totalCorrectAns = questions.reduce(
@@ -10,17 +31,17 @@ export const TestResult = ({ result }) => {
       0
     );
     setScore(totalCorrectAns);
-    console.log(score);
   };
 
   useEffect(() => {
-    calculateScore(result);
+    calculateScore(examInfo.userRecordedAnswers);
   }, []);
 
   return (
     <div className="px-6 py-4 w-1/2 mx-auto rounded-lg bg-blue-500 text-white">
       <span className="block font-bold text-xl mb-2">
-        Congratulations! You have scored {score} / {result.length}!
+        Congratulations! You have scored {score} / {examInfo?.questions?.length}
+        !
       </span>
       <button
         className="px-4 py-2 bg-blue-400 rounded-lg font-semibold"
@@ -33,11 +54,13 @@ export const TestResult = ({ result }) => {
         {!isEdit && <label htmlFor="displayName">Dhruv</label>}
         {isEdit && <input type="text" name="name" id="" value={user.fir} />} */}
 
-      <button className="px-4 py-2 ml-4 bg-blue-400 rounded-lg font-semibold">
-        Take Another
-      </button>
+      <Link to={"/test-yourself"}>
+        <button className="px-4 py-2 ml-4 bg-blue-400 rounded-lg font-semibold">
+          Take Another
+        </button>
+      </Link>
       {showResult &&
-        result.map((question, idx) => (
+        examInfo.userRecordedAnswers.map((question, idx) => (
           <div
             key={idx}
             className="flex flex-col gap-4 bg-blue-700 px-6 py-4 rounded-lg shadow-lg my-4"

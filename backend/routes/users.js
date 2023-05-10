@@ -63,7 +63,10 @@ router
             .status(200)
             .json({ message: "User registered successfully", data: rest });
         } else {
-          fs.rmSync(fileLocationDisk, { recursive: true, force: true });
+          if (payload.role === "student") {
+            let fileLocationDisk = `./uploads/${req.body.tempFilePath}`;
+            fs.rmSync(fileLocationDisk, { recursive: true, force: true });
+          }
           if (user.error === "Invalid email provided") {
             res.status(400).json({ data: [], errors: user.error });
           } else {
@@ -203,7 +206,7 @@ router
         } catch (e) {
           errors.push(e);
         }
-      }else if(req.headers["update"] === "user-profile") {
+      } else if (req.headers["update"] === "user-profile") {
         let userInfo = req.body;
         console.log(userInfo);
         if (!userInfo || Object.keys(userInfo).length === 0) {
@@ -212,12 +215,10 @@ router
         try {
           let updatedUser = await users.updateUser(req.params.id, userInfo);
           return res.status(200).json(updatedUser);
-        } 
-        catch (e) {
+        } catch (e) {
           return res.status(400).json(e);
         }
-      };
-
+      }
     } catch (e) {
       res.status(400).json(helpers.sendError(e));
     }
