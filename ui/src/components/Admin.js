@@ -111,7 +111,7 @@ export const Admin = () => {
 
   const getInterviewCall = async () => {
     try {
-      const { data } = await axios.get("http://localhost:4000/interviews", {
+      const { data } = await axios.get("http://localhost:4000/interview", {
         headers: { Authorization: localStorage.getItem("accessToken") },
       });
       return data;
