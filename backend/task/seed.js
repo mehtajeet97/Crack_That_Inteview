@@ -5,7 +5,7 @@ import articles from "../data/articles.js";
 import { exams, questions } from "../config/mongoCollections.js";
 
 const db = await dbConnection();
-await db.dropDatabase();
+//await db.dropDatabase();
 
 async function main() {
 
@@ -288,4 +288,4 @@ async function main() {
 }
 
 await main();
-await closeConnection();
+//await closeConnection();
