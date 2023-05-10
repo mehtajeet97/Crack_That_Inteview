@@ -102,6 +102,7 @@ const update = async (article) => {
   const updated = {
     title: article.title,
     content: article.content,
+    updatedAt: new Date().toUTCString(),
   };
   const articleCollection = await articles();
   const updatedInfo = await articleCollection.findOneAndUpdate(

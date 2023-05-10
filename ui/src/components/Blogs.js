@@ -40,9 +40,9 @@ export const Blogs = () => {
         });
         setfilteredBlogs(data.data);
         setAllBlogs(data.data);
-        skillState(0);
+        skillStateSet(0);
       } catch (e) {
-        if (e.response.status === 401) {
+        if (e.response?.status === 401) {
           state.triggerToast(
             "Your session has been expired. Please log in.",
             "error"

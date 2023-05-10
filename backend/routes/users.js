@@ -137,13 +137,11 @@ router
             // let allUsers = await users.getAllUsers();
             res.status(200).json(helpers.sendResponse(updateResult));
           } else {
-            console.log(validationResult.errors);
             res
               .status(400)
               .send(helpers.sendError(JSON.stringify(validationResult.errors)));
           }
         } catch (e) {
-          console.log(e);
           res.status(500).send(helpers.sendError(JSON.stringify(e)));
         }
       } else if (req.headers["reqtype"] == "premium-request") {
@@ -206,95 +204,115 @@ router
           }
         }
       } else if (req.headers["update"] === "readBlogs") {
-        if (!data || Object.keys(data).length === 0) {
-          return "error while liking the blog";
-        }
         try {
-          req.params.id = xss(helpers.idCheck(req.params.id));
-        } catch (e) {
-          errors.push(e);
-        }
-        try {
-          data.blogId = helpers.idCheck(req.body.blogId);
-        } catch (e) {
-          errors.push(e);
-        }
-      }else if(req.headers["update"] === "user-profile") {
-          let userInfo = req.body;
-          let _id = xss(req.params.id)
-          let firstName = xss(req.body.firstName);
-          let lastName = xss(req.body.lastName);
-          let age = xss(req.body.age);
-          let email = xss(req.body.email);
-          let phone = xss(req.body.phone);
-          let resume = xss(req.body.resume);
-          let skills = req.body.skills.map((skill)=>skill);
-          let linkedin = xss(req.body.linkedin);
-          let twitter = xss(req.body.twitter);
-          let github = xss(req.body.github);
-          let tags = req.body.tags.map((tag)=>(tag));
-          let yoe = xss(req.body.yoe);
-          let school = xss(req.body.school);
-          let careerRole = xss(req.body.careerRole);
-          let profilePhoto = xss(req.body.profilePhoto);
-          let role = xss(req.body.role);
-          let blogs = req.body.blogs.map((blog)=>blog);
-          let articlesRead = req.body.articlesRead.map((article)=>(article))
-          let pastInterviews = req.body.pastInterviews.map((pastInt)=>pastInt)
-          let upcomingInterviews = req.body.upcomingInterviews.map((uInt)=>uInt)
-          let availableSlots = req.body.availableSlots.map((slot)=>slot)
-          let createdAt = xss(req.body.createdAt)
-          let updatedAt = xss(req.body.updatedAt)
-          let isPremiumUser = xss(req.body.isPremiumUser)
-          let userScore = req.body.userScore
-          let isBanned =xss(req.body.isBanned)
-          let organization = xss(req.body.organization)
-          let requestPremium = req.body.requestPremium
-          let user = {  
-              _id: _id,
-              firstName: firstName,
-              lastName: lastName,
-              age: age,
-              email: email,
-              phoneNumber: phone,
-              resume: resume,
-              skills: skills,
-              linkedin: linkedin,
-              twitter: twitter,
-              github: github,
-              tags: tags,
-              yoe: yoe,
-              school: school,
-              careerRole: careerRole,
-              profilePhoto: profilePhoto,
-              role: role,
-              blogs: blogs,
-              articlesRead: articlesRead,
-              pastInterviews: pastInterviews,
-              upcomingInterviews: upcomingInterviews,
-              availableSlots: availableSlots,
-              createdAt: createdAt,
-              updatedAt: updatedAt,
-              isPremiumUser: isPremiumUser,
-              userScore: userScore,
-              isBanned: isBanned,
-              organization: organization,
-              requestPremium: requestPremium
-          } 
-          if (!user || Object.keys(user).length === 0) {
-            return res.status(400).json({ error: "There are no updates" });
+          if (!data || Object.keys(data).length === 0) {
+            return "error while liking the blog";
           }
           try {
-            let updatedUser = await users.updateUser(req.params.id, user);
-            return res.status(200).json(updatedUser);
-          } 
-          catch (e) {
-            return res.status(400).json(e);
+            req.params.id = xss(helpers.idCheck(req.params.id));
+          } catch (e) {
+            errors.push(e);
           }
+          try {
+            req.body.blogTitle = xss(helpers.stringCheck(req.body.blogTitle));
+          } catch (e) {
+            errors.push(e);
+          }
+          try {
+            data.blogId = helpers.idCheck(req.body.blogId);
+          } catch (e) {
+            errors.push(e);
+          }
+          if (errors.length > 0) throw errors;
+          try {
+            const updatedUser = await users.patchUser(req.params.id, data);
+            if (updatedUser.error) {
+              throw updatedUser.data;
+            }
+            res.status(200).json(helpers.sendResponse(updatedUser));
+          } catch (e) {
+            res.status(500).json(helpers.sendError("internal server error"));
+          }
+        } catch (e) {
+          res.status(400).json(helpers.sendError("bad request"));
+        }
+      } else if (req.headers["update"] === "user-profile") {
+        let userInfo = req.body;
+        let _id = xss(req.params.id);
+        let firstName = xss(req.body.firstName);
+        let lastName = xss(req.body.lastName);
+        let age = xss(req.body.age);
+        let email = xss(req.body.email);
+        let phone = xss(req.body.phone);
+        let resume = xss(req.body.resume);
+        let skills = req.body.skills.map((skill) => skill);
+        let linkedin = xss(req.body.linkedin);
+        let twitter = xss(req.body.twitter);
+        let github = xss(req.body.github);
+        let tags = req.body.tags.map((tag) => tag);
+        let yoe = xss(req.body.yoe);
+        let school = xss(req.body.school);
+        let careerRole = xss(req.body.careerRole);
+        let profilePhoto = xss(req.body.profilePhoto);
+        let role = xss(req.body.role);
+        let blogs = req.body.blogs.map((blog) => blog);
+        let articlesRead = req.body.articlesRead.map((article) => article);
+        let pastInterviews = req.body.pastInterviews.map((pastInt) => pastInt);
+        let upcomingInterviews = req.body.upcomingInterviews.map(
+          (uInt) => uInt
+        );
+        let availableSlots = req.body.availableSlots.map((slot) => slot);
+        let createdAt = xss(req.body.createdAt);
+        let updatedAt = xss(req.body.updatedAt);
+        let isPremiumUser = xss(req.body.isPremiumUser);
+        let userScore = req.body.userScore;
+        let isBanned = xss(req.body.isBanned);
+        let organization = xss(req.body.organization);
+        let requestPremium = req.body.requestPremium;
+        let user = {
+          _id: _id,
+          firstName: firstName,
+          lastName: lastName,
+          age: age,
+          email: email,
+          phoneNumber: phone,
+          resume: resume,
+          skills: skills,
+          linkedin: linkedin,
+          twitter: twitter,
+          github: github,
+          tags: tags,
+          yoe: yoe,
+          school: school,
+          careerRole: careerRole,
+          profilePhoto: profilePhoto,
+          role: role,
+          blogs: blogs,
+          articlesRead: articlesRead,
+          pastInterviews: pastInterviews,
+          upcomingInterviews: upcomingInterviews,
+          availableSlots: availableSlots,
+          createdAt: createdAt,
+          updatedAt: updatedAt,
+          isPremiumUser: isPremiumUser,
+          userScore: userScore,
+          isBanned: isBanned,
+          organization: organization,
+          requestPremium: requestPremium,
         };
-      } catch (e) {
-        res.status(400).json(helpers.sendError(e));
+        if (!user || Object.keys(user).length === 0) {
+          return res.status(400).json({ error: "There are no updates" });
+        }
+        try {
+          let updatedUser = await users.updateUser(req.params.id, user);
+          return res.status(200).json(updatedUser);
+        } catch (e) {
+          return res.status(400).json(e);
+        }
       }
-    });
+    } catch (e) {
+      res.status(400).json(helpers.sendError(e));
+    }
+  });
 
 export default router;
