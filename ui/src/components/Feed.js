@@ -9,14 +9,33 @@ export const Feed = () => {
     {
       title: "Interviews",
       path: "/interview",
-      data: "Hey this is an interview card. you will get any upcoming interviews here",
+      data: "You can schedule interviews here",
     },
-    { title: "Blogs", path: "/blogs" },
-    { title: "Show me what's trending today", path: "/trending" },
-    { title: "Test Yourself", path: "/test-yourself" },
-    { title: "Recent Interviews", path: "/interviewrecords" },
-    { title: "Learn More", path: "/interview" },
-    { title: "Learn About Premium", path: "/join-premium" },
+    {
+      title: "Blogs",
+      path: "/blogs",
+      data: "Latest blogs here, all curated in one place. Click here to find out",
+    },
+    {
+      title: "Show me what's trending today",
+      path: "/trending",
+      data: "Check here to find out",
+    },
+    {
+      title: "Test Yourself",
+      path: "/test-yourself",
+      data: "Confident of your skills? How about a quick check",
+    },
+    {
+      title: "Recent Interviews",
+      path: "/interviewrecords",
+      data: "Check your upcoming interviews & interview history here",
+    },
+    {
+      title: "Learn About Premium",
+      path: "/join-premium",
+      data: "Why Premium? Click here to find out",
+    },
   ];
 
   return (
@@ -46,19 +65,6 @@ export const Feed = () => {
                   {tag}
                 </span>
               ))}
-            {!card.tags && (
-              <>
-                <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
-                  #python
-                </span>
-                <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
-                  #javascript
-                </span>
-                <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
-                  #ruby
-                </span>
-              </>
-            )}
           </div>
         </div>
       ))}
