@@ -16,7 +16,7 @@ import Select from "react-select";
 export const Admin = () => {
   const navigate = useNavigate();
   const { state, updateState } = useContext(AuthContext);
-  if (state?.userDetails?.role.toLowerCase() !== "admin") {
+  if (state?.userDetails?.role?.toLowerCase() !== "admin") {
     navigate(`/feed`);
   }
 
@@ -62,6 +62,7 @@ export const Admin = () => {
     getUser();
     const getInterview = async () => {
       let interviewData = await getInterviewCall();
+      console.log(interviewData);
       if (interviewData?.length) {
         setInterviewsData(interviewData);
       }
@@ -568,7 +569,7 @@ export const Admin = () => {
   );
   const interviewPage = (
     <>
-      {interviewsData.length > 0 && (
+      {interviewsData?.length > 0 && (
         <>
           <div className="overflow-x-auto text-white font-semibold text-4xl m-4 overflow-hidden">
             Interviews
@@ -590,7 +591,10 @@ export const Admin = () => {
                     <td>{interview.interviewee}</td>
                     <td>{interview.interviewer}</td>
                     <td>{interview.interviewerLink}</td>
-                    <td>{interview.interviewDate}</td>
+                    <td>
+                      {interview.interviewDate.date}
+                      {" " + interview.interviewDate.timings}
+                    </td>
                   </tr>
                 );
               })}
