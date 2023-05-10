@@ -1,29 +1,29 @@
 import { useEffect, useState } from "react";
 
 export const QuestionCard = ({
-  questionData,
+  questionInfo,
   qNo,
   handleBack,
   handleContinue,
   isFirst,
   isLast,
+  setExamState,
 }) => {
-  const { question, options, userAnswer } = questionData;
-
+  const { question, options, userAnswer } = questionInfo;
   const [state, setState] = useState({
-    isDisabled: !questionData.userAnswer,
-    userAnswer: questionData.userAnswer,
+    isDisabled: !userAnswer,
+    userAnswer: userAnswer,
   });
 
   const onOptionSelect = (e) => {
-    const id = e.target.id.charAt(e.target.id.length - 1);
+    const id = e.target.id.charAt(e.target.id?.length - 1);
     const optionSelected = document.getElementById(question + id);
     optionSelected.checked = true;
     setState({ isDisabled: false, userAnswer: optionSelected?.value });
   };
 
   const onContiue = () => {
-    handleContinue({ ...questionData, userAnswer: state.userAnswer, isLast });
+    handleContinue({ question, userAnswer: state.userAnswer, isLast });
   };
 
   return (

@@ -63,6 +63,7 @@ router
             .json({ message: "User registered successfully", data: rest });
         } else {
           if (payload.role === "student") {
+            let fileLocationDisk = `./uploads/${req.body.tempFilePath}`;
             fs.rmSync(fileLocationDisk, { recursive: true, force: true });
           }
           if (user.error === "Invalid email provided") {
