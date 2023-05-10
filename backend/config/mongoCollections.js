@@ -18,4 +18,3 @@ export const interviews = getCollectionFn("interviews");
 export const articles = getCollectionFn("articles");
 export const questions = getCollectionFn("questions");
 export const exams = getCollectionFn("exams");
-export const social = getCollectionFn("social");
