@@ -1,7 +1,8 @@
 node_modules/
 .vscode/
-*.md
 .env
 package-lock.json
 *.pdf
 uploads/
+.DS_Store
+backend/.DS_Store
